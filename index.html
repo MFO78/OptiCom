@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSOC Cassegrain Telescope Designer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            850: '#151e2e',
+                            950: '#090d16',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar & Range Input Styling */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #1e293b;
+            border-radius: 999px;
+            border: 1px solid #334155;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+            transition: transform 0.1s ease, background-color 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            background: #7dd3fc;
+        }
+        .canvas-grid {
+            background-color: #090d16;
+            background-image: 
+                linear-gradient(to right, rgba(30, 41, 59, 0.35) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(30, 41, 59, 0.35) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col selection:bg-sky-500 selection:text-white overflow-x-hidden">
+
+    <!-- Top Navigation / Header -->
+    <header class="border-b border-slate-800/80 bg-slate-900/70 backdrop-blur-md sticky top-0 z-30 px-4 lg:px-6 py-3">
+        <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 border border-sky-400/30">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg font-bold tracking-tight text-white">OptiComm CAD</h1>
+                        <span class="text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">FSOC Edition</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Classical & Ritchey-Chrétien Cassegrain Optical Terminal Designer</p>
+                </div>
+            </div>
+
+            <!-- Preset Loader & Action Buttons -->
+            <div class="flex items-center flex-wrap gap-2">
+                <span class="text-xs text-slate-400 mr-1 hidden sm:inline">Presets:</span>
+                <button onclick="loadPreset('cubesat')" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+                    CubeSat Terminal (100mm)
+                </button>
+                <button onclick="loadPreset('leo_ogs')" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+                    LEO Micro-OGS (250mm)
+                </button>
+                <button onclick="loadPreset('deep_space')" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+                    Deep-Space OGS (500mm)
+                </button>
+                <div class="h-4 w-[1px] bg-slate-800 mx-1 hidden sm:block"></div>
+                <button onclick="exportReport()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-sky-600 hover:bg-sky-500 text-white shadow-sm shadow-sky-500/30 flex items-center gap-1.5 transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    <span>Copy Spec JSON</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Notification Banner -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-slate-800 border border-sky-500/40 text-slate-100 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+        <div class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></div>
+        <span id="toast-msg" class="text-xs font-medium">Specification copied to clipboard!</span>
+    </div>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-[1600px] w-full mx-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 p-4 lg:p-6">
+
+        <!-- LEFT COLUMN: Design Parameters & Slider Controls (4 Columns on Desktop) -->
+        <section class="lg:col-span-4 flex flex-col gap-5">
+            
+            <!-- Active Sliders Tray (Pinned for rapid tuning) -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                        <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-200">Interactive Sliders</h2>
+                    </div>
+                    <span class="text-[11px] text-slate-400">Toggle <svg class="w-3 h-3 inline text-sky-400" fill="currentColor" viewBox="0 0 20 20"><path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z"/></svg> below to pin</span>
+                </div>
+                <div id="active-sliders-container" class="space-y-3.5">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- All Parameters Configuration Card -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex-1 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                        <div>
+                            <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-200">System Parameters</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Set exact values or select parameters for live slider control</p>
+                        </div>
+                        <select id="prescription-type" onchange="recalculate()" class="bg-slate-800 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:border-sky-500">
+                            <option value="classical">Classical Cassegrain</option>
+                            <option value="rc">Ritchey-Chrétien (RC)</option>
+                            <option value="dall_kirkham">Dall-Kirkham</option>
+                        </select>
+                    </div>
+
+                    <!-- Parameter Matrix -->
+                    <div id="parameter-list" class="space-y-2.5">
+                        <!-- Dynamically populated parameter inputs -->
+                    </div>
+                </div>
+
+                <!-- Ray Trace Visualization Options -->
+                <div class="mt-6 pt-4 border-t border-slate-800">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Ray Trace & Baffle Options</h3>
+                    <div class="grid grid-cols-2 gap-2.5 text-xs">
+                        <label class="flex items-center space-x-2 bg-slate-850 p-2 rounded-lg border border-slate-800/80 cursor-pointer hover:border-slate-700">
+                            <input type="checkbox" id="show-offaxis" onchange="recalculate()" checked class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0">
+                            <span class="text-slate-300">Show FOV Marginal Rays</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-850 p-2 rounded-lg border border-slate-800/80 cursor-pointer hover:border-slate-700">
+                            <input type="checkbox" id="show-caustics" onchange="recalculate()" checked class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0">
+                            <span class="text-slate-300">Dense Ray Fan (12 Rays)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-850 p-2 rounded-lg border border-slate-800/80 cursor-pointer hover:border-slate-700">
+                            <input type="checkbox" id="show-dimensions" onchange="recalculate()" checked class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0">
+                            <span class="text-slate-300">Dimension Callouts</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-850 p-2 rounded-lg border border-slate-800/80 cursor-pointer hover:border-slate-700">
+                            <input type="checkbox" id="exact-parabola" onchange="recalculate()" checked class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0">
+                            <span class="text-slate-300">Exact Conic Surfaces</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT COLUMN: Ray-Trace Canvas & FSOC Analytics (8 Columns on Desktop) -->
+        <section class="lg:col-span-8 flex flex-col gap-5">
+
+            <!-- Interactive 2D Optical Ray-Tracing Viewport -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col relative">
+                
+                <!-- Viewport Top Bar -->
+                <div class="px-4 py-2.5 bg-slate-900/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 z-10">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            2D Optical Layout & Exact Ray Trace
+                        </span>
+                        <div class="hidden sm:flex items-center space-x-3 text-[11px] text-slate-400">
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-0.5 bg-sky-400 inline-block"></span> On-Axis Beam</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-0.5 bg-amber-400 inline-block"></span> +FOV Angle</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-0.5 bg-rose-500/70 inline-block"></span> Blocked/Obstructed</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-1.5">
+                        <button onclick="zoomCanvas(1.2)" title="Zoom In" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </button>
+                        <button onclick="zoomCanvas(0.8)" title="Zoom Out" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+                        </button>
+                        <button onclick="resetView()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition">
+                            Reset View
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Canvas Container -->
+                <div class="relative w-full h-[380px] sm:h-[440px] canvas-grid select-none overflow-hidden" id="canvas-wrapper">
+                    <canvas id="rayCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+
+                    <!-- Floating Warning Pill (if geometry invalid or clipped) -->
+                    <div id="geometry-warning" class="hidden absolute top-3 left-3 bg-rose-950/90 border border-rose-500/50 text-rose-200 px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 shadow-lg backdrop-blur-sm">
+                        <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span id="warning-text">Secondary intercept error</span>
+                    </div>
+
+                    <!-- Floating Bottom-Left Status HUD -->
+                    <div class="absolute bottom-3 left-3 pointer-events-none flex flex-wrap gap-2">
+                        <div class="bg-slate-900/85 backdrop-blur-md border border-slate-800 px-2.5 py-1 rounded-lg text-[11px] font-mono text-slate-300">
+                            EFL: <span id="hud-efl" class="text-sky-400 font-semibold">2000.0</span> mm
+                        </div>
+                        <div class="bg-slate-900/85 backdrop-blur-md border border-slate-800 px-2.5 py-1 rounded-lg text-[11px] font-mono text-slate-300">
+                            f/#: <span id="hud-fnum" class="text-sky-400 font-semibold">f/8.00</span>
+                        </div>
+                        <div class="bg-slate-900/85 backdrop-blur-md border border-slate-800 px-2.5 py-1 rounded-lg text-[11px] font-mono text-slate-300">
+                            Obscuration: <span id="hud-obs" class="text-amber-400 font-semibold">26.5%</span> lin
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comprehensive Overview & FSOC Metrics Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+                
+                <!-- Left Sub-Panel: Geometric & Mirror Prescription (7 cols) -->
+                <div class="md:col-span-7 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 mb-3.5">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Optical & Mechanical Prescription</h3>
+                            <span id="conic-badge" class="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Classical (M1 Parabola)</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <!-- Metric Card -->
+                            <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-3">
+                                <div class="text-[11px] text-slate-400">Effective Focal Length</div>
+                                <div class="text-base font-mono font-semibold text-white mt-0.5"><span id="val-efl">2000.0</span> <span class="text-xs font-normal text-slate-400">mm</span></div>
+                                <div class="text-[10px] text-slate-400 mt-1">System <span id="val-fnum" class="text-sky-400 font-mono">f/8.00</span></div>
+                            </div>
+
+                            <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-3">
+                                <div class="text-[11px] text-slate-400">Primary Mirror (M1)</div>
+                                <div class="text-base font-mono font-semibold text-white mt-0.5">f = <span id="val-f1">500.0</span> <span class="text-xs font-normal text-slate-400">mm</span></div>
+                                <div class="text-[10px] text-slate-400 mt-1">RoC R₁: <span id="val-r1" class="text-slate-200 font-mono">-1000.0</span> mm</div>
+                            </div>
+
+                            <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-3">
+                                <div class="text-[11px] text-slate-400">Secondary Mirror (M2)</div>
+                                <div class="text-base font-mono font-semibold text-white mt-0.5">f₂ = <span id="val-f2">-166.7</span> <span class="text-xs font-normal text-slate-400">mm</span></div>
+                                <div class="text-[10px] text-slate-400 mt-1">RoC R₂: <span id="val-r2" class="text-slate-200 font-mono">-333.3</span> mm</div>
+                            </div>
+
+                            <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-3">
+                                <div class="text-[11px] text-slate-400">Mirror Separation (d)</div>
+                                <div class="text-base font-mono font-semibold text-white mt-0.5"><span id="val-sep">375.0</span> <span class="text-xs font-normal text-slate-400">mm</span></div>
+                                <div class="text-[10px] text-slate-400 mt-1">Tube Length: <span id="val-length" class="text-slate-200 font-mono">475.0</span> mm</div>
+                            </div>
+
+                            <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-3">
+                                <div class="text-[11px] text-slate-400">M2 Active Diameter</div>
+                                <div class="text-base font-mono font-semibold text-white mt-0.5"><span id="val-d2">66.4</span> <span class="text-xs font-normal text-slate-400">mm</span></div>
+                                <div class="text-[10px] text-slate-400 mt-1">Axial: <span id="val-d2-axial" class="text-slate-200 font-mono">62.5</span> mm + FOV</div>
+                            </div>
+
+                            <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-3">
+                                <div class="text-[11px] text-slate-400">Conic Constants (k₁, k₂)</div>
+                                <div class="text-sm font-mono font-semibold text-white mt-1"><span id="val-k1">-1.000</span> / <span id="val-k2">-2.778</span></div>
+                                <div class="text-[10px] text-slate-400 mt-1">Plate Scale: <span id="val-ps" class="text-slate-200 font-mono">103.1</span> "/mm</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FSOC Link & Fiber Coupling KPI Bar -->
+                    <div class="mt-4 pt-3.5 border-t border-slate-800">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-sky-400">FSOC Link & Detector Coupling Metrics</span>
+                            <span id="smf-match-pill" class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">Airy vs Detector</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                            <div class="bg-slate-950/70 border border-slate-800/80 p-2.5 rounded-xl">
+                                <div class="text-[10px] text-slate-400">Rx Antenna Gain</div>
+                                <div class="text-sm font-mono font-bold text-emerald-400 mt-0.5" id="val-gain">113.8 dBi</div>
+                                <div class="text-[10px] text-slate-500">Net w/ Obscuration</div>
+                            </div>
+                            <div class="bg-slate-950/70 border border-slate-800/80 p-2.5 rounded-xl">
+                                <div class="text-[10px] text-slate-400">Obscuration Loss</div>
+                                <div class="text-sm font-mono font-bold text-amber-400 mt-0.5" id="val-obsloss">-0.61 dB</div>
+                                <div class="text-[10px] text-slate-500">Area: <span id="val-obsarea">7.0%</span></div>
+                            </div>
+                            <div class="bg-slate-950/70 border border-slate-800/80 p-2.5 rounded-xl">
+                                <div class="text-[10px] text-slate-400">Airy Disk Dia (2.44λf/#)</div>
+                                <div class="text-sm font-mono font-bold text-sky-400 mt-0.5" id="val-airy">30.3 µm</div>
+                                <div class="text-[10px] text-slate-500">Diff. Limit: <span id="val-theta">1.52</span> µrad</div>
+                            </div>
+                            <div class="bg-slate-950/70 border border-slate-800/80 p-2.5 rounded-xl">
+                                <div class="text-[10px] text-slate-400">Focal Plane FOV Spot</div>
+                                <div class="text-sm font-mono font-bold text-indigo-400 mt-0.5" id="val-fovspot">4.00 mm</div>
+                                <div class="text-[10px] text-slate-500">Max M1 Hole: <span id="val-hole">58.3</span> mm</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Sub-Panel: Pupil Annulus & Focal Plane PSF / Fiber Visualizer (5 cols) -->
+                <div class="md:col-span-5 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 mb-3">
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Pupil Obstruction & Focal Spot</h3>
+                        <span class="text-[11px] text-slate-400 font-mono" id="pupil-subtitle">ε = 0.27</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 items-center my-auto">
+                        <!-- Entrance Pupil Annulus Canvas -->
+                        <div class="flex flex-col items-center bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
+                            <canvas id="pupilCanvas" width="140" height="140" class="w-32 h-32"></canvas>
+                            <span class="text-[11px] font-medium text-slate-300 mt-2">Entrance Pupil</span>
+                            <span class="text-[10px] text-slate-400 font-mono" id="pupil-eff-area">45,604 mm² net</span>
+                        </div>
+
+                        <!-- Airy Pattern vs Fiber/Detector Overlay Canvas -->
+                        <div class="flex flex-col items-center bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
+                            <canvas id="psfCanvas" width="140" height="140" class="w-32 h-32"></canvas>
+                            <span class="text-[11px] font-medium text-slate-300 mt-2">Airy PSF vs Detector</span>
+                            <span class="text-[10px] text-slate-400 font-mono" id="psf-coupling">SMF Coupling Est: 64%</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 bg-slate-850/90 border border-slate-800 rounded-xl p-2.5 text-[11px] text-slate-300 leading-relaxed">
+                        <span class="font-semibold text-sky-400">FSOC Design Note:</span> Central obscuration ($\varepsilon = D_2/D_1$) shifts energy from the Airy core into the first diffraction ring, reducing single-mode fiber (SMF) coupling efficiency when $\varepsilon > 0.30$.
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        // ============================================================================
+        // 1. PARAMETER DEFINITIONS & STATE MANAGEMENT
+        // ============================================================================
+        const parameters = [
+            {
+                id: 'D1',
+                name: 'Primary Aperture (D₁)',
+                unit: 'mm',
+                min: 50,
+                max: 1000,
+                step: 5,
+                value: 250,
+                sliderActive: true,
+                desc: 'Clear aperture diameter of the concave primary mirror'
+            },
+            {
+                id: 'F1',
+                name: 'Primary Focal Ratio (f/#₁)',
+                unit: '',
+                min: 1.0,
+                max: 5.0,
+                step: 0.05,
+                value: 2.0,
+                sliderActive: true,
+                desc: 'Focal ratio of the primary mirror alone (f₁ = D₁ × f/#₁)'
+            },
+            {
+                id: 'm',
+                name: 'Secondary Magnification (m)',
+                unit: '×',
+                min: 2.0,
+                max: 15.0,
+                step: 0.1,
+                value: 4.0,
+                sliderActive: true,
+                desc: 'Effective focal length multiplier (F_eff = f/#₁ × m)'
+            },
+            {
+                id: 'b',
+                name: 'Back Working Distance (BWD)',
+                unit: 'mm',
+                min: 0,
+                max: 500,
+                step: 5,
+                value: 100,
+                sliderActive: true,
+                desc: 'Distance from Primary Mirror (M1) vertex to final Cassegrain focus'
+            },
+            {
+                id: 'fov',
+                name: 'Half-Field of View (θ_FOV)',
+                unit: 'mrad',
+                min: 0.1,
+                max: 10.0,
+                step: 0.1,
+                value: 2.0,
+                sliderActive: false,
+                desc: 'Half-angle field of view required for acquisition & tracking sensor'
+            },
+            {
+                id: 'lambda',
+                name: 'Laser Wavelength (λ)',
+                unit: 'nm',
+                min: 500,
+                max: 2000,
+                step: 10,
+                value: 1550,
+                sliderActive: false,
+                desc: 'Operating FSOC laser wavelength (typically 1550 nm, 1064 nm, or 850 nm)'
+            },
+            {
+                id: 'detSize',
+                name: 'Detector / Fiber MFD',
+                unit: 'µm',
+                min: 5,
+                max: 200,
+                step: 1,
+                value: 30,
+                sliderActive: false,
+                desc: 'Active diameter of InGaAs APD/PIN detector or Single-Mode Fiber MFD'
+            }
+        ];
+
+        // Viewport Pan/Zoom state
+        let viewState = {
+            zoom: 1.0,
+            panX: 0,
+            panY: 0,
+            isDragging: false,
+            lastMouseX: 0,
+            lastMouseY: 0
+        };
+
+        // ============================================================================
+        // 2. UI INITIALIZATION & SYNCHRONIZATION
+        // ============================================================================
+        function initUI() {
+            renderParameterList();
+            renderActiveSliders();
+            setupCanvasInteractions();
+            recalculate();
+        }
+
+        function renderParameterList() {
+            const container = document.getElementById('parameter-list');
+            container.innerHTML = '';
+
+            parameters.forEach(param => {
+                const row = document.createElement('div');
+                row.className = 'p-2.5 rounded-xl bg-slate-850/80 border border-slate-800/90 flex items-center justify-between gap-2 hover:border-slate-700/80 transition';
+                row.innerHTML = `
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <button onclick="toggleSlider('${param.id}')" title="Pin/Unpin Interactive Slider"
+                            class="p-1.5 rounded-lg border transition shrink-0 ${param.sliderActive 
+                                ? 'bg-sky-500/20 border-sky-500/50 text-sky-400 shadow-sm shadow-sky-500/20' 
+                                : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'}">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z"/>
+                            </svg>
+                        </button>
+                        <div class="truncate">
+                            <div class="text-xs font-medium text-slate-200 truncate">${param.name}</div>
+                            <div class="text-[10px] text-slate-400 truncate">${param.desc}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <input type="number" id="input-${param.id}" 
+                            min="${param.min}" max="${param.max}" step="${param.step}" value="${param.value}"
+                            oninput="updateParamValue('${param.id}', this.value, 'number')"
+                            class="w-20 bg-slate-900 border border-slate-700 focus:border-sky-500 rounded-lg px-2 py-1 text-right text-xs font-mono text-white focus:outline-none">
+                        <span class="text-xs font-mono text-slate-400 w-7">${param.unit}</span>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function renderActiveSliders() {
+            const container = document.getElementById('active-sliders-container');
+            container.innerHTML = '';
+
+            const activeParams = parameters.filter(p => p.sliderActive);
+            if (activeParams.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4 text-xs text-slate-500 border border-dashed border-slate-800 rounded-xl">
+                        Click the slider icon next to any parameter below to enable real-time slider tuning.
+                    </div>
+                `;
+                return;
+            }
+
+            activeParams.forEach(param => {
+                const block = document.createElement('div');
+                block.className = 'bg-slate-850/90 border border-slate-800/90 rounded-xl px-3 py-2.5';
+                block.innerHTML = `
+                    <div class="flex items-center justify-between text-xs mb-1.5">
+                        <span class="font-medium text-slate-200">${param.name}</span>
+                        <span class="font-mono text-sky-400 font-semibold">
+                            <span id="slider-val-${param.id}">${param.value}</span> ${param.unit}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-mono text-slate-500">${param.min}</span>
+                        <input type="range" id="slider-${param.id}"
+                            min="${param.min}" max="${param.max}" step="${param.step}" value="${param.value}"
+                            oninput="updateParamValue('${param.id}', this.value, 'slider')"
+                            class="w-full">
+                        <span class="text-[10px] font-mono text-slate-500">${param.max}</span>
+                    </div>
+                `;
+                container.appendChild(block);
+            });
+        }
+
+        function toggleSlider(id) {
+            const param = parameters.find(p => p.id === id);
+            if (param) {
+                param.sliderActive = !param.sliderActive;
+                renderParameterList();
+                renderActiveSliders();
+            }
+        }
+
+        function updateParamValue(id, rawVal, source) {
+            const val = parseFloat(rawVal);
+            if (isNaN(val)) return;
+
+            const param = parameters.find(p => p.id === id);
+            if (!param) return;
+
+            param.value = val;
+
+            // Sync DOM elements without full re-render
+            if (source !== 'number') {
+                const numInput = document.getElementById(`input-${id}`);
+                if (numInput) numInput.value = val;
+            }
+            if (source !== 'slider') {
+                const rangeInput = document.getElementById(`slider-${id}`);
+                if (rangeInput) rangeInput.value = val;
+            }
+            const labelVal = document.getElementById(`slider-val-${id}`);
+            if (labelVal) labelVal.textContent = val;
+
+            recalculate();
+        }
+
+        function getParam(id) {
+            return parameters.find(p => p.id === id).value;
+        }
+
+        // ============================================================================
+        // 3. CASSEGRAIN OPTICAL & FSOC PHYSICS ENGINE
+        // ============================================================================
+        function computeOpticalModel() {
+            const D1 = getParam('D1');           // Primary diameter (mm)
+            const F1 = getParam('F1');           // Primary f-number
+            const m = getParam('m');             // Secondary magnification
+            const b = getParam('b');             // Back Working Distance from M1 vertex (mm)
+            const fovMrad = getParam('fov');     // Half-FOV (mrad)
+            const lambdaNm = getParam('lambda'); // Wavelength (nm)
+            const detUm = getParam('detSize');   // Detector / MFD (µm)
+            const prescription = document.getElementById('prescription-type').value;
+
+            // Primary focal length & radius of curvature
+            const f1 = D1 * F1;
+            const R1 = -2 * f1; // Concave mirror positioned on right facing left (-X)
+
+            // Effective system focal length & f-number
+            const EFL = f1 * m;
+            const Feff = F1 * m;
+
+            // Back focal distance from M2 to Cassegrain focus (L2) and M2 to M1 focus (p1)
+            // We know: L2 / p1 = m  and  p1 + L2 = f1 + b  =>  p1(1 + m) = f1 + b
+            const p1 = (f1 + b) / (m + 1);
+            const L2 = m * p1;
+            const d = f1 - p1; // Separation between M1 and M2 vertices
+
+            // Secondary focal length & radius of curvature (Convex hyperboloid)
+            // 1/f2 = -1/p1 + 1/L2 = -(m - 1) / (m * p1)
+            const f2 = -(m * p1) / (m - 1);
+            const R2 = -2 * Math.abs(f2); // Convex facing left
+
+            // Secondary diameter D2 (axial beam + field of view expansion)
+            const fovRad = fovMrad * 1e-3;
+            const D2_axial = D1 * (p1 / f1);
+            const D2_fov = 2 * d * Math.tan(fovRad);
+            const D2 = D2_axial + D2_fov;
+
+            // Central obscuration ratio (linear & area)
+            const epsLinear = D2 / D1;
+            const epsArea = epsLinear * epsLinear;
+
+            // Conic Constants (k1, k2)
+            let k1 = -1.0;
+            let k2 = -Math.pow((m + 1) / (m - 1), 2);
+
+            if (prescription === 'rc') {
+                // Ritchey-Chretien coma-free condition
+                k1 = -1 - (2 * p1 * Math.pow(1 / m, 2)) / (d * m);
+                k2 = -Math.pow((m + 1) / (m - 1), 2) - (2 * Math.pow(m, 2) * (m + 1)) / ((d / p1) * Math.pow(m - 1, 3));
+            } else if (prescription === 'dall_kirkham') {
+                // Dall-Kirkham: Ellipsoidal primary, Spherical secondary (k2 = 0)
+                k2 = 0.0;
+                k1 = -1 + Math.pow((m * m - 1) / Math.pow(m, 2), 2) * (p1 / f1);
+            }
+
+            // Primary central hole max unvignetted diameter at M1 vertex (z=0)
+            const focalSpotDia = 2 * EFL * Math.tan(fovRad);
+            const holeDia = D2_axial * ((b / L2)) + focalSpotDia * ((L2 - b) / L2);
+
+            // FSOC Metrics
+            const lambdaMm = lambdaNm * 1e-6;
+            const lambdaM = lambdaNm * 1e-9;
+            const D1_m = D1 * 1e-3;
+
+            // Obscuration loss in dB: 10 * log10(1 - eps^2)
+            const obsLossDb = epsLinear < 1 ? 10 * Math.log10(1 - epsArea) : -99.9;
+            // Ideal antenna gain: (pi * D / lambda)^2
+            const idealGainDbi = 10 * Math.log10(Math.pow((Math.PI * D1_m) / lambdaM, 2));
+            const netGainDbi = idealGainDbi + obsLossDb;
+
+            // Diffraction limit & Airy Disk
+            const thetaDiffUr = (2.44 * lambdaM / D1_m) * 1e6; // Full angle in µrad
+            const airyDiaUm = 2.44 * (lambdaNm * 1e-3) * Feff; // First dark ring diameter (µm)
+            const plateScale = 206265 / EFL; // arcsec/mm
+
+            // Estimated SMF / Detector Coupling Efficiency (analytical approximation for obstructed pupil)
+            // Optimal beta ~ 1.12, penalty from epsLinear
+            const maxSubeff = Math.pow(1 - epsArea, 2) * Math.exp(-1.2 * epsArea);
+            const spotRatio = detUm / airyDiaUm;
+            const sizeMatchFactor = 1 - Math.exp(-2.2 * Math.pow(spotRatio, 1.6));
+            const couplingEst = Math.max(0, Math.min(0.81, maxSubeff * sizeMatchFactor)) * 100;
+
+            return {
+                D1, F1, m, b, fovMrad, fovRad, lambdaNm, detUm, prescription,
+                f1, R1, EFL, Feff, p1, L2, d, f2, R2,
+                D2_axial, D2, epsLinear, epsArea, k1, k2,
+                focalSpotDia, holeDia,
+                obsLossDb, netGainDbi, thetaDiffUr, airyDiaUm, plateScale, couplingEst
+            };
+        }
+
+        // ============================================================================
+        // 4. UPDATE DASHBOARD & CANVASES
+        // ============================================================================
+        function recalculate() {
+            const model = computeOpticalModel();
+
+            // Update HUD & Numerical Cards
+            document.getElementById('hud-efl').textContent = model.EFL.toFixed(1);
+            document.getElementById('hud-fnum').textContent = `f/${model.Feff.toFixed(2)}`;
+            document.getElementById('hud-obs').textContent = `${(model.epsLinear * 100).toFixed(1)}%`;
+
+            document.getElementById('val-efl').textContent = model.EFL.toFixed(1);
+            document.getElementById('val-fnum').textContent = `f/${model.Feff.toFixed(2)}`;
+            document.getElementById('val-f1').textContent = model.f1.toFixed(1);
+            document.getElementById('val-r1').textContent = model.R1.toFixed(1);
+            document.getElementById('val-f2').textContent = model.f2.toFixed(1);
+            document.getElementById('val-r2').textContent = model.R2.toFixed(1);
+            document.getElementById('val-sep').textContent = model.d.toFixed(1);
+            document.getElementById('val-length').textContent = (model.d + model.b).toFixed(1);
+            document.getElementById('val-d2').textContent = model.D2.toFixed(1);
+            document.getElementById('val-d2-axial').textContent = model.D2_axial.toFixed(1);
+            document.getElementById('val-k1').textContent = model.k1.toFixed(3);
+            document.getElementById('val-k2').textContent = model.k2.toFixed(3);
+            document.getElementById('val-ps').textContent = model.plateScale.toFixed(1);
+
+            document.getElementById('val-gain').textContent = isFinite(model.netGainDbi) ? `${model.netGainDbi.toFixed(1)} dBi` : 'N/A';
+            document.getElementById('val-obsloss').textContent = `${model.obsLossDb.toFixed(2)} dB`;
+            document.getElementById('val-obsarea').textContent = `${(model.epsArea * 100).toFixed(1)}%`;
+            document.getElementById('val-airy').textContent = `${model.airyDiaUm.toFixed(1)} µm`;
+            document.getElementById('val-theta').textContent = model.thetaDiffUr.toFixed(2);
+            document.getElementById('val-fovspot').textContent = `${model.focalSpotDia.toFixed(2)} mm`;
+            document.getElementById('val-hole').textContent = model.holeDia.toFixed(1);
+
+            const badge = document.getElementById('conic-badge');
+            if (model.prescription === 'classical') {
+                badge.textContent = 'Classical (Parabola + Hyperbola)';
+            } else if (model.prescription === 'rc') {
+                badge.textContent = 'Ritchey-Chrétien (Aplanatic Dual Hyperbola)';
+            } else {
+                badge.textContent = 'Dall-Kirkham (Ellipse + Sphere)';
+            }
+
+            // Warning checks
+            const warnBox = document.getElementById('geometry-warning');
+            const warnText = document.getElementById('warning-text');
+            if (model.epsLinear >= 0.95) {
+                warnBox.classList.remove('hidden');
+                warnText.textContent = 'Complete beam blockage! Secondary mirror exceeds Primary diameter (D₂ ≥ D₁).';
+            } else if (model.epsLinear > 0.45) {
+                warnBox.classList.remove('hidden');
+                warnText.textContent = `High central obscuration (${(model.epsLinear * 100).toFixed(1)}%). Consider increasing f/#₁ or m.`;
+            } else {
+                warnBox.classList.add('hidden');
+            }
+
+            // Draw Visualizations
+            drawRayTrace(model);
+            drawPupilAndPSF(model);
+        }
+
+        // ============================================================================
+        // 5. EXACT 2D RAY-TRACING ENGINE & RENDERER
+        // ============================================================================
+        function drawRayTrace(model) {
+            const canvas = document.getElementById('rayCanvas');
+            const wrapper = document.getElementById('canvas-wrapper');
+            const dpr = window.devicePixelRatio || 1;
+            const width = wrapper.clientWidth;
+            const height = wrapper.clientHeight;
+
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+
+            const ctx = canvas.getContext('2d');
+            ctx.save();
+            ctx.scale(dpr, dpr);
+            ctx.clearRect(0, 0, width, height);
+
+            // Coordinate System:
+            // Optical axis is horizontal (Y = 0).
+            // Incoming light travels from LEFT (-Z) to RIGHT (+Z).
+            // Primary mirror (M1) vertex is at Z = 0.
+            // Secondary mirror (M2) vertex is at Z = -model.d.
+            // Final Cassegrain Focal Plane is at Z = +model.b.
+            const zMin = -model.d * 1.25;
+            const zMax = Math.max(model.b * 1.25, model.d * 0.25);
+            const totalZ = zMax - zMin;
+            const totalY = model.D1 * 1.35;
+
+            const scaleZ = (width * 0.82) / totalZ;
+            const scaleY = (height * 0.80) / totalY;
+            const baseScale = Math.min(scaleZ, scaleY);
+            const scale = baseScale * viewState.zoom;
+
+            const originX = width * 0.5 - ((zMin + zMax) * 0.5) * scale + viewState.panX;
+            const originY = height * 0.5 + viewState.panY;
+
+            // Helper: World (z, y) -> Screen (px, py)
+            const toScreen = (z, y) => [originX + z * scale, originY - y * scale];
+
+            // Surface Sag functions:
+            // M1 vertex at z = 0, opens to left (R1 < 0)
+            const sagM1 = (y) => {
+                const c = 1 / model.R1; // negative
+                const r2 = y * y;
+                const disc = Math.max(0, 1 - (1 + model.k1) * c * c * r2);
+                return (c * r2) / (1 + Math.sqrt(disc));
+            };
+
+            // M2 vertex at z = -d, convex facing left (R2 < 0)
+            const sagM2 = (y) => {
+                const c = 1 / model.R2; // negative
+                const r2 = y * y;
+                const disc = Math.max(0, 1 - (1 + model.k2) * c * c * r2);
+                return -model.d + (c * r2) / (1 + Math.sqrt(disc));
+            };
+
+            // 1. Draw Optical Axis (Centerline)
+            ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([8, 6]);
+            const [axX1, axY1] = toScreen(zMin * 1.2, 0);
+            const [axX2, axY2] = toScreen(zMax * 1.2, 0);
+            ctx.beginPath();
+            ctx.moveTo(axX1, axY1);
+            ctx.lineTo(axX2, axY2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 2. Draw Telescope Outer Tube / Baffle Envelope
+            const [tubeLeftX, tubeTopY] = toScreen(-model.d * 1.08, model.D1 * 0.54);
+            const [tubeRightX, tubeBotY] = toScreen(0, -model.D1 * 0.54);
+            ctx.strokeStyle = 'rgba(71, 85, 105, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(tubeLeftX, tubeTopY);
+            ctx.lineTo(tubeRightX, tubeTopY);
+            ctx.moveTo(tubeLeftX, tubeBotY);
+            ctx.lineTo(tubeRightX, tubeBotY);
+            ctx.stroke();
+
+            // 3. Trace Rays (On-Axis & Optional Off-Axis FOV)
+            const showDense = document.getElementById('show-caustics').checked;
+            const showOffAxis = document.getElementById('show-offaxis').checked;
+            const exactConic = document.getElementById('exact-parabola').checked;
+
+            const numRaysPerHalf = showDense ? 6 : 3;
+            const rayFractions = [];
+            for (let i = 1; i <= numRaysPerHalf; i++) {
+                const frac = i / numRaysPerHalf;
+                rayFractions.push(frac * 0.98);
+                rayFractions.push(-frac * 0.98);
+            }
+
+            const traceBundle = (angleRad, colorValid, colorBlocked) => {
+                const sinA = Math.sin(angleRad);
+                const cosA = Math.cos(angleRad);
+
+                rayFractions.forEach(frac => {
+                    const yPupil = frac * (model.D1 * 0.5);
+                    // Start ray at entrance plane zStart = -model.d * 1.15
+                    const zStart = -model.d * 1.18;
+                    const yStart = yPupil + (zStart - (-model.d)) * Math.tan(angleRad);
+
+                    // Check if incoming ray is blocked by the back of Secondary Mirror M2 at z = -d
+                    const yAtM2Plane = yStart + (-model.d - zStart) * Math.tan(angleRad);
+                    if (Math.abs(yAtM2Plane) <= model.D2 * 0.5) {
+                        // Obstructed by M2!
+                        const zHitBack = sagM2(yAtM2Plane);
+                        ctx.strokeStyle = colorBlocked;
+                        ctx.lineWidth = 1.1;
+                        ctx.setLineDash([3, 3]);
+                        ctx.beginPath();
+                        const [sx, sy] = toScreen(zStart, yStart);
+                        const [hx, hy] = toScreen(zHitBack, yAtM2Plane);
+                        ctx.moveTo(sx, sy);
+                        ctx.lineTo(hx, hy);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        return;
+                    }
+
+                    // Intersect with Primary Mirror M1 near z = 0
+                    // Approximate y1, then refine 2 iterations on sagM1
+                    let y1 = yStart + (0 - zStart) * Math.tan(angleRad);
+                    let z1 = sagM1(y1);
+                    y1 = yStart + (z1 - zStart) * Math.tan(angleRad);
+                    z1 = sagM1(y1);
+
+                    // Check if falls inside M1 central hole or outside M1 aperture
+                    if (Math.abs(y1) > model.D1 * 0.5 || Math.abs(y1) < model.holeDia * 0.5) {
+                        return;
+                    }
+
+                    // Surface normal at M1: dz/dy = c * y / sqrt(1 - (1+k1)*c^2*y^2)
+                    const c1 = 1 / model.R1;
+                    const k1Used = exactConic ? model.k1 : -1.0;
+                    const slope1 = (c1 * y1) / Math.sqrt(Math.max(1e-6, 1 - (1 + k1Used) * c1 * c1 * y1 * y1));
+                    // Normal vector pointing left (-z): n = (-1, slope1) normalized
+                    const nLen1 = Math.hypot(1, slope1);
+                    const nz1 = -1 / nLen1;
+                    const ny1 = slope1 / nLen1;
+
+                    // Incoming unit vector: d_in = (cosA, sinA)
+                    const dot1 = cosA * nz1 + sinA * ny1;
+                    const rz1 = cosA - 2 * dot1 * nz1;
+                    const ry1 = sinA - 2 * dot1 * ny1;
+
+                    // Intersect reflected ray (z1, y1) + t*(rz1, ry1) with Secondary Mirror M2 near z = -d
+                    let t2 = (-model.d - z1) / rz1;
+                    let y2 = y1 + t2 * ry1;
+                    let z2 = sagM2(y2);
+                    // Refine 3 times
+                    for (let iter = 0; iter < 3; iter++) {
+                        t2 = (z2 - z1) / rz1;
+                        y2 = y1 + t2 * ry1;
+                        z2 = sagM2(y2);
+                    }
+
+                    // Draw segment 1: Start -> M1 -> M2
+                    ctx.strokeStyle = colorValid;
+                    ctx.lineWidth = 1.25;
+                    ctx.beginPath();
+                    const [p0x, p0y] = toScreen(zStart, yStart);
+                    const [p1x, p1y] = toScreen(z1, y1);
+                    const [p2x, p2y] = toScreen(z2, y2);
+                    ctx.moveTo(p0x, p0y);
+                    ctx.lineTo(p1x, p1y);
+                    ctx.lineTo(p2x, p2y);
+                    ctx.stroke();
+
+                    // Check if M2 captures the ray
+                    if (Math.abs(y2) > model.D2 * 0.52) return;
+
+                    // Surface normal at M2:
+                    const c2 = 1 / model.R2;
+                    const k2Used = exactConic ? model.k2 : -Math.pow((model.m + 1) / (model.m - 1), 2);
+                    const slope2 = (c2 * y2) / Math.sqrt(Math.max(1e-6, 1 - (1 + k2Used) * c2 * c2 * y2 * y2));
+                    const nLen2 = Math.hypot(1, slope2);
+                    // Normal pointing left (-z)
+                    const nz2 = -1 / nLen2;
+                    const ny2 = slope2 / nLen2;
+
+                    const dot2 = rz1 * nz2 + ry1 * ny2;
+                    const rz2 = rz1 - 2 * dot2 * nz2;
+                    const ry2 = ry1 - 2 * dot2 * ny2;
+
+                    // Propagate from M2 to Final Focal Plane at z = +model.b
+                    const t3 = (model.b - z2) / rz2;
+                    const z3 = model.b;
+                    const y3 = y2 + t3 * ry2;
+
+                    const [p3x, p3y] = toScreen(z3, y3);
+                    ctx.beginPath();
+                    ctx.moveTo(p2x, p2y);
+                    ctx.lineTo(p3x, p3y);
+                    ctx.stroke();
+                });
+            };
+
+            // Trace Off-Axis (+FOV) first so On-Axis overlays cleanly
+            if (showOffAxis) {
+                traceBundle(model.fovRad, 'rgba(251, 191, 36, 0.65)', 'rgba(244, 63, 94, 0.25)');
+            }
+            // Trace On-Axis (0 rad)
+            traceBundle(0, 'rgba(56, 189, 248, 0.85)', 'rgba(244, 63, 94, 0.5)');
+
+            // 4. Draw Primary Mirror (M1) Upper and Lower Segments (with central hole)
+            const drawMirrorSegment = (yStart, yEnd, sagFn, thickness, fillStyle, strokeStyle) => {
+                const steps = 30;
+                ctx.beginPath();
+                for (let i = 0; i <= steps; i++) {
+                    const y = yStart + (yEnd - yStart) * (i / steps);
+                    const z = sagFn(y);
+                    const [sx, sy] = toScreen(z, y);
+                    if (i === 0) ctx.moveTo(sx, sy);
+                    else ctx.lineTo(sx, sy);
+                }
+                const zBackEnd = sagFn(yEnd) + thickness;
+                const zBackStart = sagFn(yStart) + thickness;
+                const [bx1, by1] = toScreen(zBackEnd, yEnd);
+                const [bx2, by2] = toScreen(zBackStart, yStart);
+                ctx.lineTo(bx1, by1);
+                ctx.lineTo(bx2, by2);
+                ctx.closePath();
+                ctx.fillStyle = fillStyle;
+                ctx.fill();
+                ctx.strokeStyle = strokeStyle;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            };
+
+            const m1Thick = Math.max(model.D1 * 0.06, 8);
+            const holeHalf = Math.min(model.holeDia * 0.5, model.D1 * 0.45);
+            // Upper M1 segment
+            drawMirrorSegment(holeHalf, model.D1 * 0.5, sagM1, m1Thick, 'rgba(30, 58, 138, 0.55)', '#38bdf8');
+            // Lower M1 segment
+            drawMirrorSegment(-model.D1 * 0.5, -holeHalf, sagM1, m1Thick, 'rgba(30, 58, 138, 0.55)', '#38bdf8');
+
+            // 5. Draw Secondary Mirror (M2)
+            const m2Thick = -Math.max(model.D2 * 0.08, 5);
+            drawMirrorSegment(-model.D2 * 0.5, model.D2 * 0.5, sagM2, m2Thick, 'rgba(51, 65, 85, 0.8)', '#cbd5e1');
+
+            // Secondary Spider Vanes (thin support struts)
+            const [spTopX, spTopY] = toScreen(-model.d + m2Thick * 0.5, model.D1 * 0.54);
+            const [spM2TopX, spM2TopY] = toScreen(-model.d + m2Thick * 0.5, model.D2 * 0.5);
+            const [spBotX, spBotY] = toScreen(-model.d + m2Thick * 0.5, -model.D1 * 0.54);
+            const [spM2BotX, spM2BotY] = toScreen(-model.d + m2Thick * 0.5, -model.D2 * 0.5);
+            ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(spTopX, spTopY);
+            ctx.lineTo(spM2TopX, spM2TopY);
+            ctx.moveTo(spBotX, spBotY);
+            ctx.lineTo(spM2BotX, spM2BotY);
+            ctx.stroke();
+
+            // 6. Draw Detector / Focal Plane at z = +b
+            const detHeight = Math.max(model.D1 * 0.12, model.focalSpotDia * 1.5);
+            const [fpTopX, fpTopY] = toScreen(model.b, detHeight);
+            const [fpBotX, fpBotY] = toScreen(model.b, -detHeight);
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(fpTopX, fpTopY);
+            ctx.lineTo(fpBotX, fpBotY);
+            ctx.stroke();
+
+            // Focal plane label
+            ctx.fillStyle = '#34d399';
+            ctx.font = '600 10px Inter, sans-serif';
+            ctx.fillText('FSOC Focal Plane', fpTopX + 6, fpTopY + 10);
+
+            // 7. Dimension Callouts
+            if (document.getElementById('show-dimensions').checked) {
+                ctx.font = '500 10px JetBrains Mono, monospace';
+                ctx.fillStyle = '#94a3b8';
+                ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+                ctx.lineWidth = 1;
+
+                // Separation d dimension line at bottom
+                const yDim = -model.D1 * 0.62;
+                const [dX1, dY1] = toScreen(-model.d, yDim);
+                const [dX2, dY2] = toScreen(0, yDim);
+                ctx.beginPath();
+                ctx.moveTo(dX1, dY1 - 5);
+                ctx.lineTo(dX1, dY1 + 5);
+                ctx.moveTo(dX2, dY2 - 5);
+                ctx.lineTo(dX2, dY2 + 5);
+                ctx.moveTo(dX1, dY1);
+                ctx.lineTo(dX2, dY2);
+                ctx.stroke();
+                ctx.fillText(`d = ${model.d.toFixed(1)} mm`, (dX1 + dX2) * 0.5 - 38, dY1 + 14);
+
+                // BWD dimension line
+                if (model.b > 0) {
+                    const [bX2, bY2] = toScreen(model.b, yDim);
+                    ctx.beginPath();
+                    ctx.moveTo(dX2, dY2);
+                    ctx.lineTo(bX2, bY2);
+                    ctx.moveTo(bX2, bY2 - 5);
+                    ctx.lineTo(bX2, bY2 + 5);
+                    ctx.stroke();
+                    ctx.fillText(`BWD = ${model.b.toFixed(0)} mm`, (dX2 + bX2) * 0.5 - 32, bY2 + 14);
+                }
+
+                // M1 & M2 labels
+                const [m1LblX, m1LblY] = toScreen(0, model.D1 * 0.55);
+                ctx.fillStyle = '#38bdf8';
+                ctx.fillText(`M1 (Ø${model.D1}mm)`, m1LblX - 30, m1LblY - 6);
+
+                const [m2LblX, m2LblY] = toScreen(-model.d, model.D2 * 0.5 + 12);
+                ctx.fillStyle = '#cbd5e1';
+                ctx.fillText(`M2 (Ø${model.D2.toFixed(1)}mm)`, m2LblX - 38, m2LblY - 6);
+            }
+
+            ctx.restore();
+        }
+
+        // ============================================================================
+        // 6. ENTRANCE PUPIL ANNULUS & FOCAL PLANE AIRY PSF VISUALIZER
+        // ============================================================================
+        function drawPupilAndPSF(model) {
+            // --- A. Entrance Pupil Canvas ---
+            const pCanvas = document.getElementById('pupilCanvas');
+            const pCtx = pCanvas.getContext('2d');
+            const w = pCanvas.width;
+            const h = pCanvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            const maxR = w * 0.43;
+
+            pCtx.clearRect(0, 0, w, h);
+
+            // Primary clear aperture circle
+            pCtx.beginPath();
+            pCtx.arc(cx, cy, maxR, 0, Math.PI * 2);
+            pCtx.fillStyle = 'rgba(56, 189, 248, 0.22)';
+            pCtx.fill();
+            pCtx.lineWidth = 2;
+            pCtx.strokeStyle = '#38bdf8';
+            pCtx.stroke();
+
+            // Spider vanes
+            pCtx.strokeStyle = 'rgba(15, 23, 42, 0.85)';
+            pCtx.lineWidth = 2.5;
+            pCtx.beginPath();
+            pCtx.moveTo(cx - maxR, cy);
+            pCtx.lineTo(cx + maxR, cy);
+            pCtx.moveTo(cx, cy - maxR);
+            pCtx.lineTo(cx, cy + maxR);
+            pCtx.stroke();
+
+            // Secondary central obscuration circle
+            const obsR = Math.min(maxR, maxR * model.epsLinear);
+            pCtx.beginPath();
+            pCtx.arc(cx, cy, obsR, 0, Math.PI * 2);
+            pCtx.fillStyle = '#090d16';
+            pCtx.fill();
+            pCtx.lineWidth = 1.5;
+            pCtx.strokeStyle = '#f59e0b';
+            pCtx.stroke();
+
+            const netAreaMm2 = Math.max(0, (Math.PI * Math.pow(model.D1 * 0.5, 2)) * (1 - model.epsArea));
+            document.getElementById('pupil-subtitle').textContent = `ε = ${model.epsLinear.toFixed(2)} (${(model.epsArea * 100).toFixed(1)}% area)`;
+            document.getElementById('pupil-eff-area').textContent = `${Math.round(netAreaMm2).toLocaleString()} mm² net`;
+
+            // --- B. Focal Plane Airy Disk vs Detector/Fiber Overlay ---
+            const fCanvas = document.getElementById('psfCanvas');
+            const fCtx = fCanvas.getContext('2d');
+            fCtx.clearRect(0, 0, w, h);
+
+            // Scale view to cover max(AiryDia, detUm) * 1.8
+            const viewSpanUm = Math.max(model.airyDiaUm, model.detUm) * 1.85;
+            const umToPx = (w * 0.85) / viewSpanUm;
+
+            const airyRadiusPx = (model.airyDiaUm * 0.5) * umToPx;
+            const detRadiusPx = (model.detUm * 0.5) * umToPx;
+
+            // Draw First Diffraction Ring (brightened by central obscuration)
+            const ringOuterPx = airyRadiusPx * 1.65;
+            const ringGrad = fCtx.createRadialGradient(cx, cy, airyRadiusPx * 0.95, cx, cy, ringOuterPx);
+            const ringAlpha = Math.min(0.65, 0.15 + model.epsLinear * 0.7);
+            ringGrad.addColorStop(0, 'rgba(56, 189, 248, 0)');
+            ringGrad.addColorStop(0.5, `rgba(56, 189, 248, ${ringAlpha})`);
+            ringGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+
+            fCtx.beginPath();
+            fCtx.arc(cx, cy, ringOuterPx, 0, Math.PI * 2);
+            fCtx.fillStyle = ringGrad;
+            fCtx.fill();
+
+            // Draw Airy Central Core
+            const coreGrad = fCtx.createRadialGradient(cx, cy, 0, cx, cy, airyRadiusPx);
+            coreGrad.addColorStop(0, 'rgba(224, 242, 254, 0.95)');
+            coreGrad.addColorStop(0.45, 'rgba(56, 189, 248, 0.75)');
+            coreGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+
+            fCtx.beginPath();
+            fCtx.arc(cx, cy, airyRadiusPx, 0, Math.PI * 2);
+            fCtx.fillStyle = coreGrad;
+            fCtx.fill();
+
+            // Draw Detector / Fiber Core Boundary
+            fCtx.beginPath();
+            fCtx.arc(cx, cy, detRadiusPx, 0, Math.PI * 2);
+            fCtx.setLineDash([4, 3]);
+            fCtx.lineWidth = 1.75;
+            fCtx.strokeStyle = '#10b981';
+            fCtx.stroke();
+            fCtx.setLineDash([]);
+
+            document.getElementById('psf-coupling').textContent = `Coupling Est: ${model.couplingEst.toFixed(1)}%`;
+            const pill = document.getElementById('smf-match-pill');
+            pill.textContent = `Spot: ${model.airyDiaUm.toFixed(1)}µm | Det: ${model.detUm}µm`;
+        }
+
+        // ============================================================================
+        // 7. CANVAS INTERACTIONS, PRESETS & EXPORT
+        // ============================================================================
+        function setupCanvasInteractions() {
+            const canvas = document.getElementById('rayCanvas');
+
+            canvas.addEventListener('mousedown', e => {
+                viewState.isDragging = true;
+                viewState.lastMouseX = e.clientX;
+                viewState.lastMouseY = e.clientY;
+            });
+
+            window.addEventListener('mouseup', () => {
+                viewState.isDragging = false;
+            });
+
+            window.addEventListener('mousemove', e => {
+                if (!viewState.isDragging) return;
+                const dx = e.clientX - viewState.lastMouseX;
+                const dy = e.clientY - viewState.lastMouseY;
+                viewState.panX += dx;
+                viewState.panY += dy;
+                viewState.lastMouseX = e.clientX;
+                viewState.lastMouseY = e.clientY;
+                recalculate();
+            });
+
+            canvas.addEventListener('wheel', e => {
+                e.preventDefault();
+                const factor = e.deltaY < 0 ? 1.1 : 0.9;
+                zoomCanvas(factor);
+            }, { passive: false });
+
+            window.addEventListener('resize', () => recalculate());
+        }
+
+        function zoomCanvas(factor) {
+            viewState.zoom = Math.max(0.4, Math.min(5.0, viewState.zoom * factor));
+            recalculate();
+        }
+
+        function resetView() {
+            viewState.zoom = 1.0;
+            viewState.panX = 0;
+            viewState.panY = 0;
+            recalculate();
+        }
+
+        function loadPreset(type) {
+            const presets = {
+                cubesat: { D1: 100, F1: 1.5, m: 5.0, b: 35, fov: 2.5, lambda: 1550, detSize: 15, type: 'rc' },
+                leo_ogs: { D1: 250, F1: 2.0, m: 4.0, b: 100, fov: 2.0, lambda: 1550, detSize: 30, type: 'classical' },
+                deep_space: { D1: 500, F1: 2.2, m: 6.0, b: 180, fov: 1.0, lambda: 1064, detSize: 50, type: 'rc' }
+            };
+            const p = presets[type];
+            if (!p) return;
+
+            document.getElementById('prescription-type').value = p.type;
+            Object.keys(p).forEach(key => {
+                if (key === 'type') return;
+                const param = parameters.find(item => item.id === key);
+                if (param) param.value = p[key];
+            });
+
+            renderParameterList();
+            renderActiveSliders();
+            resetView();
+        }
+
+        function exportReport() {
+            const model = computeOpticalModel();
+            const report = {
+                project: "FSOC Cassegrain Optical Terminal Specification",
+                prescriptionType: model.prescription,
+                inputs: {
+                    primaryAperture_mm: model.D1,
+                    primaryFNumber: model.F1,
+                    secondaryMagnification: model.m,
+                    backWorkingDistance_mm: model.b,
+                    halfFOV_mrad: model.fovMrad,
+                    wavelength_nm: model.lambdaNm,
+                    detectorOrFiberMFD_um: model.detUm
+                },
+                derivedOptics: {
+                    effectiveFocalLength_mm: Number(model.EFL.toFixed(2)),
+                    systemFNumber: Number(model.Feff.toFixed(2)),
+                    primaryFocalLength_mm: Number(model.f1.toFixed(2)),
+                    primaryRoC_mm: Number(model.R1.toFixed(2)),
+                    secondaryFocalLength_mm: Number(model.f2.toFixed(2)),
+                    secondaryRoC_mm: Number(model.R2.toFixed(2)),
+                    mirrorSeparation_mm: Number(model.d.toFixed(2)),
+                    secondaryDiameter_mm: Number(model.D2.toFixed(2)),
+                    linearObscurationRatio: Number(model.epsLinear.toFixed(4)),
+                    areaObscurationPercent: Number((model.epsArea * 100).toFixed(2)),
+                    conicConstants: { k1: Number(model.k1.toFixed(4)), k2: Number(model.k2.toFixed(4)) }
+                },
+                fsocPerformance: {
+                    netRxGain_dBi: Number(model.netGainDbi.toFixed(2)),
+                    obscurationLoss_dB: Number(model.obsLossDb.toFixed(2)),
+                    airyDiskDiameter_um: Number(model.airyDiaUm.toFixed(2)),
+                    diffractionLimit_urad: Number(model.thetaDiffUr.toFixed(2))
+                }
+            };
+
+            const tempArea = document.createElement('textarea');
+            tempArea.value = JSON.stringify(report, null, 2);
+            document.body.appendChild(tempArea);
+            tempArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempArea);
+
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2600);
+        }
+
+        window.onload = initUI;
+    </script>
+</body>
+</html>
