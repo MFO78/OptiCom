@@ -97,7 +97,7 @@
                 <div class="h-3.5 w-[1px] bg-slate-800"></div>
                 <div title="Linear & Area Central Obstruction"><span class="text-slate-500">Obstruction (ε):</span> <span id="top-obs" class="text-amber-400 font-semibold">26.5% lin (7.0% area)</span></div>
                 <div class="h-3.5 w-[1px] bg-slate-800"></div>
-                <div title="Fried Parameter at Wavelength λ"><span class="text-slate-500">r₀(λ):</span> <span id="top-r0" class="text-emerald-400 font-semibold">38.9cm</span></div>
+                <div title="Astronomical Seeing & Fried Parameter at λ"><span class="text-slate-500">Seeing / r₀(λ):</span> <span id="top-r0" class="text-emerald-400 font-semibold">1.01″ / 38.9cm</span></div>
                 <div class="h-3.5 w-[1px] bg-slate-800"></div>
                 <div title="Net Strehl Ratio"><span class="text-slate-500">Strehl (S):</span> <span id="top-strehl" class="text-purple-400 font-semibold">0.85</span></div>
             </div>
@@ -365,9 +365,9 @@
                                 </div>
 
                                 <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-2 border-emerald-500/30">
-                                    <div class="text-[10px] text-slate-400">Fried Parameter r₀(λ)</div>
-                                    <div class="text-xs lg:text-sm font-mono font-semibold text-emerald-400 mt-0.5"><span id="val-r0-lambda">38.9</span> <span class="text-[10px] font-normal text-slate-400">cm</span></div>
-                                    <div class="text-[10px] text-slate-400 mt-0.5">r₀(500nm): <span id="val-r0" class="text-slate-200 font-mono">10.0</span> cm</div>
+                                    <div class="text-[10px] text-slate-400">Seeing &amp; Fried r₀(λ)</div>
+                                    <div class="text-xs lg:text-sm font-mono font-semibold text-emerald-400 mt-0.5"><span id="val-seeing-arcsec">1.01″</span> <span class="text-[10px] font-normal text-slate-400">@500nm</span></div>
+                                    <div class="text-[10px] text-slate-400 mt-0.5">r₀(λ): <span id="val-r0-lambda" class="text-emerald-300 font-mono">38.9</span>cm | r₀: <span id="val-r0" class="text-slate-200 font-mono">10.0</span>cm</div>
                                 </div>
                             </div>
                         </div>
@@ -507,22 +507,22 @@
                             <!-- Right: End-to-End Link Budget & BER Table -->
                             <div class="sm:col-span-7 bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 flex flex-col justify-between text-xs font-mono">
                                 <div class="flex items-center justify-between border-b border-slate-800 pb-1 mb-1.5">
-                                    <span class="text-[10px] font-sans font-semibold uppercase tracking-wider text-slate-300">End-to-End Link Budget Waterfall</span>
+                                    <span class="text-[10px] font-sans font-semibold uppercase tracking-wider text-slate-300">Realistic Link Budget (99% Availability)</span>
                                     <span class="text-[10px] text-sky-400">Range: <span id="lb-range">1000</span> km</span>
                                 </div>
                                 <div class="space-y-1 text-[11px]">
-                                    <div class="flex justify-between"><span class="text-slate-400">Tx Power + Tx Gain (Ø10cm):</span><span id="lb-eirp" class="text-slate-200">+136.0 dBm</span></div>
+                                    <div class="flex justify-between"><span class="text-slate-400">Tx Power + Clipped Gauss Gain:</span><span id="lb-eirp" class="text-slate-200">+134.2 dBm</span></div>
                                     <div class="flex justify-between"><span class="text-slate-400">Free-Space Path Loss (FSPL):</span><span id="lb-fspl" class="text-rose-400">-258.2 dB</span></div>
-                                    <div class="flex justify-between"><span class="text-slate-400">Atmo + Pointing + Scintillation:</span><span id="lb-atmo-loss" class="text-amber-400">-3.8 dB</span></div>
-                                    <div class="flex justify-between"><span class="text-slate-400">Rx Cassegrain Gain (net ε²):</span><span id="lb-rxgain" class="text-emerald-400">+113.8 dBi</span></div>
-                                    <div class="flex justify-between"><span class="text-slate-400">AO SMF Coupling Loss (η_SMF):</span><span id="lb-smf-loss" class="text-indigo-400">-2.1 dB</span></div>
+                                    <div class="flex justify-between"><span class="text-slate-400">Atmo + Scint(99%) + Tx Jitter:</span><span id="lb-atmo-loss" class="text-amber-400">-9.4 dB</span></div>
+                                    <div class="flex justify-between"><span class="text-slate-400">Rx Gain (net ε²) - Optics Loss:</span><span id="lb-rxgain" class="text-emerald-400">+110.3 dBi</span></div>
+                                    <div class="flex justify-between"><span class="text-slate-400">AO SMF Coupling Loss (η_SMF):</span><span id="lb-smf-loss" class="text-indigo-400">-3.4 dB</span></div>
                                     <div class="border-t border-slate-800 pt-1 mt-1 flex justify-between font-bold">
                                         <span class="text-slate-200">Received Fiber Power (P_Rx):</span>
-                                        <span id="lb-prx" class="text-sky-400">-14.3 dBm</span>
+                                        <span id="lb-prx" class="text-sky-400">-26.5 dBm</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-slate-400">Link Margin (vs -38dBm) / BER:</span>
-                                        <span><span id="lb-margin" class="text-emerald-400 font-bold">+23.7 dB</span> | <span id="lb-ber" class="text-purple-300 font-bold">1.0×10⁻¹²</span></span>
+                                        <span><span id="lb-margin" class="text-emerald-400 font-bold">+11.5 dB</span> | <span id="lb-ber" class="text-purple-300 font-bold">≤ 10⁻¹²</span></span>
                                     </div>
                                 </div>
                             </div>
@@ -532,17 +532,31 @@
                     <!-- SUB-TAB 3: THEORY, EQUATIONS & ENGINEERING ASSUMPTIONS -->
                     <div id="subtab-theory" class="hidden flex-1 min-h-0 overflow-y-auto pr-1 space-y-2.5 text-xs text-slate-300 leading-relaxed">
                         <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
-                            <h4 class="text-sky-400 font-semibold uppercase tracking-wider text-[11px] mb-1">1. Cassegrain Paraxial &amp; Conic Prescription Geometry</h4>
+                            <h4 class="text-emerald-400 font-semibold uppercase tracking-wider text-[11px] mb-1">2. Seeing (arcsec) &amp; Fried Parameter (r₀) vs. Adaptive Optics (AO)</h4>
                             <p class="text-[11px] text-slate-400 mb-1.5">
-                                Given primary diameter <code class="text-sky-300">D₁</code>, primary focal ratio <code class="text-sky-300">F₁</code>, secondary magnification <code class="text-sky-300">m</code>, and back working distance <code class="text-sky-300">BWD (b)</code>:
+                                Astronomical seeing FWHM angle <code class="text-emerald-300">θ_seeing</code> (in arcseconds at 500 nm) and Fried coherence length <code class="text-emerald-300">r₀</code> are directly coupled via <code class="text-emerald-300">θ_seeing = 0.98 · λ / r₀</code> (so <code class="text-emerald-300">r₀ = 10 cm</code> equals <code class="text-emerald-300">1.01″</code> seeing at 500 nm). Across wavelength, <code class="text-emerald-300">r₀(λ) = r₀(500nm) · (λ / 500nm)^(6/5)</code>. Using <strong>Noll’s (1976) Zernike expansion</strong> plus realistic AO servo-lag/WFS noise floor:
                             </p>
                             <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800">
-                                <div>f₁ = D₁·F₁ , &nbsp; EFL = m·f₁ , &nbsp; F_eff = m·F₁ , &nbsp; p₁ = (f₁ + b)/(m + 1)</div>
-                                <div>d = f₁ - p₁ (M₁-M₂ separation) , &nbsp; f₂ = -m·p₁/(m - 1) , &nbsp; R₁ = -2f₁ , &nbsp; R₂ = -2|f₂|</div>
-                                <div>D₂ = D₁·(p₁/f₁) + 2·d·tan(θ_FOV) &nbsp; [Unvignetted axial + field diameter]</div>
+                                <div>θ_seeing(500nm) [arcsec] = 10.107 / r₀(500nm) [cm] &nbsp; (Bidirectionally synced)</div>
+                                <div>Spatial Fitting Error: &nbsp;&nbsp;σ²_fit(N) = C_N · (D₁ / r₀(λ))^(5/3) [rad²]</div>
+                                <div>Temporal Lag + WFS Noise: σ²_servo  ≈ 0.06 · (D₁ / r₀(λ))^(5/3) + 0.04 [rad²] (when N &gt; 0)</div>
+                                <div>Net Strehl Ratio: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;S_net = exp(-(σ²_fit + σ²_servo)) · (1 - ε²)</div>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1.5">
-                                <strong>Conic Constants (k₁, k₂):</strong> Classical uses a parabolic primary (<code class="text-slate-200">k₁ = -1</code>) and hyperbolic secondary (<code class="text-slate-200">k₂ = -((m+1)/(m-1))²</code>) eliminating spherical aberration. <strong>Ritchey-Chrétien (RC)</strong> modifies both <code class="text-slate-200">k₁, k₂</code> to simultaneously cancel 3rd-order spherical aberration and tangential coma (<code class="text-slate-200">Coma = 0</code>). <strong>Dall-Kirkham</strong> uses a spherical secondary (<code class="text-slate-200">k₂ = 0</code>) for ease of polishing, at the penalty of ~3.2× higher off-axis coma.
+                                <strong>Why ideal Noll isn't enough:</strong> Even with 100+ Zernike modes, finite Greenwood frequency bandwidth (~1–2 kHz loop rate vs wind speed) and WFS subaperture aliasing impose a non-zero residual phase floor (<code class="text-slate-200">σ²_servo</code>).
+                            </p>
+                        </div>
+
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
+                            <h4 class="text-amber-400 font-semibold uppercase tracking-wider text-[11px] mb-1">3. Realistic 99%-Availability FSOC Link Budget &amp; BER</h4>
+                            <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800">
+                                <div>G_Tx = 10·log₁₀((π·D_Tx/λ)²) - 1.8 dB (Clipped Gaussian beam efficiency)</div>
+                                <div>L_pointing(99%) = 4.343 · 2 · (-ln(0.01)) · (σ_jitter / θ_e^-2)² &nbsp; [99% availability]</div>
+                                <div>L_scint(99%) = 2.0 + 3.8 · (1 + 0.35·(D₁/r₀(λ)))^(-7/6) dB &nbsp; [Aperture-averaged fade]</div>
+                                <div>L_optics = -3.5 dB (Tx/Rx mirror coatings, dichroics, WFS splitters &amp; window)</div>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-1.5">
+                                <strong>Engineering Realism:</strong> Unlike optimistic back-of-the-envelope link budgets that only compute mean irradiance, an operational 10 Gbps FSOC link without deep interleaving must survive 99% probability fades from <strong>pointing jitter bursts</strong> (<code class="text-slate-200">-ln(0.01) = 4.6×</code> mean pointing loss) and <strong>scintillation fades</strong>, plus <code class="text-slate-200">-3.5 dB</code> of internal optical train throughput loss.
                             </p>
                         </div>
 
@@ -652,11 +666,12 @@
             { id: 'F1', name: 'Primary Focal Ratio (f/#₁)', unit: '', min: 1.0, max: 5.0, step: 0.05, value: 2.0, sliderActive: true, desc: 'Focal ratio of primary mirror alone' },
             { id: 'm', name: 'Secondary Magnification (m)', unit: '×', min: 2.0, max: 15.0, step: 0.1, value: 4.0, sliderActive: true, desc: 'Effective focal length multiplier' },
             { id: 'b', name: 'Back Working Distance (BWD)', unit: 'mm', min: 0, max: 500, step: 5, value: 100, sliderActive: false, desc: 'Distance from M1 vertex behind to focal plane' },
-            { id: 'r0_500', name: 'Fried Parameter r₀ (@500nm)', unit: 'cm', min: 2.0, max: 30.0, step: 0.5, value: 10.0, sliderActive: true, desc: 'Atmospheric coherence diameter at zenith' },
+            { id: 'seeing_arcsec', name: 'Astronomical Seeing (@500nm)', unit: 'arcsec', min: 0.35, max: 5.0, step: 0.05, value: 1.01, sliderActive: true, desc: 'Atmospheric seeing FWHM (coupled with r₀ = 0.98λ/θ)' },
+            { id: 'r0_500', name: 'Fried Parameter r₀ (@500nm)', unit: 'cm', min: 2.0, max: 30.0, step: 0.2, value: 10.0, sliderActive: false, desc: 'Atmospheric coherence diameter at zenith (synced w/ seeing)' },
             { id: 'aoModes', name: 'AO Corrected Modes (N_AO)', unit: 'modes', min: 0, max: 150, step: 1, value: 15, sliderActive: true, desc: '0=No AO, 2=Tip/Tilt FSM, >2=Deformable Mirror Zernikes' },
             { id: 'linkDist', name: 'FSOC Link Range (L)', unit: 'km', min: 10, max: 40000, step: 50, value: 1000, sliderActive: false, desc: 'Slant range between Tx spacecraft and Rx terminal' },
             { id: 'txPower', name: 'Tx Optical Power (P_Tx)', unit: 'dBm', min: 0, max: 50, step: 0.5, value: 33.0, sliderActive: false, desc: 'Transmitter laser output power (33 dBm = 2W)' },
-            { id: 'jitterUr', name: 'Residual Pointing Jitter (σ_j)', unit: 'µrad', min: 0.1, max: 20.0, step: 0.2, value: 1.5, sliderActive: false, desc: 'RMS angular tracking error on sky' },
+            { id: 'jitterUr', name: 'Residual Pointing Jitter (σ_j)', unit: 'µrad', min: 0.1, max: 20.0, step: 0.2, value: 1.5, sliderActive: false, desc: '1-sigma RMS angular tracking error on Tx beam' },
             { id: 'deltaT', name: 'Thermal Swing (ΔT)', unit: '°C', min: 1, max: 80, step: 1, value: 20, sliderActive: false, desc: 'Operating temperature excursion on metering structure' },
             { id: 'fov', name: 'Acquisition Half-FOV (θ)', unit: 'mrad', min: 0.1, max: 10.0, step: 0.1, value: 2.0, sliderActive: false, desc: 'Half-angle field of view for tracking sensor' },
             { id: 'lambda', name: 'Laser Wavelength (λ)', unit: 'nm', min: 500, max: 2000, step: 1, value: 1550, sliderActive: false, desc: 'Operating optical carrier wavelength' },
@@ -830,6 +845,15 @@
             if (!param) return;
             param.value = val;
 
+            const syncControl = (targetId, targetVal) => {
+                const numEl = document.getElementById(`input-${targetId}`);
+                if (numEl) numEl.value = targetVal;
+                const rangeEl = document.getElementById(`slider-${targetId}`);
+                if (rangeEl) rangeEl.value = targetVal;
+                const lblEl = document.getElementById(`slider-val-${targetId}`);
+                if (lblEl) lblEl.textContent = targetVal;
+            };
+
             if (source !== 'number') {
                 const numInput = document.getElementById(`input-${id}`);
                 if (numInput) numInput.value = val;
@@ -840,6 +864,24 @@
             }
             const labelVal = document.getElementById(`slider-val-${id}`);
             if (labelVal) labelVal.textContent = val;
+
+            // Bidirectional coupling between Seeing (arcsec @ 500nm) and Fried Parameter r0 (cm @ 500nm)
+            // Formula: theta_arcsec = (0.98 * 500e-9 / (r0_cm * 0.01)) * 206264.806 = 10.107 / r0_cm
+            if (id === 'seeing_arcsec' && val > 0.05) {
+                const r0Param = parameters.find(p => p.id === 'r0_500');
+                if (r0Param) {
+                    const syncedR0 = Number(Math.max(2.0, Math.min(30.0, 10.107 / val)).toFixed(2));
+                    r0Param.value = syncedR0;
+                    syncControl('r0_500', syncedR0);
+                }
+            } else if (id === 'r0_500' && val > 0.1) {
+                const seeingParam = parameters.find(p => p.id === 'seeing_arcsec');
+                if (seeingParam) {
+                    const syncedSeeing = Number(Math.max(0.35, Math.min(5.0, 10.107 / val)).toFixed(2));
+                    seeingParam.value = syncedSeeing;
+                    syncControl('seeing_arcsec', syncedSeeing);
+                }
+            }
 
             recalculate();
         }
@@ -853,13 +895,18 @@
         // ============================================================================
         function getNollResidualVariance(N, dOverR0) {
             const factor = Math.pow(Math.max(0.001, dOverR0), 5.0 / 3.0);
+            let fitVar = 0;
             if (N <= 0) return 1.0299 * factor;
-            if (N === 1) return 0.5820 * factor;
-            if (N === 2) return 0.1340 * factor; // Tip + Tilt removed
-            if (N === 3) return 0.1110 * factor; // Defocus removed
-            if (N === 4) return 0.0880 * factor;
-            if (N === 5) return 0.0648 * factor;
-            return 0.2944 * Math.pow(N, -Math.sqrt(3) / 2.0) * factor;
+            if (N === 1) fitVar = 0.5820 * factor;
+            else if (N === 2) fitVar = 0.1340 * factor; // Tip + Tilt removed
+            else if (N === 3) fitVar = 0.1110 * factor; // Defocus removed
+            else if (N === 4) fitVar = 0.0880 * factor;
+            else if (N === 5) fitVar = 0.0648 * factor;
+            else fitVar = 0.2944 * Math.pow(N, -Math.sqrt(3) / 2.0) * factor;
+
+            // Realistic AO includes finite temporal bandwidth (Greenwood servo lag) + WFS measurement/aliasing floor
+            const servoAndWfsFloor = 0.055 * factor + 0.035;
+            return fitVar + servoAndWfsFloor;
         }
 
         function erfcApprox(x) {
@@ -877,6 +924,7 @@
             const m = getParam('m');
             const b = getParam('b');
             const r0_500 = getParam('r0_500'); // cm at 500nm
+            const seeingArcsec = getParam('seeing_arcsec'); // arcsec at 500nm
             const aoModes = Math.round(getParam('aoModes'));
             const linkDistKm = getParam('linkDist');
             const txPowerDbm = getParam('txPower');
@@ -947,6 +995,7 @@
 
             // Atmospheric Turbulence (r₀ wavelength scaling: r₀ ∝ λ^(6/5)) & AO Noll Modes
             const r0_lambda_cm = r0_500 * Math.pow(lambdaNm / 500.0, 1.2);
+            const seeingLambdaArcsec = seeingArcsec * Math.pow(500.0 / lambdaNm, 0.2);
             const dOverR0 = (D1 * 0.1) / r0_lambda_cm;
 
             const varUncorr = getNollResidualVariance(0, dOverR0);
@@ -962,24 +1011,38 @@
             // SMF Coupling with & without AO
             const maxSubeff = 0.8145 * Math.pow(1 - epsArea, 2) * Math.exp(-1.2 * epsArea);
             const spotRatio = detUm / Math.max(1.0, airyDiaUm / Math.sqrt(netStrehl));
-            const sizeMatchFactor = 1 - Math.exp(-2.2 * Math.pow(spotRatio, 1.6));
-            const couplingEst = Math.max(0.2, Math.min(81.4, maxSubeff * sizeMatchFactor * netStrehl * 100));
+            const sizeMatchFactor = 1 - Math.exp(-1.8 * Math.pow(spotRatio, 1.5));
+            const couplingEst = Math.max(0.1, Math.min(78.0, maxSubeff * sizeMatchFactor * netStrehl * 100));
             const couplingLossDb = 10 * Math.log10(couplingEst / 100);
 
             const spotRatioUncorr = detUm / Math.max(1.0, airyDiaUm / Math.sqrt(strehlUncorr));
-            const couplingUncorr = Math.max(0.1, maxSubeff * (1 - Math.exp(-2.2 * Math.pow(spotRatioUncorr, 1.6))) * strehlUncorr * 100);
+            const couplingUncorr = Math.max(0.05, maxSubeff * (1 - Math.exp(-1.8 * Math.pow(spotRatioUncorr, 1.5))) * strehlUncorr * 100);
             const aoGainBoostDb = 10 * Math.log10(couplingEst / couplingUncorr);
 
-            // End-to-End Link Budget & BER
+            // Realistic End-to-End Link Budget (99% Link Availability) & BER
             const txDiaM = 0.10; // Reference 10cm Tx terminal
-            const txGainDbi = 10 * Math.log10(Math.pow((Math.PI * txDiaM) / lambdaM, 2));
+            // Clipped Gaussian Tx beam has ~1.8 dB lower on-axis far-field gain than uniform top-hat
+            const txGainDbi = 10 * Math.log10(Math.pow((Math.PI * txDiaM) / lambdaM, 2)) - 1.8;
             const eirpDbm = txPowerDbm + txGainDbi;
             const fsplDb = -20 * Math.log10((4 * Math.PI * linkDistKm * 1000) / lambdaM);
-            const pointingLossDb = -4.3429 * Math.pow(jitterUr / Math.max(1.0, thetaDiffUr), 2);
-            const scintLossDb = -Math.min(8.0, 1.2 * Math.pow(dOverR0, 0.6));
-            const atmoTotalLossDb = -1.5 + pointingLossDb + scintLossDb; // 1.5 dB clear sky + pointing + scintillation
 
-            const pRxDbm = eirpDbm + fsplDb + atmoTotalLossDb + netGainDbi + couplingLossDb;
+            // Tx 1/e^2 half-angle beamwidth (in urad): theta_e2 ≈ (2 * lambda) / (pi * w0) ≈ 1.42 * lambda / D_Tx
+            const txBeamHalfAngleUr = (1.42 * lambdaM / txDiaM) * 1e6;
+            // 99% availability pointing fade: L_ptg(p=0.01) = 4.3429 * 2 * (-ln(0.01)) * (sigma_j / theta_e2)^2
+            const pointingFade99Db = -Math.min(25.0, 4.3429 * 2.0 * 4.605 * Math.pow(jitterUr / Math.max(1.0, txBeamHalfAngleUr), 2));
+
+            // 99% availability scintillation fade with Rx aperture averaging
+            const apertureAvgFactor = Math.pow(1.0 + 0.35 * dOverR0, -7.0 / 6.0);
+            const scintFade99Db = -(1.8 + 4.2 * Math.min(2.5, Math.pow(dOverR0, 0.45)) * apertureAvgFactor);
+
+            // Clear-sky zenith/slant atmospheric extinction (-2.0 dB)
+            const atmoTotalLossDb = -2.0 + pointingFade99Db + scintFade99Db;
+
+            // Internal Tx + Rx optical implementation & coating losses (mirrors, dichroics, WFS splitters, fiber AR)
+            const opticsThroughputLossDb = -3.5;
+            const effectiveRxGainDbi = netGainDbi + opticsThroughputLossDb;
+
+            const pRxDbm = eirpDbm + fsplDb + atmoTotalLossDb + effectiveRxGainDbi + couplingLossDb;
             const rxSensDbm = modScheme === 'dpsk' ? -38.0 : -31.0; // 10 Gbps baseline sensitivity for BER=1e-9
             const linkMarginDb = pRxDbm - rxSensDbm;
 
@@ -1009,9 +1072,9 @@
                 f1, R1, EFL, Feff, p1, L2, d, f2, R2,
                 D2_axial, D2, epsLinear, epsArea, k1, k2,
                 comaSpotUm, despaceSensitivity, dofUm,
-                focalSpotDia, holeDia, obsLossDb, netGainDbi,
+                focalSpotDia, holeDia, obsLossDb, netGainDbi, effectiveRxGainDbi,
                 thetaDiffUr, airyDiaUm, plateScale, couplingEst, couplingLossDb,
-                r0_500, r0_lambda_cm, dOverR0, netStrehl,
+                r0_500, seeingArcsec, seeingLambdaArcsec, r0_lambda_cm, dOverR0, netStrehl,
                 aoModes, varUncorr, varTT, varActive, strehlUncorr, strehlTT, aoGainBoostDb,
                 linkDistKm, txPowerDbm, jitterUr, eirpDbm, fsplDb, atmoTotalLossDb, pRxDbm, linkMarginDb, ber, modScheme,
                 deltaT, ctePpm, thermalDeltaDUm, thermalFocusShiftUm, dofBudgetPct, mBeam, fColMm
@@ -1037,14 +1100,14 @@
             document.getElementById('top-efl').textContent = model.EFL.toFixed(0);
             document.getElementById('top-fnum').textContent = `f/${model.Feff.toFixed(1)}`;
             document.getElementById('top-obs').textContent = `${linPct}% lin (${areaPct}% area)`;
-            document.getElementById('top-r0').textContent = `${model.r0_lambda_cm.toFixed(1)}cm`;
+            document.getElementById('top-r0').textContent = `${model.seeingArcsec.toFixed(2)}″ / ${model.r0_lambda_cm.toFixed(1)}cm`;
             document.getElementById('top-strehl').textContent = model.netStrehl.toFixed(2);
 
             // Sub-header Ribbon (Mobile/Tablet)
             document.getElementById('mob-efl').textContent = model.EFL.toFixed(0);
             document.getElementById('mob-fnum').textContent = `f/${model.Feff.toFixed(1)}`;
             document.getElementById('mob-obs').textContent = `${linPct}% (${areaPct}%)`;
-            document.getElementById('mob-r0').textContent = `${model.r0_lambda_cm.toFixed(1)}cm`;
+            document.getElementById('mob-r0').textContent = `${model.seeingArcsec.toFixed(2)}″ (${model.r0_lambda_cm.toFixed(0)}cm)`;
             document.getElementById('mob-strehl').textContent = model.netStrehl.toFixed(2);
 
             // Panel 3 Metrics
@@ -1064,6 +1127,7 @@
             document.getElementById('val-despace').textContent = model.despaceSensitivity.toFixed(1);
             document.getElementById('val-dof').textContent = `±${model.dofUm.toFixed(0)} µm`;
 
+            document.getElementById('val-seeing-arcsec').textContent = `${model.seeingArcsec.toFixed(2)}″`;
             document.getElementById('val-r0').textContent = model.r0_500.toFixed(1);
             document.getElementById('val-r0-lambda').textContent = model.r0_lambda_cm.toFixed(1);
 
@@ -1085,13 +1149,13 @@
             document.getElementById('ao-var-active').textContent = model.varActive.toFixed(2);
             document.getElementById('ao-s-active').textContent = model.netStrehl.toFixed(2);
             document.getElementById('ao-gain-boost').textContent = `${model.aoGainBoostDb >= 0 ? '+' : ''}${model.aoGainBoostDb.toFixed(1)} dB`;
-            document.getElementById('ao-chart-subtitle').textContent = `D₁/r₀ = ${model.dOverR0.toFixed(2)}`;
+            document.getElementById('ao-chart-subtitle').textContent = `Seeing ${model.seeingArcsec.toFixed(2)}″ | D₁/r₀=${model.dOverR0.toFixed(2)}`;
 
             document.getElementById('lb-range').textContent = model.linkDistKm.toLocaleString();
             document.getElementById('lb-eirp').textContent = `+${model.eirpDbm.toFixed(1)} dBm`;
             document.getElementById('lb-fspl').textContent = `${model.fsplDb.toFixed(1)} dB`;
             document.getElementById('lb-atmo-loss').textContent = `${model.atmoTotalLossDb.toFixed(1)} dB`;
-            document.getElementById('lb-rxgain').textContent = `+${model.netGainDbi.toFixed(1)} dBi`;
+            document.getElementById('lb-rxgain').textContent = `+${model.effectiveRxGainDbi.toFixed(1)} dBi`;
             document.getElementById('lb-smf-loss').textContent = `${model.couplingLossDb.toFixed(1)} dB`;
             document.getElementById('lb-prx').textContent = `${model.pRxDbm.toFixed(1)} dBm`;
             document.getElementById('lb-margin').textContent = `${model.linkMarginDb >= 0 ? '+' : ''}${model.linkMarginDb.toFixed(1)} dB`;
@@ -1742,9 +1806,9 @@
 
         function loadPreset(type) {
             const presets = {
-                cubesat: { D1: 100, F1: 1.5, m: 5.0, b: 35, r0_500: 8.0, aoModes: 2, linkDist: 600, txPower: 30, jitterUr: 2.5, deltaT: 35, fov: 2.5, lambda: 1550, detSize: 15, type: 'rc' },
-                leo_ogs: { D1: 250, F1: 2.0, m: 4.0, b: 100, r0_500: 10.0, aoModes: 15, linkDist: 1000, txPower: 33, jitterUr: 1.5, deltaT: 20, fov: 2.0, lambda: 1550, detSize: 30, type: 'classical' },
-                deep_space: { D1: 500, F1: 2.2, m: 6.0, b: 180, r0_500: 15.0, aoModes: 65, linkDist: 36000, txPower: 40, jitterUr: 0.8, deltaT: 15, fov: 1.0, lambda: 1064, detSize: 50, type: 'rc' }
+                cubesat: { D1: 100, F1: 1.5, m: 5.0, b: 35, seeing_arcsec: 1.26, r0_500: 8.0, aoModes: 2, linkDist: 600, txPower: 30, jitterUr: 2.5, deltaT: 35, fov: 2.5, lambda: 1550, detSize: 15, type: 'rc' },
+                leo_ogs: { D1: 250, F1: 2.0, m: 4.0, b: 100, seeing_arcsec: 1.01, r0_500: 10.0, aoModes: 15, linkDist: 1000, txPower: 33, jitterUr: 1.5, deltaT: 20, fov: 2.0, lambda: 1550, detSize: 30, type: 'classical' },
+                deep_space: { D1: 500, F1: 2.2, m: 6.0, b: 180, seeing_arcsec: 0.67, r0_500: 15.0, aoModes: 65, linkDist: 36000, txPower: 40, jitterUr: 0.8, deltaT: 15, fov: 1.0, lambda: 1064, detSize: 50, type: 'rc' }
             };
             const p = presets[type];
             if (!p) return;
