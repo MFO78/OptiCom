@@ -873,6 +873,7 @@
         };
         let activeMobileTab = 'trace';
         let activeMetricsSubTab = 'optics';
+        let openBounds = {};
 
         function switchMetricsSubTab(subTab) {
             activeMetricsSubTab = subTab;
@@ -1039,35 +1040,76 @@
             requestAnimationFrame(() => recalculate());
         }
 
+        function toggleBounds(id) {
+            openBounds[id] = !openBounds[id];
+            renderParameterList();
+        }
+
+        function updateBound(id, type, rawVal) {
+            const val = parseFloat(rawVal);
+            if (isNaN(val)) return;
+            const param = parameters.find(p => p.id === id);
+            if (!param) return;
+            
+            if (type === 'min') param.min = Math.min(val, param.max);
+            else if (type === 'max') param.max = Math.max(val, param.min);
+
+            // Re-trigger the primary update logic to safely clamp the current value and resolve dependent couplings
+            updateParamValue(id, param.value, 'change');
+            
+            renderParameterList();
+            renderActiveSliders();
+        }
+
         function renderParameterList() {
             const container = document.getElementById('parameter-list');
             container.innerHTML = '';
 
             parameters.forEach(param => {
                 const row = document.createElement('div');
-                row.className = 'p-2.5 rounded-xl bg-slate-850/80 border border-slate-800/90 flex items-center justify-between gap-2 hover:border-slate-700/80 transition';
+                row.className = 'p-2.5 rounded-xl bg-slate-850/80 border border-slate-800/90 flex flex-col gap-2 hover:border-slate-700/80 transition';
                 row.innerHTML = `
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <button onclick="toggleSlider('${param.id}')" title="Pin/Unpin Interactive Slider"
-                            class="p-1.5 rounded-lg border transition shrink-0 ${param.sliderActive 
-                                ? 'bg-sky-500/20 border-sky-500/50 text-sky-400 shadow-sm shadow-sky-500/20' 
-                                : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'}">
-                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z"/>
-                            </svg>
-                        </button>
-                        <div class="truncate">
-                            <div class="text-xs font-medium text-slate-200 truncate">${param.name}</div>
-                            <div class="text-[10px] text-slate-400 truncate">${param.desc}</div>
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <button onclick="toggleSlider('${param.id}')" title="Pin/Unpin Interactive Slider"
+                                class="p-1.5 rounded-lg border transition shrink-0 ${param.sliderActive 
+                                    ? 'bg-sky-500/20 border-sky-500/50 text-sky-400 shadow-sm shadow-sky-500/20' 
+                                    : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'}">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z"/>
+                                </svg>
+                            </button>
+                            <button onclick="toggleBounds('${param.id}')" title="Edit Range Bounds"
+                                class="p-1.5 rounded-lg border transition shrink-0 ${openBounds[param.id] 
+                                    ? 'bg-amber-500/20 border-amber-500/50 text-amber-400 shadow-sm shadow-amber-500/20' 
+                                    : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'}">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            </button>
+                            <div class="truncate ml-1">
+                                <div class="text-xs font-medium text-slate-200 truncate">${param.name}</div>
+                                <div class="text-[10px] text-slate-400 truncate">${param.desc}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <input type="number" id="input-${param.id}" 
+                                min="${param.min}" max="${param.max}" step="${param.step}" value="${param.value}"
+                                oninput="updateParamValue('${param.id}', this.value, 'number')"
+                                onchange="updateParamValue('${param.id}', this.value, 'change')"
+                                class="w-20 bg-slate-900 border border-slate-700 focus:border-sky-500 rounded-lg px-2 py-1 text-right text-xs font-mono text-white focus:outline-none">
+                            <span class="text-xs font-mono text-slate-400 w-7">${param.unit}</span>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <input type="number" id="input-${param.id}" 
-                            min="${param.min}" max="${param.max}" step="${param.step}" value="${param.value}"
-                            oninput="updateParamValue('${param.id}', this.value, 'number')"
-                            class="w-20 bg-slate-900 border border-slate-700 focus:border-sky-500 rounded-lg px-2 py-1 text-right text-xs font-mono text-white focus:outline-none">
-                        <span class="text-xs font-mono text-slate-400 w-7">${param.unit}</span>
+                    ${openBounds[param.id] ? `
+                    <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-700/50">
+                        <div class="text-[10px] text-slate-400">Adjust Slider Limits:</div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-slate-500">Min</span>
+                            <input type="number" value="${param.min}" step="${param.step}" onchange="updateBound('${param.id}', 'min', this.value)" class="w-16 bg-slate-950 border border-slate-700 focus:border-amber-500 rounded px-1.5 py-0.5 text-right text-[11px] font-mono text-amber-300 focus:outline-none">
+                            <span class="text-[10px] text-slate-500">Max</span>
+                            <input type="number" value="${param.max}" step="${param.step}" onchange="updateBound('${param.id}', 'max', this.value)" class="w-16 bg-slate-950 border border-slate-700 focus:border-amber-500 rounded px-1.5 py-0.5 text-right text-[11px] font-mono text-amber-300 focus:outline-none">
+                        </div>
                     </div>
+                    ` : ''}
                 `;
                 container.appendChild(row);
             });
@@ -1123,48 +1165,49 @@
         }
 
         function updateParamValue(id, rawVal, source) {
-            const val = parseFloat(rawVal);
+            let val = parseFloat(rawVal);
             if (isNaN(val)) return;
 
             const param = parameters.find(p => p.id === id);
             if (!param) return;
-            param.value = val;
+            
+            // Strictly clamp value within defined min/max bounds for the model calculations
+            const clampedVal = Math.max(param.min, Math.min(param.max, val));
+            param.value = clampedVal;
 
-            const syncControl = (targetId, targetVal) => {
-                const numEl = document.getElementById(`input-${targetId}`);
-                if (numEl) numEl.value = targetVal;
-                const rangeEl = document.getElementById(`slider-${targetId}`);
-                if (rangeEl) rangeEl.value = targetVal;
+            const syncControl = (targetId, targetVal, sourceTrigger) => {
+                // If it's a "change" event (blur/enter), we want to forcibly update the number input
+                // to show the clamped value. If it's just "number" (typing), leave it alone so we don't
+                // interrupt them typing "1" -> "10" -> "100" when the minimum is 50.
+                if (sourceTrigger !== 'number') {
+                    const numEl = document.getElementById(`input-${targetId}`);
+                    if (numEl) numEl.value = targetVal;
+                }
+                if (sourceTrigger !== 'slider') {
+                    const rangeEl = document.getElementById(`slider-${targetId}`);
+                    if (rangeEl) rangeEl.value = targetVal;
+                }
                 const lblEl = document.getElementById(`slider-val-${targetId}`);
                 if (lblEl) lblEl.textContent = targetVal;
             };
 
-            if (source !== 'number') {
-                const numInput = document.getElementById(`input-${id}`);
-                if (numInput) numInput.value = val;
-            }
-            if (source !== 'slider') {
-                const rangeInput = document.getElementById(`slider-${id}`);
-                if (rangeInput) rangeInput.value = val;
-            }
-            const labelVal = document.getElementById(`slider-val-${id}`);
-            if (labelVal) labelVal.textContent = val;
+            syncControl(id, clampedVal, source);
 
             // Bidirectional coupling between Seeing (arcsec @ 500nm) and Fried Parameter r0 (cm @ 500nm)
             // Formula: theta_arcsec = (0.98 * 500e-9 / (r0_cm * 0.01)) * 206264.806 = 10.107 / r0_cm
-            if (id === 'seeing_arcsec' && val > 0.05) {
+            if (id === 'seeing_arcsec' && clampedVal > 0.05) {
                 const r0Param = parameters.find(p => p.id === 'r0_500');
                 if (r0Param) {
-                    const syncedR0 = Number(Math.max(2.0, Math.min(30.0, 10.107 / val)).toFixed(2));
+                    const syncedR0 = Number(Math.max(r0Param.min, Math.min(r0Param.max, 10.107 / clampedVal)).toFixed(2));
                     r0Param.value = syncedR0;
-                    syncControl('r0_500', syncedR0);
+                    syncControl('r0_500', syncedR0, null); // null forces full sync
                 }
-            } else if (id === 'r0_500' && val > 0.1) {
+            } else if (id === 'r0_500' && clampedVal > 0.1) {
                 const seeingParam = parameters.find(p => p.id === 'seeing_arcsec');
                 if (seeingParam) {
-                    const syncedSeeing = Number(Math.max(0.35, Math.min(5.0, 10.107 / val)).toFixed(2));
+                    const syncedSeeing = Number(Math.max(seeingParam.min, Math.min(seeingParam.max, 10.107 / clampedVal)).toFixed(2));
                     seeingParam.value = syncedSeeing;
-                    syncControl('seeing_arcsec', syncedSeeing);
+                    syncControl('seeing_arcsec', syncedSeeing, null); // null forces full sync
                 }
             }
 
