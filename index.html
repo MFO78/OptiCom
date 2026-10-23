@@ -481,8 +481,8 @@
                                 </div>
 
                                 <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-2">
-                                    <div class="text-[10px] text-slate-400">Mirror Separation (d)</div>
-                                    <div class="text-xs lg:text-sm font-mono font-semibold text-white mt-0.5"><span id="val-sep">375.0</span> <span class="text-[10px] font-normal text-slate-400">mm</span></div>
+                                    <div class="text-[10px] text-slate-400">Back Working Dist (BWD)</div>
+                                    <div class="text-xs lg:text-sm font-mono font-semibold text-white mt-0.5"><span id="val-bwd">100.0</span> <span class="text-[10px] font-normal text-slate-400">mm</span></div>
                                     <div class="text-[10px] text-slate-400 mt-0.5">Len: <span id="val-length" class="text-slate-200 font-mono">475.0</span> mm</div>
                                 </div>
 
@@ -844,7 +844,7 @@
             { id: 'D1', name: 'Primary Aperture (D₁)', unit: 'mm', min: 50, max: 1000, step: 5, value: 250, sliderActive: true, desc: 'Clear aperture diameter of primary mirror' },
             { id: 'F1', name: 'Primary Focal Ratio (f/#₁)', unit: '', min: 1.0, max: 5.0, step: 0.05, value: 2.0, sliderActive: true, desc: 'Focal ratio of primary mirror alone' },
             { id: 'm', name: 'Secondary Magnification (m)', unit: '×', min: 2.0, max: 15.0, step: 0.1, value: 4.0, sliderActive: true, desc: 'Effective focal length multiplier' },
-            { id: 'b', name: 'Back Working Distance (BWD)', unit: 'mm', min: 0, max: 500, step: 5, value: 100, sliderActive: false, desc: 'Distance from M1 vertex behind to focal plane' },
+            { id: 'd', name: 'M1-M2 Separation (d)', unit: 'mm', min: 50, max: 2000, step: 5, value: 380, sliderActive: true, desc: 'Axial distance between M1 and M2 vertices' },
             { id: 'm3Z', name: 'Nasmyth M₃ Axial Pos (z₃)', unit: 'mm', min: -350, max: 50, step: 5, value: -100, sliderActive: true, desc: 'Axial Z position of 45° M3 fold mirror relative to M1 vertex' },
             { id: 'seeing_arcsec', name: 'Astronomical Seeing (@500nm)', unit: 'arcsec', min: 0.35, max: 5.0, step: 0.05, value: 1.01, sliderActive: true, desc: 'Atmospheric seeing FWHM (coupled with r₀ = 0.98λ/θ)' },
             { id: 'r0_500', name: 'Fried Parameter r₀ (@500nm)', unit: 'cm', min: 2.0, max: 30.0, step: 0.2, value: 10.0, sliderActive: false, desc: 'Atmospheric coherence diameter at zenith (synced w/ seeing)' },
@@ -1207,7 +1207,7 @@
             const D1 = getParam('D1');
             const F1 = getParam('F1');
             const m = getParam('m');
-            const b = getParam('b');
+            const dInput = getParam('d');
             const m3ZRaw = getParam('m3Z');
             const r0_500 = getParam('r0_500'); // cm at 500nm
             const seeingArcsec = getParam('seeing_arcsec'); // arcsec at 500nm
@@ -1229,9 +1229,11 @@
             const EFL = f1 * m;
             const Feff = F1 * m;
 
-            const p1 = (f1 + b) / (m + 1);
+            // Clamp separation to ensure the secondary stays inside the primary converging beam
+            const d = Math.min(dInput, f1 - 5);
+            const p1 = f1 - d;
+            const b = (m * p1) - d;
             const L2 = m * p1;
-            const d = f1 - p1;
             const f2 = -(m * p1) / (m - 1);
             const R2 = -2 * Math.abs(f2);
 
@@ -1436,10 +1438,13 @@
             if (warnBox && warnText) {
                 if (model.epsLinear >= 0.85) {
                     warnBox.classList.remove('hidden');
-                    warnText.textContent = `Critical Central Obstruction (${obsLinPct}% linear) — reduce BWD or increase m`;
+                    warnText.textContent = `Critical Central Obstruction (${obsLinPct}% linear) — reduce separation d or increase m`;
                 } else if (model.d <= 15) {
                     warnBox.classList.remove('hidden');
                     warnText.textContent = `Mirror separation d (${model.d.toFixed(1)} mm) is physically too small`;
+                } else if (model.b < 0) {
+                    warnBox.classList.remove('hidden');
+                    warnText.textContent = `Focal plane is inside the telescope (BWD = ${model.b.toFixed(1)} mm). Decrease separation d or increase m.`;
                 } else {
                     warnBox.classList.add('hidden');
                 }
@@ -1469,7 +1474,7 @@
             setText('val-r2', model.R2.toFixed(1));
             setText('val-obs-lin', `${obsLinPct}%`);
             setText('val-obs-area', `${obsAreaPct}%`);
-            setText('val-sep', model.d.toFixed(1));
+            setText('val-bwd', model.b.toFixed(1));
             setText('val-length', (model.d + model.b).toFixed(1));
             setText('val-k1', model.k1.toFixed(3));
             setText('val-k2', model.k2.toFixed(3));
@@ -2600,9 +2605,9 @@
 
         function loadPreset(type) {
             const presets = {
-                cubesat: { D1: 100, F1: 1.5, m: 5.0, b: 35, m3Z: -35, seeing_arcsec: 1.26, r0_500: 8.0, aoModes: 2, linkDist: 600, txPower: 30, jitterUr: 2.5, deltaT: 35, fov: 2.5, lambda: 1550, detSize: 15, type: 'rc' },
-                leo_ogs: { D1: 250, F1: 2.0, m: 4.0, b: 100, m3Z: -100, seeing_arcsec: 1.01, r0_500: 10.0, aoModes: 15, linkDist: 1000, txPower: 33, jitterUr: 1.5, deltaT: 20, fov: 2.0, lambda: 1550, detSize: 30, type: 'classical' },
-                deep_space: { D1: 500, F1: 2.2, m: 6.0, b: 180, m3Z: -180, seeing_arcsec: 0.67, r0_500: 15.0, aoModes: 65, linkDist: 36000, txPower: 40, jitterUr: 0.8, deltaT: 15, fov: 1.0, lambda: 1064, detSize: 50, type: 'rc' }
+                cubesat: { D1: 100, F1: 1.5, m: 5.0, d: 119, m3Z: -35, seeing_arcsec: 1.26, r0_500: 8.0, aoModes: 2, linkDist: 600, txPower: 30, jitterUr: 2.5, deltaT: 35, fov: 2.5, lambda: 1550, detSize: 15, type: 'rc' },
+                leo_ogs: { D1: 250, F1: 2.0, m: 4.0, d: 380, m3Z: -100, seeing_arcsec: 1.01, r0_500: 10.0, aoModes: 15, linkDist: 1000, txPower: 33, jitterUr: 1.5, deltaT: 20, fov: 2.0, lambda: 1550, detSize: 30, type: 'classical' },
+                deep_space: { D1: 500, F1: 2.2, m: 6.0, d: 917, m3Z: -180, seeing_arcsec: 0.67, r0_500: 15.0, aoModes: 65, linkDist: 36000, txPower: 40, jitterUr: 0.8, deltaT: 15, fov: 1.0, lambda: 1064, detSize: 50, type: 'rc' }
             };
             const p = presets[type];
             if (!p) return;
@@ -2673,7 +2678,7 @@ ${m3SurfaceBlock}
                     primaryAperture_mm: model.D1,
                     primaryFNumber: model.F1,
                     secondaryMagnification: model.m,
-                    backWorkingDistance_mm: model.b,
+                    m1_m2_Separation_d_mm: model.d,
                     nasmythEnabled: model.nasmythEnabled,
                     nasmythM3Position_z3_mm: model.m3Z,
                     friedParameter_r0_500nm_cm: model.r0_500,
@@ -2684,7 +2689,7 @@ ${m3SurfaceBlock}
                     systemFNumber: Number(model.Feff.toFixed(2)),
                     primaryRoC_mm: Number(model.R1.toFixed(2)),
                     secondaryRoC_mm: Number(model.R2.toFixed(2)),
-                    mirrorSeparation_mm: Number(model.d.toFixed(2)),
+                    backWorkingDistance_bwd_mm: Number(model.b.toFixed(2)),
                     conicConstants: { k1: Number(model.k1.toFixed(4)), k2: Number(model.k2.toFixed(4)) },
                     nasmythM3ClearAperture_mm: {
                         minorAxis: Number(model.D3_minor.toFixed(2)),
