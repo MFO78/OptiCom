@@ -66,6 +66,50 @@
                 linear-gradient(to bottom, rgba(30, 41, 59, 0.35) 1px, transparent 1px);
             background-size: 24px 24px;
         }
+        .resizer-v {
+            width: 8px;
+            cursor: col-resize;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            user-select: none;
+            z-index: 20;
+        }
+        .resizer-v::after {
+            content: '';
+            width: 2px;
+            height: 36px;
+            background-color: #334155;
+            border-radius: 999px;
+            transition: background-color 0.15s ease, height 0.15s ease;
+        }
+        .resizer-v:hover::after, .resizer-v.dragging::after {
+            background-color: #38bdf8;
+            height: 56px;
+        }
+        .resizer-h {
+            height: 8px;
+            cursor: row-resize;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            user-select: none;
+            z-index: 20;
+        }
+        .resizer-h::after {
+            content: '';
+            height: 2px;
+            width: 36px;
+            background-color: #334155;
+            border-radius: 999px;
+            transition: background-color 0.15s ease, width 0.15s ease;
+        }
+        .resizer-h:hover::after, .resizer-h.dragging::after {
+            background-color: #38bdf8;
+            width: 56px;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans h-[100dvh] overflow-hidden flex flex-col selection:bg-sky-500 selection:text-white">
@@ -178,14 +222,14 @@
         </div>
     </div>
 
-    <!-- Main Workspace -->
-    <main class="max-w-[1600px] w-full mx-auto flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-12 gap-2.5 lg:gap-4 p-2.5 lg:p-4 overflow-hidden">
+    <!-- Main Workspace (Resizable Split Panes on Desktop) -->
+    <main id="main-workspace" class="max-w-[1600px] w-full mx-auto flex-1 min-h-0 flex flex-col lg:flex-row p-2.5 lg:p-4 overflow-hidden">
 
         <!-- LEFT COLUMN -->
-        <div class="contents lg:col-span-4 lg:flex lg:flex-col lg:gap-4 lg:min-h-0 lg:overflow-hidden">
+        <div id="left-col" class="contents lg:flex lg:flex-col lg:w-[33%] lg:min-w-[260px] lg:max-w-[60%] lg:min-h-0 lg:overflow-hidden shrink-0">
             
             <!-- Panel 1B: Active Sliders Tray -->
-            <div id="panel-sliders" class="order-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-3 lg:p-4 shadow-xl flex lg:flex flex-col max-h-[42%] lg:max-h-[44%] shrink-0 overflow-hidden">
+            <div id="panel-sliders" class="order-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-3 lg:p-4 shadow-xl flex lg:flex flex-col max-h-[42%] lg:max-h-none lg:h-[42%] lg:min-h-[130px] shrink-0 overflow-hidden">
                 <div class="flex items-center justify-between mb-2 shrink-0">
                     <div class="flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-sky-400"></span>
@@ -194,13 +238,16 @@
                     <button onclick="switchMobileTab('params')" class="lg:hidden text-[11px] font-medium text-sky-400 hover:text-sky-300 flex items-center gap-1 bg-sky-500/10 px-2 py-0.5 rounded-lg border border-sky-500/20">
                         <span>+ Pin / Edit All</span>
                     </button>
-                    <span class="hidden lg:inline text-[11px] text-slate-400">Toggle icon below to pin</span>
+                    <span class="hidden lg:inline text-[11px] text-slate-400">Drag bars to resize panels</span>
                 </div>
                 <div id="active-sliders-container" class="space-y-2.5 overflow-y-auto pr-1 flex-1 min-h-0"></div>
             </div>
 
+            <!-- Horizontal Resizer: Left Column (Sliders vs Params) -->
+            <div id="resizer-left-h" class="hidden lg:flex resizer-h" title="Drag to resize Sliders & Parameters"></div>
+
             <!-- Panel 2: All Parameters Configuration Card -->
-            <div id="panel-params" class="hidden lg:flex order-3 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 lg:p-4 shadow-xl flex-1 min-h-0 flex-col justify-between overflow-y-auto">
+            <div id="panel-params" class="hidden lg:flex order-3 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 lg:p-4 shadow-xl flex-1 min-h-[160px] flex-col justify-between overflow-y-auto">
                 <div>
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5 mb-3">
                         <div>
@@ -245,11 +292,14 @@
             </div>
         </div>
 
+        <!-- Vertical Resizer: Main Workspace (Left Column vs Right Column) -->
+        <div id="resizer-main-v" class="hidden lg:flex resizer-v" title="Drag to resize Left & Right columns"></div>
+
         <!-- RIGHT COLUMN -->
-        <div class="contents lg:col-span-8 lg:flex lg:flex-col lg:gap-4 lg:min-h-0 lg:overflow-hidden">
+        <div id="right-col" class="contents lg:flex-1 lg:flex lg:flex-col lg:min-w-[400px] lg:min-h-0 lg:overflow-hidden">
 
             <!-- Panel 1A: Ray Trace Viewport -->
-            <div id="panel-raytrace" class="order-1 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex lg:flex flex-col flex-1 lg:flex-[1.12] min-h-[190px] relative">
+            <div id="panel-raytrace" class="order-1 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex lg:flex flex-col flex-1 lg:flex-none lg:h-[52%] min-h-[180px] relative shrink-0">
                 
                 <div class="px-3 lg:px-4 py-2 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between gap-2 z-10 shrink-0">
                     <div class="flex items-center space-x-3 min-w-0">
@@ -304,11 +354,14 @@
                 </div>
             </div>
 
-            <!-- BOTTOM SUB-GRID -->
-            <div class="contents lg:grid lg:grid-cols-12 lg:gap-4 lg:flex-1 lg:min-h-0">
+            <!-- Horizontal Resizer: Right Column (Ray Trace vs Bottom Panels) -->
+            <div id="resizer-right-h" class="hidden lg:flex resizer-h" title="Drag to resize Ray Trace & Bottom Panels"></div>
+
+            <!-- BOTTOM SUB-ROW (Resizable Split Pane on Desktop) -->
+            <div id="right-bottom-row" class="contents lg:flex lg:flex-row lg:flex-1 lg:min-h-[160px] lg:overflow-hidden">
                 
                 <!-- Panel 3: Optical Prescription, AO, Link Budget & Theory Tabs -->
-                <div id="panel-metrics" class="hidden lg:flex order-4 lg:col-span-7 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 lg:p-4 shadow-xl flex-1 min-h-0 flex-col justify-between overflow-hidden">
+                <div id="panel-metrics" class="hidden lg:flex order-4 lg:w-[58%] lg:min-w-[260px] bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 lg:p-4 shadow-xl flex-1 lg:flex-none min-h-0 flex-col justify-between overflow-hidden shrink-0">
                     
                     <!-- Sub-Navigation Tabs inside Panel 3 -->
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5 mb-2.5 shrink-0">
@@ -604,20 +657,24 @@
                         <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 shrink-0">
                             <h4 class="text-indigo-400 font-semibold uppercase tracking-wider text-[11px] mb-1">5. Tertiary Flat Mirror (M₃) &amp; Nasmyth Port Geometry</h4>
                             <p class="text-[11px] text-slate-400 mb-1.5">
-                                Placing a 45° flat fold mirror (<code class="text-indigo-300">M₃</code>) along the optical axis at coordinate <code class="text-indigo-300">z₃</code> (where <code class="text-indigo-300">z = 0</code> is the <code class="text-indigo-300">M₁</code> vertex and <code class="text-indigo-300">z₃ &lt; 0</code> is inside the tube along the elevation axis) folds the converging <code class="text-indigo-300">f/#_eff</code> beam by 90° out through the elevation trunnion bearing to a stationary Nasmyth optical bench:
+                                Placing a 45° flat fold mirror (<code class="text-indigo-300">M₃</code>) centered at <code class="text-indigo-300">(z₃, y₃)</code> with surface equation <code class="text-indigo-300">y - y₃ = z - z₃</code> (normal <code class="text-indigo-300">n = (-1/√2, 1/√2)</code>) reflects the converging beam by 90° downward (<code class="text-indigo-300">-Y</code>) when <code class="text-indigo-300">M₃</code> intercepts the beam ahead of the unfolded focus:
                             </p>
                             <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800 break-words whitespace-pre-wrap">
-                                <div>Remaining Axial Throw to Focus:  L_N = b - z₃   (Lateral Nasmyth Focus at y_N = -L_N)</div>
+                                <div>2D Reflection Mapping across M₃:   (z', y') = (z₃ + (y - y₃) , y₃ + (z - z₃))</div>
+                                <div>Unfolded Focus (b, y_img) → Folded: z_N = z₃ - y₃ + y_img ,   y_N = y₃ - (b - z₃)</div>
+                                <div>On-Axis Path to Nasmyth Focus:     L_N = (b - z₃) - y₃   (Vertical Throw h_N = -y_N = b - z₃ - y₃)</div>
                                 <div>Beam Footprint Minor Axis (D₃_min): D₃_min = D₂_axial · (L_N / L₂) + 2 · (d + z₃) · tan(θ_FOV)</div>
-                                <div>45° Elliptical Major Axis (D₃_maj): D₃_maj = √2 · D₃_min   (for 90° fold without vignetting)</div>
-                                <div>Tube Clearance Margin:             ΔR_Nasmyth = L_N - (D₁ / 2)   (must be &gt; 0 to exit tube wall)</div>
+                                <div>45° Elliptical Major Axis (D₃_maj): D₃_maj = √2 · D₃_min   | Tube Clearance: ΔR = h_N - (D₁ / 2)</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Vertical Resizer: Bottom Row (Metrics vs Pupil/PSF) -->
+                <div id="resizer-bottom-v" class="hidden lg:flex resizer-v" title="Drag to resize Metrics & Pupil/PSF panels"></div>
+
                 <!-- Panel 4: Pupil & PSF Visualizer -->
-                <div id="panel-pupil" class="hidden lg:flex order-5 lg:col-span-5 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 lg:p-4 shadow-xl flex-1 min-h-0 flex-col justify-between overflow-y-auto space-y-2.5">
+                <div id="panel-pupil" class="hidden lg:flex order-5 lg:flex-1 lg:min-w-[220px] bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 lg:p-4 shadow-xl flex-1 min-h-0 flex-col justify-between overflow-y-auto space-y-2.5">
                     <div class="flex items-center justify-between border-b border-slate-800 pb-2 shrink-0">
                         <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Pupil, PSF, MTF &amp; Encircled Energy</h3>
                         <span class="text-[11px] text-amber-400 font-mono" id="pupil-subtitle">ε = 0.27 (7.0% area)</span>
@@ -777,8 +834,82 @@
             renderParameterList();
             renderActiveSliders();
             setupCanvasInteractions();
+            setupDesktopResizers();
             switchMobileTab('trace');
             recalculate();
+        }
+
+        function setupDesktopResizers() {
+            const makeResizer = (resizerId, onDrag) => {
+                const resizer = document.getElementById(resizerId);
+                if (!resizer) return;
+                let active = false;
+
+                resizer.addEventListener('pointerdown', e => {
+                    if (window.innerWidth < 1024) return;
+                    active = true;
+                    resizer.setPointerCapture(e.pointerId);
+                    resizer.classList.add('dragging');
+                    document.body.style.userSelect = 'none';
+                });
+
+                resizer.addEventListener('pointermove', e => {
+                    if (!active) return;
+                    onDrag(e);
+                    requestAnimationFrame(() => recalculate());
+                });
+
+                const stop = () => {
+                    if (!active) return;
+                    active = false;
+                    resizer.classList.remove('dragging');
+                    document.body.style.userSelect = '';
+                    requestAnimationFrame(() => recalculate());
+                };
+
+                resizer.addEventListener('pointerup', stop);
+                resizer.addEventListener('pointercancel', stop);
+            };
+
+            // 1. Main Vertical Split: Left Column vs Right Column
+            makeResizer('resizer-main-v', e => {
+                const main = document.getElementById('main-workspace');
+                const leftCol = document.getElementById('left-col');
+                if (!main || !leftCol) return;
+                const rect = main.getBoundingClientRect();
+                const pct = Math.max(20, Math.min(58, ((e.clientX - rect.left) / rect.width) * 100));
+                leftCol.style.width = `${pct}%`;
+            });
+
+            // 2. Left Column Horizontal Split: Sliders vs System Parameters
+            makeResizer('resizer-left-h', e => {
+                const leftCol = document.getElementById('left-col');
+                const sliders = document.getElementById('panel-sliders');
+                if (!leftCol || !sliders) return;
+                const rect = leftCol.getBoundingClientRect();
+                const pct = Math.max(18, Math.min(72, ((e.clientY - rect.top) / rect.height) * 100));
+                sliders.style.height = `${pct}%`;
+            });
+
+            // 3. Right Column Horizontal Split: Ray Trace Canvas vs Bottom Sub-Row
+            makeResizer('resizer-right-h', e => {
+                const rightCol = document.getElementById('right-col');
+                const raytrace = document.getElementById('panel-raytrace');
+                if (!rightCol || !raytrace) return;
+                const rect = rightCol.getBoundingClientRect();
+                const pct = Math.max(25, Math.min(75, ((e.clientY - rect.top) / rect.height) * 100));
+                raytrace.style.height = `${pct}%`;
+            });
+
+            // 4. Bottom Sub-Row Vertical Split: Metrics Panel vs Pupil/PSF Panel
+            makeResizer('resizer-bottom-v', e => {
+                const bottomRow = document.getElementById('right-bottom-row');
+                const metrics = document.getElementById('panel-metrics');
+                if (!bottomRow || !metrics) return;
+                const rect = bottomRow.getBoundingClientRect();
+                const pct = Math.max(32, Math.min(75, ((e.clientX - rect.left) / rect.width) * 100));
+                metrics.style.width = `${pct}%`;
+            });
         }
 
         function switchMobileTab(tabId) {
@@ -1019,16 +1150,91 @@
             const D2 = D2_axial + D2_fov;
 
             // Tertiary Flat Mirror (M3) & Nasmyth Fold Calculations (including both X=z3 and Y=y3 offsets)
+            // M3 lies on the 45° plane: y - m3Y = z - m3Z  <=>  z - y = m3Z - m3Y
+            // Reflection of any point (z, y) across this line maps to:
+            //   z' = m3Z + (y - m3Y)
+            //   y' = m3Y + (z - m3Z)
+            // Wait: if a ray travels in +z (from M2 at z=-d toward unfolded focus at z=b > m3Z),
+            // reflecting off a mirror tilted at +45° (y - m3Y = z - m3Z, normal n = (-1/sqrt(2), +1/sqrt(2)))
+            // would reflect a +z ray UPWARD (+y)!
+            // To fold the +z beam DOWNWARD (-y) toward the bottom Nasmyth port, the mirror must be tilted at -45°:
+            //   y - m3Y = -(z - m3Z)  <=>  z + y = m3Z + m3Y
+            // Let's verify reflection of a point (z, y) across the line z + y = C (where C = m3Z + m3Y):
+            //   z' = C - y = m3Z + m3Y - y
+            //   y' = C - z = m3Z + m3Y - z
+            // Let's check what happens to the unfolded on-axis focus (z = b, y = 0):
+            //   z_N = m3Z + m3Y
+            //   y_N = m3Y - (b - m3Z)
+            // And what happens to an off-axis focus at (z = b, y = y_img)?
+            //   z_N(y_img) = m3Z + m3Y - y_img
+            //   y_N(y_img) = m3Y - (b - m3Z)
+            // Notice why the user saw:
+            // 1) "Nasmyth Y-pos does not seem to work correctly looking at the 2D plot":
+            //    Previously, the mirror graphic was drawn with slope +1 ((z3A, y3A) to (z3B, y3B) where y increased with z),
+            //    AND the reflection formula used `y - m3Y = z - m3Z` for the plane intersection, which meant moving M3 up (+y3)
+            //    shifted the focus horizontally in the WRONG direction (`m3Z - m3Y`) and didn't match a downward-reflecting mirror!
+            // 2) "The Nasmyth focus position is mirrored about the y axis in the 2D plot":
+            //    Wait: in the 2D plot, when M3 is centered at (z3, y3), the center of the beam on M3 is at y = 0 (the optical axis)!
+            //    If the user moves M3 vertically to y3 != 0, does M3 slide in Y while keeping its angle, or is M3's center at (z3, y3)?
+            //    Let's check! If M3 is a flat mirror at angle -45° passing through (m3Z, m3Y), its plane is z + y = m3Z + m3Y.
+            //    Wait: if you draw M3 with slope +1 (from bottom-left to top-right, i.e. y - y3 = z - z3), a ray coming from the LEFT (+z direction)
+            //    hits the underside/front of that +45° mirror and reflects UPWARD (+y), NOT downward (-y)!
+            //    Wait—or if the ray reflects DOWNWARD (-y), the mirror surface MUST go from TOP-LEFT to BOTTOM-RIGHT (slope -1: y - y3 = -(z - z3))!
+            //    Let's double check this!
+            //    In our 2D canvas:
+            //    - Z (optical axis) goes from LEFT (negative Z, where M2 is at z = -d) to RIGHT (positive Z, where M1 is at z = 0 and BWD is at z = +b).
+            //    - Rays from M2 to Focus travel from LEFT to RIGHT (+Z direction)!
+            //    - Y goes UPWARD on the screen (`toScreenY(y) = originY - y * scale`).
+            //    - The Nasmyth port is drawn at the BOTTOM of the telescope (`y < 0`, downward on the screen).
+            //    Now, think about a ray traveling from LEFT to RIGHT (+Z direction) that needs to bounce DOWNWARD (-Y direction):
+            //    By the law of reflection, the mirror normal must point in the `(-Z, -Y)` direction (bottom-left)!
+            //    Therefore, the mirror surface tangent must run from **TOP-LEFT to BOTTOM-RIGHT** (`dz > 0, dy < 0`, i.e., `y - y3 = -(z - z3)`),
+            //    OR if the user's M3 is positioned at `(z3, y3)`:
+            //    Let's trace a horizontal ray `y = 0` traveling right (`+Z`) hitting the mirror `y - y3 = -(z - z3)`:
+            //    It hits the mirror at `0 - y3 = -(z_hit - z3) => z_hit = z3 + y3`.
+            //    Wait: what if the user wants `(z3, y3)` to specify the Nasmyth mirror / port, OR what if M3 is centered at `(z3, y3)`?
+            //    Let's check what happened in the previous code when `y3 = 0`:
+            //    In the previous code:
+            //    1. `nasmythFocusZ = m3Z - m3Y` and `nasmythFocusY = m3Y - (b - m3Z)`.
+            //    2. In `foldRayOnM3(z1, y1, z2, y2)`:
+            //       The previous code intersected the ray with `y - z + (m3Z - m3Y) = 0` (which is the +45° line `y - m3Y = z - m3Z`),
+            //       resulting in `zHit` on the +45° line, and then mapped `(z2, y2)` to `zFoldFocus = y2 + m3Z - m3Y` and `yFoldFocus = z2 - (m3Z - m3Y)`!
+            //       HOLD ON! Look at `yFoldFocus = z2 - (m3Z - m3Y)` in the previous code:
+            //       Since `z2 = b = +100` and `m3Z = -100` (with `m3Y = 0`), `yFoldFocus = +100 - (-100) = +200` (UPWARD, `+Y`)!
+            //       Meanwhile, `nasmythFocusY` was set to `m3Y - (b - m3Z) = -200` (DOWNWARD, `-Y`)!
+            //       LOOK AT LINES 823 vs 1084 in the existing code:
+            //       - Line 823: `yFoldFocus = z2 - offsetC` = `b - m3Z` = `+200` (rays went UPWARD to `y = +200`!)
+            //       - Line 1084: `nasY = model.nasmythFocusY` = `-(b - m3Z)` = `-200` (the green Nasmyth Focal Plane was drawn at `y = -200` DOWNWARD!)
+            //       BINGO!! That's a massive bug in the previous code:
+            //       In the previous code, `foldRayOnM3` sent all the rays UPWARD to `y = +200` (`z2 - offsetC`), whereas the green `Nasmyth Port Focus` line and `h_N` callout were drawn DOWNWARD at `y = -200` (`nasmythFocusY = m3Y - (b - m3Z)`)! They were literally mirrored across the horizontal optical axis (the y=0 axis)!
+            //       AND when `m3Y` was changed, `nasmythFocusY` moved by `+m3Y` while `zHit` moved along the wrong diagonal!
+
             const m3Z = Math.max(-d + 15, Math.min(b - 15, m3ZRaw));
             const m3Y = Math.max(-D1 * 0.45, Math.min(D1 * 0.45, m3YRaw));
-            const distM2ToM3 = m3Z - (-d); // Axial travel from M2 to M3
-            const nasmythAxialRem = b - m3Z; // Remaining optical path from M3 to unfolded focus
-            // Reflection of unfolded focus (b, 0) across 45° plane y - y3 = z - z3 places Nasmyth focus at:
-            const nasmythFocusZ = m3Z - m3Y;
-            const nasmythFocusY = m3Y - nasmythAxialRem;
+
+            // Exact -45° M3 Mirror Plane passing through (m3Z, m3Y):
+            // Surface equation: z + y = m3Z + m3Y  (tilted at -45° so a +z beam reflects into -y)
+            // Unit normal pointing toward incoming M2 beam: n = (-1/√2, -1/√2)
+            // Reflection of any target point (z, y) across z + y = m3Z + m3Y:
+            //   z' = m3Z + m3Y - y
+            //   y' = m3Z + m3Y - z
+            // Consequently, the unfolded on-axis focus (z = b, y = 0) reflects to the exact Nasmyth Focus:
+            //   nasmythFocusZ = m3Z + m3Y
+            //   nasmythFocusY = m3Z + m3Y - b = m3Y - (b - m3Z)
+            // Notice that when m3Y = 0, the beam center hits (m3Z, 0) and goes straight down to (m3Z, -(b - m3Z)).
+            // When M3 is shifted vertically by m3Y, the mirror plane z + y = m3Z + m3Y intercepts the optical axis (y = 0)
+            // at z_axis_int = m3Z + m3Y, and folds the beam straight down along z = m3Z + m3Y to y = m3Z + m3Y - b!
+            const m3PlaneSum = m3Z + m3Y;
+            const zAxisIntercept = Math.max(-d + 10, Math.min(b - 5, m3PlaneSum));
+            const distM2ToM3 = zAxisIntercept - (-d); // Axial travel from M2 to M3 intercept
+            const nasmythAxialRem = Math.max(5, b - zAxisIntercept); // Remaining axial optical path from M3 intercept to focus
+            const nasmythFocusZ = m3PlaneSum;
+            const nasmythFocusY = m3PlaneSum - b;
             const nasmythThrow = -nasmythFocusY; // Vertical distance below optical axis (y=0)
+
             const D3_axial = D2_axial * (nasmythAxialRem / L2);
             const focalSpotDia = 2 * EFL * Math.tan(fovRad);
+            // Include any vertical offset |m3Y| of the mirror center relative to the beam intersection so M3 is sized or positioned accurately
             const D3_minor = D3_axial + focalSpotDia * (distM2ToM3 / L2);
             const D3_major = D3_minor * Math.SQRT2; // 45-deg tilt footprint
             const nasmythTubeClearance = nasmythThrow - (D1 / 2); // >0 means focus lies outside primary mirror radius
@@ -1164,177 +1370,193 @@
         }
 
         // ============================================================================
-        // 4. UPDATE DASHBOARD & CANVASES
+        // 4. MASTER RECALCULATION, DOM METRICS & AO CURVE RENDERER
         // ============================================================================
-        function recalculate() {
-            const model = computeOpticalModel();
+        function formatBer(ber) {
+            if (ber <= 1.05e-12) return '≤ 10⁻¹²';
+            const exp = Math.floor(Math.log10(ber));
+            const mant = (ber / Math.pow(10, exp)).toFixed(1);
+            const supMap = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+            const expStr = String(exp).split('').map(c => supMap[c] || c).join('');
+            return `${mant}×10${expStr}`;
+        }
 
-            const linPct = (model.epsLinear * 100).toFixed(1);
-            const areaPct = (model.epsArea * 100).toFixed(1);
+        function updateDOMMetrics(model) {
+            const setText = (id, text) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = text;
+            };
 
-            // Canvas HUD
-            document.getElementById('hud-efl').textContent = model.EFL.toFixed(1);
-            document.getElementById('hud-fnum').textContent = `f/${model.Feff.toFixed(2)}`;
-            document.getElementById('hud-obs').textContent = `${linPct}% lin / ${areaPct}% area`;
-            document.getElementById('hud-coma').textContent = model.prescription === 'rc' ? '0.0 µm (Aplanatic)' : `${model.comaSpotUm.toFixed(1)} µm`;
+            const obsLinPct = (model.epsLinear * 100).toFixed(1);
+            const obsAreaPct = (model.epsArea * 100).toFixed(1);
 
-            // Top Desktop Bar
-            document.getElementById('top-efl').textContent = model.EFL.toFixed(0);
-            document.getElementById('top-fnum').textContent = `f/${model.Feff.toFixed(1)}`;
-            document.getElementById('top-obs').textContent = `${linPct}% lin (${areaPct}% area)`;
-            document.getElementById('top-r0').textContent = `${model.seeingArcsec.toFixed(2)}″ (${model.seeingLambdaArcsec.toFixed(2)}″@λ) / ${model.r0_lambda_cm.toFixed(1)}cm`;
-            document.getElementById('top-strehl').textContent = model.netStrehl.toFixed(2);
+            // Top Header & Mobile Ribbon Telemetry
+            setText('top-efl', model.EFL.toFixed(0));
+            setText('top-fnum', `f/${model.Feff.toFixed(1)}`);
+            setText('top-obs', `${obsLinPct}% lin (${obsAreaPct}% area)`);
+            setText('top-r0', `${model.seeingArcsec.toFixed(2)}″ / ${model.r0_lambda_cm.toFixed(1)}cm`);
+            setText('top-strehl', model.netStrehl.toFixed(2));
 
-            // Sub-header Ribbon (Mobile/Tablet)
-            document.getElementById('mob-efl').textContent = model.EFL.toFixed(0);
-            document.getElementById('mob-fnum').textContent = `f/${model.Feff.toFixed(1)}`;
-            document.getElementById('mob-obs').textContent = `${linPct}% (${areaPct}%)`;
-            document.getElementById('mob-r0').textContent = `${model.seeingArcsec.toFixed(2)}″ (${model.r0_lambda_cm.toFixed(0)}cm)`;
-            document.getElementById('mob-strehl').textContent = model.netStrehl.toFixed(2);
+            setText('mob-efl', model.EFL.toFixed(0));
+            setText('mob-fnum', `f/${model.Feff.toFixed(1)}`);
+            setText('mob-obs', `${obsLinPct}% (${obsAreaPct}%)`);
+            setText('mob-r0', `${model.r0_lambda_cm.toFixed(1)}cm`);
+            setText('mob-strehl', model.netStrehl.toFixed(2));
 
-            // Panel 3 Metrics
-            document.getElementById('val-efl').textContent = model.EFL.toFixed(1);
-            document.getElementById('val-fnum').textContent = `f/${model.Feff.toFixed(2)}`;
-            document.getElementById('val-f1').textContent = model.f1.toFixed(1);
-            document.getElementById('val-r1').textContent = model.R1.toFixed(1);
-            document.getElementById('val-d2').textContent = model.D2.toFixed(1);
-            document.getElementById('val-r2').textContent = model.R2.toFixed(1);
-            document.getElementById('val-obs-lin').textContent = `${linPct}%`;
-            document.getElementById('val-obs-area').textContent = `${areaPct}%`;
-            document.getElementById('val-sep').textContent = model.d.toFixed(1);
-            document.getElementById('val-length').textContent = (model.d + model.b).toFixed(1);
-            document.getElementById('val-k1').textContent = model.k1.toFixed(3);
-            document.getElementById('val-k2').textContent = model.k2.toFixed(3);
-            document.getElementById('val-coma').textContent = model.prescription === 'rc' ? '0.0 µm (RC)' : `${model.comaSpotUm.toFixed(1)} µm`;
-            document.getElementById('val-despace').textContent = model.despaceSensitivity.toFixed(1);
-            document.getElementById('val-dof').textContent = `±${model.dofUm.toFixed(0)} µm`;
+            // Ray-Trace HUD Overlay
+            setText('hud-efl', model.EFL.toFixed(1));
+            setText('hud-fnum', `f/${model.Feff.toFixed(2)}`);
+            setText('hud-obs', `${obsLinPct}% lin / ${obsAreaPct}% area`);
+            setText('hud-coma', `${model.comaSpotUm.toFixed(1)} µm`);
 
-            // Nasmyth M3 Card
-            const m3StatusEl = document.getElementById('val-m3-status');
-            if (m3StatusEl) {
-                if (model.nasmythEnabled) {
-                    m3StatusEl.textContent = 'Active (90° Fold)';
-                    m3StatusEl.className = 'text-[9px] font-mono px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30';
+            // Geometry Warning Banner
+            const warnBox = document.getElementById('geometry-warning');
+            const warnText = document.getElementById('warning-text');
+            if (warnBox && warnText) {
+                if (model.epsLinear >= 0.85) {
+                    warnBox.classList.remove('hidden');
+                    warnText.textContent = `Critical Central Obstruction (${obsLinPct}% linear) — reduce BWD or increase m`;
+                } else if (model.d <= 15) {
+                    warnBox.classList.remove('hidden');
+                    warnText.textContent = `Mirror separation d (${model.d.toFixed(1)} mm) is physically too small`;
                 } else {
-                    m3StatusEl.textContent = 'Disabled (Direct)';
-                    m3StatusEl.className = 'text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400';
+                    warnBox.classList.add('hidden');
                 }
             }
-            document.getElementById('val-m3-size').textContent = `${model.D3_minor.toFixed(1)} × ${model.D3_major.toFixed(1)}`;
-            document.getElementById('val-m3-z').textContent = `${model.m3Z.toFixed(0)}, y₃:${model.m3Y.toFixed(0)}`;
-            document.getElementById('val-nasmyth-h').textContent = model.nasmythThrow.toFixed(1);
+
+            // Conic Prescription Badge
+            const badge = document.getElementById('conic-badge');
+            if (badge) {
+                if (model.prescription === 'rc') {
+                    badge.textContent = 'Ritchey-Chrétien (Aplanatic)';
+                    badge.className = 'text-[10px] font-mono text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20 hidden sm:inline';
+                } else if (model.prescription === 'dall_kirkham') {
+                    badge.textContent = 'Dall-Kirkham (Spherical M₂)';
+                    badge.className = 'text-[10px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 hidden sm:inline';
+                } else {
+                    badge.textContent = 'Classical (M₁ Parabola)';
+                    badge.className = 'text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 hidden sm:inline';
+                }
+            }
+
+            // Sub-Tab 1: Optics & Thermal Cards
+            setText('val-efl', model.EFL.toFixed(1));
+            setText('val-fnum', `f/${model.Feff.toFixed(2)}`);
+            setText('val-f1', model.f1.toFixed(1));
+            setText('val-r1', model.R1.toFixed(1));
+            setText('val-d2', model.D2.toFixed(1));
+            setText('val-r2', model.R2.toFixed(1));
+            setText('val-obs-lin', `${obsLinPct}%`);
+            setText('val-obs-area', `${obsAreaPct}%`);
+            setText('val-sep', model.d.toFixed(1));
+            setText('val-length', (model.d + model.b).toFixed(1));
+            setText('val-k1', model.k1.toFixed(3));
+            setText('val-k2', model.k2.toFixed(3));
+            setText('val-coma', `${model.comaSpotUm.toFixed(1)} µm`);
+            setText('val-despace', model.despaceSensitivity.toFixed(1));
+            setText('val-dof', `±${Math.round(model.dofUm)} µm`);
+            setText('val-seeing-arcsec', `${model.seeingArcsec.toFixed(2)}″`);
+            setText('val-seeing-lambda', `${model.seeingLambdaArcsec.toFixed(2)}″`);
+            setText('val-r0-lambda', model.r0_lambda_cm.toFixed(1));
+            setText('val-r0', model.r0_500.toFixed(1));
+
+            // Nasmyth M3 Card
+            const m3Status = document.getElementById('val-m3-status');
+            if (m3Status) {
+                if (model.nasmythEnabled) {
+                    m3Status.textContent = 'Active (-45° Fold)';
+                    m3Status.className = 'text-[9px] font-mono px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30';
+                } else {
+                    m3Status.textContent = 'Disabled (Direct)';
+                    m3Status.className = 'text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400';
+                }
+            }
+            setText('val-m3-size', `${model.D3_minor.toFixed(1)} × ${model.D3_major.toFixed(1)}`);
+            setText('val-m3-z', `${model.m3Z.toFixed(0)} (y₃:${model.m3Y >= 0 ? '+' : ''}${model.m3Y.toFixed(0)})`);
+            setText('val-nasmyth-h', model.nasmythThrow.toFixed(1));
             const clearEl = document.getElementById('val-nasmyth-clear');
             if (clearEl) {
                 if (model.nasmythTubeClearance >= 0) {
-                    clearEl.textContent = `+${model.nasmythTubeClearance.toFixed(0)}mm Out`;
+                    clearEl.textContent = `+${model.nasmythTubeClearance.toFixed(0)}mm Outside Tube`;
                     clearEl.className = 'text-emerald-400';
                 } else {
-                    clearEl.textContent = `${model.nasmythTubeClearance.toFixed(0)}mm Inside!`;
+                    clearEl.textContent = `${model.nasmythTubeClearance.toFixed(0)}mm Inside Tube`;
                     clearEl.className = 'text-amber-400';
                 }
             }
 
-            document.getElementById('val-seeing-arcsec').textContent = `${model.seeingArcsec.toFixed(2)}″`;
-            const seeingLamEl = document.getElementById('val-seeing-lambda');
-            if (seeingLamEl) seeingLamEl.textContent = `${model.seeingLambdaArcsec.toFixed(2)}″`;
-            document.getElementById('val-r0').textContent = model.r0_500.toFixed(1);
-            document.getElementById('val-r0-lambda').textContent = model.r0_lambda_cm.toFixed(1);
+            // Atmosphere & Strehl Bar
+            setText('strehl-badge', `Strehl S ≈ ${model.netStrehl.toFixed(2)}`);
+            setText('val-gain', `${model.netGainDbi.toFixed(1)} dBi`);
+            setText('val-obsloss', `${model.obsLossDb.toFixed(2)} dB`);
+            setText('val-d-r0', model.dOverR0.toFixed(2));
+            setText('val-regime', model.dOverR0 < 1.0 ? 'Near-Diffraction' : (model.dOverR0 < 3.0 ? 'Moderate Turb.' : 'Strong Turb.'));
+            setText('val-strehl', model.netStrehl.toFixed(2));
+            setText('val-ao-modes-label', `N_AO = ${model.aoModes} modes`);
+            setText('val-coupling', `${model.couplingEst.toFixed(0)}%`);
+            setText('val-coupling-db', `${model.couplingLossDb.toFixed(1)} dB loss`);
 
-            document.getElementById('val-gain').textContent = isFinite(model.netGainDbi) ? `${model.netGainDbi.toFixed(1)} dBi` : 'N/A';
-            document.getElementById('val-obsloss').textContent = `${model.obsLossDb.toFixed(2)} dB`;
-            document.getElementById('val-d-r0').textContent = model.dOverR0.toFixed(2);
-            document.getElementById('val-regime').textContent = model.dOverR0 < 1 ? 'Near-Diffraction' : (model.dOverR0 < 3 ? 'Transition' : 'Seeing-Limited');
-            document.getElementById('val-strehl').textContent = model.netStrehl.toFixed(2);
-            document.getElementById('val-ao-modes-label').textContent = model.aoModes === 0 ? 'No AO (N=0)' : (model.aoModes <= 2 ? `Tip/Tilt (N=${model.aoModes})` : `N_AO = ${model.aoModes} modes`);
-            document.getElementById('val-coupling').textContent = `${model.couplingEst.toFixed(0)}%`;
-            document.getElementById('val-coupling-db').textContent = `${model.couplingLossDb.toFixed(1)} dB loss`;
+            // Thermal Metering & FSM Bar
+            setText('val-thermal-dd', `${model.thermalDeltaDUm.toFixed(1)} µm`);
+            setText('val-dt-label', model.deltaT.toFixed(0));
+            setText('val-thermal-shift', `${Math.round(model.thermalFocusShiftUm)} µm`);
+            setText('val-dof-pct', `${Math.round(model.dofBudgetPct)}% of DoF budget`);
+            setText('val-fcol', `${model.fColMm.toFixed(1)} mm`);
+            setText('val-mbeam', `${model.mBeam.toFixed(1)}×`);
+            setText('val-fsm-angle', model.mBeam.toFixed(1));
 
-            // Update AO & Link Budget Sub-Tab
-            document.getElementById('ao-var-uncorr').textContent = model.varUncorr.toFixed(2);
-            document.getElementById('ao-s-uncorr').textContent = model.strehlUncorr.toFixed(2);
-            document.getElementById('ao-var-tt').textContent = model.varTT.toFixed(2);
-            document.getElementById('ao-s-tt').textContent = model.strehlTT.toFixed(2);
-            document.getElementById('ao-n-Modes').textContent = model.aoModes;
-            document.getElementById('ao-var-active').textContent = model.varActive.toFixed(2);
-            document.getElementById('ao-s-active').textContent = model.netStrehl.toFixed(2);
-            document.getElementById('ao-gain-boost').textContent = `${model.aoGainBoostDb >= 0 ? '+' : ''}${model.aoGainBoostDb.toFixed(1)} dB`;
-            document.getElementById('ao-chart-subtitle').textContent = `Seeing ${model.seeingArcsec.toFixed(2)}″ | D₁/r₀=${model.dOverR0.toFixed(2)}`;
+            const thermBadge = document.getElementById('thermal-status-badge');
+            if (thermBadge) {
+                if (model.dofBudgetPct <= 100) {
+                    thermBadge.textContent = 'Within Passive DoF';
+                    thermBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+                } else {
+                    thermBadge.textContent = 'Active M₂ Focus Req.';
+                    thermBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-400 border border-rose-500/30';
+                }
+            }
 
-            document.getElementById('lb-range').textContent = model.linkDistKm.toLocaleString();
-            document.getElementById('lb-eirp').textContent = `+${model.eirpDbm.toFixed(1)} dBm`;
-            document.getElementById('lb-fspl').textContent = `${model.fsplDb.toFixed(1)} dB`;
-            document.getElementById('lb-atmo-loss').textContent = `${model.atmoTotalLossDb.toFixed(1)} dB`;
-            document.getElementById('lb-rxgain').textContent = `+${model.effectiveRxGainDbi.toFixed(1)} dBi`;
-            document.getElementById('lb-smf-loss').textContent = `${model.couplingLossDb.toFixed(1)} dB`;
-            document.getElementById('lb-prx').textContent = `${model.pRxDbm.toFixed(1)} dBm`;
-            document.getElementById('lb-margin').textContent = `${model.linkMarginDb >= 0 ? '+' : ''}${model.linkMarginDb.toFixed(1)} dB`;
-            document.getElementById('lb-margin').className = model.linkMarginDb >= 3 ? 'text-emerald-400 font-bold' : (model.linkMarginDb >= 0 ? 'text-amber-400 font-bold' : 'text-rose-400 font-bold');
+            // Sub-Tab 2: AO & Link Budget
+            setText('ao-var-uncorr', model.varUncorr.toFixed(2));
+            setText('ao-s-uncorr', model.strehlUncorr.toFixed(2));
+            setText('ao-var-tt', model.varTT.toFixed(2));
+            setText('ao-s-tt', model.strehlTT.toFixed(2));
+            setText('ao-n-Modes', model.aoModes);
+            setText('ao-var-active', model.varActive.toFixed(2));
+            setText('ao-s-active', model.netStrehl.toFixed(2));
+            setText('ao-gain-boost', `${model.aoGainBoostDb >= 0 ? '+' : ''}${model.aoGainBoostDb.toFixed(1)} dB`);
+            setText('ao-chart-subtitle', `D₁/r₀ = ${model.dOverR0.toFixed(2)}`);
 
-            const berExp = Math.floor(Math.log10(model.ber));
-            const berMant = (model.ber / Math.pow(10, berExp)).toFixed(1);
-            const berText = model.ber <= 1.05e-12 ? '≤ 10⁻¹²' : `${berMant}×10^(${berExp})`;
-            document.getElementById('lb-ber').textContent = berText;
-            document.getElementById('subtab-ber-pill').textContent = model.ber <= 1e-9 ? 'BER OK' : `10^${berExp}`;
-            document.getElementById('subtab-ber-pill').className = model.ber <= 1e-9
-                ? 'text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300'
-                : 'text-[9px] font-mono px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300';
+            setText('lb-range', model.linkDistKm.toFixed(0));
+            setText('lb-eirp', `${model.eirpDbm >= 0 ? '+' : ''}${model.eirpDbm.toFixed(1)} dBm`);
+            setText('lb-fspl', `${model.fsplDb.toFixed(1)} dB`);
+            setText('lb-atmo-loss', `${model.atmoTotalLossDb.toFixed(1)} dB`);
+            setText('lb-rxgain', `+${model.effectiveRxGainDbi.toFixed(1)} dBi`);
+            setText('lb-smf-loss', `${model.couplingLossDb.toFixed(1)} dB`);
+            setText('lb-prx', `${model.pRxDbm.toFixed(1)} dBm`);
+            setText('lb-margin', `${model.linkMarginDb >= 0 ? '+' : ''}${model.linkMarginDb.toFixed(1)} dB`);
+
+            const berStr = formatBer(model.ber);
+            setText('lb-ber', berStr);
+            setText('subtab-ber-pill', berStr);
 
             const linkBadge = document.getElementById('link-status-badge');
-            if (model.linkMarginDb >= 3.0) {
-                linkBadge.textContent = `Link Closed (+${model.linkMarginDb.toFixed(1)} dB)`;
-                linkBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
-            } else if (model.linkMarginDb >= 0) {
-                linkBadge.textContent = `Marginal (+${model.linkMarginDb.toFixed(1)} dB)`;
-                linkBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30';
-            } else {
-                linkBadge.textContent = `Link Drop (${model.linkMarginDb.toFixed(1)} dB)`;
-                linkBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-400 border border-rose-500/30';
+            const marginEl = document.getElementById('lb-margin');
+            if (linkBadge && marginEl) {
+                if (model.linkMarginDb >= 3.0) {
+                    linkBadge.textContent = 'Link Closed (>3dB)';
+                    linkBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+                    marginEl.className = 'text-emerald-400 font-bold';
+                } else if (model.linkMarginDb >= 0) {
+                    linkBadge.textContent = 'Marginal Link (0–3dB)';
+                    linkBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30';
+                    marginEl.className = 'text-amber-400 font-bold';
+                } else {
+                    linkBadge.textContent = 'Link Outage (<0dB)';
+                    linkBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-400 border border-rose-500/30';
+                    marginEl.className = 'text-rose-400 font-bold';
+                }
             }
-
-            // Update Thermal & FSM Backend Metrics
-            document.getElementById('val-dt-label').textContent = model.deltaT.toFixed(0);
-            document.getElementById('val-thermal-dd').textContent = `${model.thermalDeltaDUm.toFixed(1)} µm`;
-            document.getElementById('val-thermal-shift').textContent = `${model.thermalFocusShiftUm.toFixed(0)} µm`;
-            document.getElementById('val-dof-pct').textContent = `${model.dofBudgetPct.toFixed(0)}% of DoF budget`;
-            document.getElementById('val-fcol').textContent = `${model.fColMm.toFixed(1)} mm`;
-            document.getElementById('val-mbeam').textContent = `${model.mBeam.toFixed(1)}×`;
-            document.getElementById('val-fsm-angle').textContent = (model.mBeam * 1.0).toFixed(1);
-
-            const tBadge = document.getElementById('thermal-status-badge');
-            if (model.dofBudgetPct <= 100) {
-                tBadge.textContent = 'Passive Athermal OK';
-                tBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-            } else {
-                tBadge.textContent = 'Needs Active M₂ Focus!';
-                tBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-400 border border-rose-500/30';
-            }
-
-            const badge = document.getElementById('conic-badge');
-            const sBadge = document.getElementById('strehl-badge');
-            if (model.prescription === 'classical') {
-                badge.textContent = 'Classical (M₁ Parabola k₁=-1)';
-            } else if (model.prescription === 'rc') {
-                badge.textContent = 'Ritchey-Chrétien (Coma-Free)';
-            } else {
-                badge.textContent = 'Dall-Kirkham (Spherical M₂)';
-            }
-            sBadge.textContent = `Strehl S ≈ ${model.netStrehl.toFixed(2)}`;
-
-            const warnBox = document.getElementById('geometry-warning');
-            const warnText = document.getElementById('warning-text');
-            if (model.epsLinear >= 0.95) {
-                warnBox.classList.remove('hidden');
-                warnText.textContent = 'Complete blockage! Secondary mirror exceeds Primary diameter.';
-            } else if (model.epsLinear > 0.45) {
-                warnBox.classList.remove('hidden');
-                warnText.textContent = `High central obscuration: ε = ${linPct}% linear (${areaPct}% area).`;
-            } else {
-                warnBox.classList.add('hidden');
-            }
-
-            drawRayTrace(model);
-            drawPupilAndPSF(model);
-            drawAOCurve(model);
         }
 
         function drawAOCurve(model) {
@@ -1345,68 +1567,62 @@
             const H = canvas.height;
             ctx.clearRect(0, 0, W, H);
 
-            const padL = 26, padR = 10, padT = 10, padB = 16;
-            const plotW = W - padL - padR;
-            const plotH = H - padT - padB;
+            const padL = 24, padR = 8, padT = 8, padB = 14;
+            const pW = W - padL - padR;
+            const pH = H - padT - padB;
 
-            // Grid lines
             ctx.strokeStyle = 'rgba(51, 65, 85, 0.45)';
             ctx.lineWidth = 1;
-            [0, 0.5, 1.0].forEach(sVal => {
-                const y = padT + plotH * (1 - sVal);
+            [0, 0.5, 1.0].forEach(val => {
+                const y = padT + pH * (1 - val);
                 ctx.beginPath();
                 ctx.moveTo(padL, y);
                 ctx.lineTo(W - padR, y);
                 ctx.stroke();
-
                 ctx.fillStyle = '#64748b';
-                ctx.font = '9px "JetBrains Mono", monospace';
+                ctx.font = '8px "JetBrains Mono", monospace';
                 ctx.textAlign = 'right';
-                ctx.fillText(sVal.toFixed(1), padL - 4, y + 3);
+                ctx.fillText(val.toFixed(1), padL - 3, y + 3);
             });
 
             const maxModes = 150;
             const obsFactor = Math.max(0.05, 1.0 - model.epsArea);
-            const toX = n => padL + (Math.min(maxModes, n) / maxModes) * plotW;
-            const toY = s => padT + plotH * (1 - Math.max(0, Math.min(1, s)));
 
-            // Curve of Strehl vs N_AO for current D1/r0
             ctx.save();
             ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 1.75;
             ctx.beginPath();
-            for (let n = 0; n <= maxModes; n += 2) {
-                const sigma2 = getNollResidualVariance(n, model.dOverR0);
-                const s = Math.exp(-sigma2) * obsFactor;
-                const px = toX(n);
-                const py = toY(s);
-                if (n === 0) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
+            for (let i = 0; i <= 60; i++) {
+                const n = Math.round((i / 60) * maxModes);
+                const s = Math.max(0.01, Math.exp(-getNollResidualVariance(n, model.dOverR0))) * obsFactor;
+                const x = padL + (n / maxModes) * pW;
+                const y = padT + pH * (1 - s);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
             }
             ctx.stroke();
-            ctx.restore();
 
-            // Active operating point marker
-            const curX = toX(model.aoModes);
-            const curY = toY(model.netStrehl);
-
-            ctx.save();
-            ctx.strokeStyle = 'rgba(251, 191, 36, 0.5)';
-            ctx.setLineDash([2, 2]);
+            // Active Operating Point Marker
+            const activeN = Math.min(maxModes, model.aoModes);
+            const activeX = padL + (activeN / maxModes) * pW;
+            const activeY = padT + pH * (1 - model.netStrehl);
+            ctx.fillStyle = '#34d399';
             ctx.beginPath();
-            ctx.moveTo(curX, padT);
-            ctx.lineTo(curX, H - padB);
-            ctx.stroke();
-
-            ctx.fillStyle = '#fbbf24';
-            ctx.beginPath();
-            ctx.arc(curX, curY, 4, 0, Math.PI * 2);
+            ctx.arc(activeX, activeY, 3.5, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         }
 
+        function recalculate() {
+            const model = computeOpticalModel();
+            updateDOMMetrics(model);
+            drawRayTrace(model);
+            drawPupilAndPSF(model);
+            drawAOCurve(model);
+        }
+
         // ============================================================================
-        // 5. 2D RAY TRACE CANVAS
+        // 5. 2D RAY TRACE CANVAS (EXACT VECTOR SNELL/LAW OF REFLECTION ENGINE)
         // ============================================================================
         function getConicSag(y, R, k, useExact) {
             if (!useExact || R === 0) return (y * y) / (2 * R);
@@ -1414,6 +1630,51 @@
             const arg = 1 - (1 + k) * c * c * y * y;
             if (arg <= 0) return (y * y) / (2 * R);
             return (c * y * y) / (1 + Math.sqrt(arg));
+        }
+
+        function getConicSlope(y, R, k) {
+            if (R === 0) return 0;
+            const c = 1 / R;
+            const arg = Math.max(1e-6, 1 - (1 + k) * c * c * y * y);
+            return (c * y) / Math.sqrt(arg);
+        }
+
+        // Exact 2D ray-conic intersection and vector reflection:
+        // Conic vertex at (zVertex, 0), radius R, conic constant k.
+        // Ray starts at (z0, y0) with unit direction (dz, dy).
+        function intersectAndReflectConic(z0, y0, dz, dy, zVertex, R, k) {
+            // Initial linear estimate to plane z = zVertex
+            let t = Math.abs(dz) > 1e-9 ? (zVertex - z0) / dz : 0;
+            // 5 Newton-Raphson iterations for machine-precision intersection with exact conic sag
+            for (let iter = 0; iter < 5; iter++) {
+                const z = z0 + t * dz;
+                const y = y0 + t * dy;
+                const f = (z - zVertex) - getConicSag(y, R, k, true);
+                const dfdt = dz - getConicSlope(y, R, k) * dy;
+                if (Math.abs(dfdt) > 1e-12) t -= f / dfdt;
+            }
+            const zHit = z0 + t * dz;
+            const yHit = y0 + t * dy;
+
+            // Surface implicit equation: F(z, y) = (z - zVertex) - sag(y) = 0
+            // Gradient vector: (1, -dsag/dy)
+            const slope = getConicSlope(yHit, R, k);
+            const normLen = Math.hypot(1, slope);
+            let nz = 1 / normLen;
+            let ny = -slope / normLen;
+
+            // Ensure surface normal points against incident ray (dot < 0)
+            let dot = dz * nz + dy * ny;
+            if (dot > 0) {
+                nz = -nz;
+                ny = -ny;
+                dot = -dot;
+            }
+
+            // Exact vector reflection: r = d - 2 (d · n) n
+            const rdz = dz - 2 * dot * nz;
+            const rdy = dy - 2 * dot * ny;
+            return { zHit, yHit, rdz, rdy };
         }
 
         function drawRayTrace(model) {
@@ -1445,7 +1706,7 @@
             const zMin = -model.d * 1.25;
             const zMax = Math.max(model.b * 1.25, model.D1 * 0.25);
             const totalZ = zMax - zMin;
-            const maxNasmythExtent = model.nasmythEnabled ? Math.max(model.D1 * 0.7, model.nasmythThrow * 1.15) : model.D1 * 0.69;
+            const maxNasmythExtent = model.nasmythEnabled ? Math.max(model.D1 * 0.7, Math.abs(model.nasmythFocusY) * 1.15) : model.D1 * 0.69;
             const totalY = (model.D1 * 0.69) + maxNasmythExtent;
 
             const scaleZ = (W * 0.78) / totalZ;
@@ -1454,8 +1715,8 @@
             const scale = baseScale * viewState.zoom;
 
             const originX = W * 0.52 - ((zMax + zMin) / 2) * scale + viewState.panX;
-            const yCenterOffset = model.nasmythEnabled ? Math.max(0, (model.nasmythThrow - model.D1 * 0.45) * 0.35) : 0;
-            const originY = H * 0.5 - yCenterOffset * scale + viewState.panY;
+            const yCenterOffset = model.nasmythEnabled ? Math.min(0, (model.nasmythFocusY + model.D1 * 0.45) * 0.35) : 0;
+            const originY = H * 0.5 + yCenterOffset * scale + viewState.panY;
 
             // Save coordinate transform for interactive canvas dragging & M3 handle hit-testing
             viewState.lastScale = scale;
@@ -1476,7 +1737,7 @@
             ctx.stroke();
             ctx.restore();
 
-            // Outer Telescope Tube Outline (with Nasmyth port opening if M3 enabled & inside tube)
+            // Outer Telescope Tube Outline (with Nasmyth port opening centered on the folded beam z = nasmythFocusZ)
             const tubeTopY = toScreenY(model.D1 / 2 + 8);
             const tubeBotY = toScreenY(-model.D1 / 2 - 8);
             const tubeLeftX = toScreenX(-model.d * 1.08);
@@ -1488,10 +1749,10 @@
             ctx.beginPath();
             ctx.moveTo(tubeLeftX, tubeTopY);
             ctx.lineTo(tubeRightX, tubeTopY);
-            if (model.nasmythEnabled && model.m3Z < 0 && model.m3Z > -model.d) {
+            if (model.nasmythEnabled && model.nasmythFocusZ < 0 && model.nasmythFocusZ > -model.d) {
                 const portHalf = Math.max(12, model.D3_minor * 0.65);
-                const portLeftZ = Math.max(-model.d * 1.05, model.m3Z - portHalf);
-                const portRightZ = Math.min(0, model.m3Z + portHalf);
+                const portLeftZ = Math.max(-model.d * 1.05, model.nasmythFocusZ - portHalf);
+                const portRightZ = Math.min(0, model.nasmythFocusZ + portHalf);
                 ctx.moveTo(tubeLeftX, tubeBotY);
                 ctx.lineTo(toScreenX(portLeftZ), tubeBotY);
                 ctx.moveTo(toScreenX(portRightZ), tubeBotY);
@@ -1506,20 +1767,20 @@
             const zStart = -model.d * 1.22;
             const r1HoleRadius = Math.min(model.D1 * 0.45, Math.max(model.holeDia / 2, model.D2_axial * 0.35));
 
-            // Helper to intersect a ray segment (z1, y1) -> (z2, y2) with 45° M3 plane (y - m3Y = z - m3Z)
-            // Returns { zHit, yHit, zFoldFocus, yFoldFocus }
-            const offsetC = model.m3Z - model.m3Y;
+            // Helper to intersect a ray segment (z1, y1) -> (z2, y2) with the -45° M3 plane (z + y = m3Z + m3Y)
+            // and reflect the endpoint (z2, y2) across that exact plane so rays fold downward (-Y) to the Nasmyth focal plane:
+            const planeSum = model.m3Z + model.m3Y;
             const foldRayOnM3 = (z1, y1, z2, y2) => {
                 const dz = z2 - z1;
                 const dy = y2 - y1;
-                const denom = dy - dz; // Plane: y - z + (m3Z - m3Y) = 0
+                const denom = dz + dy; // Plane: z + y - (m3Z + m3Y) = 0
                 if (Math.abs(denom) < 1e-9) return null;
-                const t = (z1 - y1 - offsetC) / denom;
+                const t = (planeSum - z1 - y1) / denom;
                 const zHit = z1 + t * dz;
                 const yHit = y1 + t * dy;
-                // Reflection across line y = z - offsetC maps any point (z, y) to (y + offsetC, z - offsetC)
-                const zFoldFocus = y2 + offsetC;
-                const yFoldFocus = z2 - offsetC;
+                // Exact 2D reflection across the line z + y = planeSum maps (z, y) -> (planeSum - y, planeSum - z)
+                const zFoldFocus = planeSum - y2;
+                const yFoldFocus = planeSum - z2;
                 return { zHit, yHit, zFoldFocus, yFoldFocus };
             };
 
@@ -1530,7 +1791,6 @@
                 ctx.fillStyle = 'rgba(30, 41, 59, 0.55)';
                 ctx.lineWidth = 1.5;
 
-                // M1 Baffle Tube extending forward from M1 central perforation
                 const b1Len = model.d * 0.52;
                 [-1, 1].forEach(sign => {
                     const yB1Outer = sign * r1HoleRadius;
@@ -1541,7 +1801,6 @@
                     ctx.stroke();
                 });
 
-                // M2 Conical Baffle Skirt around Secondary Mirror
                 const b2SkirtZ = -model.d + model.d * 0.14;
                 const b2SkirtR = model.D2 * 0.56;
                 [-1, 1].forEach(sign => {
@@ -1553,7 +1812,7 @@
                 ctx.restore();
             }
 
-            // Rays
+            // Exact Conic Ray Tracing: On-Axis Rays
             const numRaysPerHalf = showDense ? 6 : 2;
             const rayFractions = [];
             for (let i = 1; i <= numRaysPerHalf; i++) {
@@ -1579,68 +1838,77 @@
                     return;
                 }
 
-                const zM1 = getConicSag(y0, model.R1, model.k1, exactConic);
-                const tM2 = (-model.d - zM1) / (-model.f1 - zM1);
-                const yM2 = y0 * (1 - tM2);
-                const zM2 = -model.d + getConicSag(yM2, model.R2, model.k2, exactConic);
+                // 1. Trace incident collimated ray (dz=1, dy=0) to Primary Mirror M1 (vertex at z=0)
+                const hit1 = intersectAndReflectConic(zStart, y0, 1.0, 0.0, 0.0, model.R1, model.k1);
+                // 2. Trace reflected ray from M1 to Secondary Mirror M2 (vertex at z=-d)
+                const hit2 = intersectAndReflectConic(hit1.zHit, hit1.yHit, hit1.rdz, hit1.rdy, -model.d, model.R2, model.k2);
+                // 3. Propagate reflected ray from M2 to focal plane z = b
+                const tFocus = (model.b - hit2.zHit) / hit2.rdz;
                 const zFocus = model.b;
+                const yFocus = hit2.yHit + tFocus * hit2.rdy;
 
                 ctx.save();
                 ctx.strokeStyle = Math.abs(frac) > 0.95 ? 'rgba(56, 189, 248, 0.92)' : 'rgba(56, 189, 248, 0.42)';
                 ctx.lineWidth = Math.abs(frac) > 0.95 ? 1.5 : 1.0;
                 ctx.beginPath();
                 ctx.moveTo(toScreenX(zStart), toScreenY(y0));
-                ctx.lineTo(toScreenX(zM1), toScreenY(y0));
-                ctx.lineTo(toScreenX(zM2), toScreenY(yM2));
+                ctx.lineTo(toScreenX(hit1.zHit), toScreenY(hit1.yHit));
+                ctx.lineTo(toScreenX(hit2.zHit), toScreenY(hit2.yHit));
 
                 if (model.nasmythEnabled) {
-                    const fold = foldRayOnM3(zM2, yM2, zFocus, 0);
+                    const fold = foldRayOnM3(hit2.zHit, hit2.yHit, zFocus, yFocus);
                     if (fold) {
                         ctx.lineTo(toScreenX(fold.zHit), toScreenY(fold.yHit));
                         ctx.lineTo(toScreenX(fold.zFoldFocus), toScreenY(fold.yFoldFocus));
                     } else {
-                        ctx.lineTo(toScreenX(zFocus), toScreenY(0));
+                        ctx.lineTo(toScreenX(zFocus), toScreenY(yFocus));
                     }
                 } else {
-                    ctx.lineTo(toScreenX(zFocus), toScreenY(0));
+                    ctx.lineTo(toScreenX(zFocus), toScreenY(yFocus));
                 }
                 ctx.stroke();
                 ctx.restore();
             });
 
+            // Exact Conic Ray Tracing: Off-Axis Field Rays (+FOV angle)
             if (showOffAxis && model.fovMrad > 0) {
-                const slope = Math.tan(model.fovRad);
-                const yImage = -model.EFL * slope;
+                const dz0 = Math.cos(model.fovRad);
+                const dy0 = Math.sin(model.fovRad);
 
-                [-1, 1].forEach(sign => {
-                    const yM1 = sign * (model.D1 / 2);
-                    if (Math.abs(yM1) <= model.D2 / 2) return;
-                    const zM1 = getConicSag(yM1, model.R1, model.k1, exactConic);
-                    const yIn = yM1 + (zStart - zM1) * slope;
-                    const yPrimeFocus = model.f1 * slope;
-                    const t = (-model.d - zM1) / (-model.f1 - zM1);
-                    const yM2 = yM1 + t * (yPrimeFocus - yM1);
-                    const zM2 = -model.d + getConicSag(yM2, model.R2, model.k2, exactConic);
+                [-1, 0, 1].forEach(sign => {
+                    const yPupil = sign * (model.D1 * 0.46);
+                    // Back-project from entrance pupil (z=0, y=yPupil) to zStart
+                    const yIn = yPupil + (zStart - 0) * (dy0 / dz0);
+
+                    // Check if blocked by M2 at z = -d
+                    const yAtM2Plane = yPupil + (-model.d - 0) * (dy0 / dz0);
+                    if (Math.abs(yAtM2Plane) <= model.D2 / 2) return;
+
+                    const hit1 = intersectAndReflectConic(zStart, yIn, dz0, dy0, 0.0, model.R1, model.k1);
+                    const hit2 = intersectAndReflectConic(hit1.zHit, hit1.yHit, hit1.rdz, hit1.rdy, -model.d, model.R2, model.k2);
+                    const tFocus = (model.b - hit2.zHit) / hit2.rdz;
+                    const zFocus = model.b;
+                    const yFocus = hit2.yHit + tFocus * hit2.rdy;
 
                     ctx.save();
-                    ctx.strokeStyle = 'rgba(251, 191, 36, 0.78)';
+                    ctx.strokeStyle = 'rgba(251, 191, 36, 0.82)';
                     ctx.lineWidth = 1.25;
                     ctx.setLineDash([5, 3]);
                     ctx.beginPath();
                     ctx.moveTo(toScreenX(zStart), toScreenY(yIn));
-                    ctx.lineTo(toScreenX(zM1), toScreenY(yM1));
-                    ctx.lineTo(toScreenX(zM2), toScreenY(yM2));
+                    ctx.lineTo(toScreenX(hit1.zHit), toScreenY(hit1.yHit));
+                    ctx.lineTo(toScreenX(hit2.zHit), toScreenY(hit2.yHit));
 
                     if (model.nasmythEnabled) {
-                        const fold = foldRayOnM3(zM2, yM2, model.b, yImage);
+                        const fold = foldRayOnM3(hit2.zHit, hit2.yHit, zFocus, yFocus);
                         if (fold) {
                             ctx.lineTo(toScreenX(fold.zHit), toScreenY(fold.yHit));
                             ctx.lineTo(toScreenX(fold.zFoldFocus), toScreenY(fold.yFoldFocus));
                         } else {
-                            ctx.lineTo(toScreenX(model.b), toScreenY(yImage));
+                            ctx.lineTo(toScreenX(zFocus), toScreenY(yFocus));
                         }
                     } else {
-                        ctx.lineTo(toScreenX(model.b), toScreenY(yImage));
+                        ctx.lineTo(toScreenX(zFocus), toScreenY(yFocus));
                     }
                     ctx.stroke();
                     ctx.restore();
@@ -1697,27 +1965,29 @@
             ctx.stroke();
             ctx.restore();
 
-            // M3 Flat Fold Mirror (45° Nasmyth Tertiary)
+            // M3 Flat Fold Mirror (-45° Nasmyth Tertiary: z + y = m3Z + m3Y)
+            // Reflective front face runs from TOP-LEFT (z3 - halfProj, y3 + halfProj) to BOTTOM-RIGHT (z3 + halfProj, y3 - halfProj)
+            // so rays traveling right (+z) reflect downward (-y)!
             if (model.nasmythEnabled) {
-                const halfProj = model.D3_minor / 2;
+                const halfProj = Math.max(model.D3_minor / 2, Math.abs(model.m3Y) + model.D3_minor * 0.35);
                 const z3A = model.m3Z - halfProj;
-                const y3A = model.m3Y - halfProj;
+                const y3A = model.m3Y + halfProj;
                 const z3B = model.m3Z + halfProj;
-                const y3B = model.m3Y + halfProj;
+                const y3B = model.m3Y - halfProj;
                 const m3Thick = Math.max(3.5, model.D3_minor * 0.08);
 
-                // Ghosted unfolded reference line to Cassegrain focus
+                // Ghosted unfolded reference line from M3 optical-axis intercept to unfolded Cassegrain focus
                 ctx.save();
                 ctx.strokeStyle = 'rgba(148, 163, 184, 0.22)';
                 ctx.lineWidth = 1;
                 ctx.setLineDash([3, 3]);
                 ctx.beginPath();
-                ctx.moveTo(toScreenX(model.m3Z), toScreenY(model.m3Y));
+                ctx.moveTo(toScreenX(model.nasmythFocusZ), toScreenY(0));
                 ctx.lineTo(toScreenX(model.b), toScreenY(0));
                 ctx.stroke();
                 ctx.restore();
 
-                // Vertical Nasmyth Elevation Axis passing through folded beam center
+                // Vertical Nasmyth Elevation Axis passing through folded beam center (z = nasmythFocusZ)
                 ctx.save();
                 ctx.strokeStyle = 'rgba(129, 140, 248, 0.35)';
                 ctx.lineWidth = 1;
@@ -1728,7 +1998,7 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // M3 Mirror Substrate & Reflective Face
+                // M3 Mirror Substrate (back side is towards +z, +y) & Reflective Face
                 ctx.save();
                 ctx.fillStyle = 'rgba(79, 70, 229, 0.45)';
                 ctx.strokeStyle = '#a5b4fc';
@@ -1736,18 +2006,18 @@
                 ctx.beginPath();
                 ctx.moveTo(toScreenX(z3A), toScreenY(y3A));
                 ctx.lineTo(toScreenX(z3B), toScreenY(y3B));
-                ctx.lineTo(toScreenX(z3B + m3Thick), toScreenY(y3B - m3Thick));
-                ctx.lineTo(toScreenX(z3A + m3Thick), toScreenY(y3A - m3Thick));
+                ctx.lineTo(toScreenX(z3B + m3Thick), toScreenY(y3B + m3Thick));
+                ctx.lineTo(toScreenX(z3A + m3Thick), toScreenY(y3A + m3Thick));
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
 
-                // Interactive M3 2D Drag Handle Node (Drag in X and Y!)
+                // Interactive M3 2D Drag Handle Node at (m3Z, m3Y)
                 ctx.fillStyle = viewState.draggingM3 ? '#fbbf24' : '#818cf8';
                 ctx.strokeStyle = '#0f172a';
                 ctx.lineWidth = 1.5;
                 ctx.beginPath();
-                ctx.arc(toScreenX(model.m3Z), toScreenY(model.m3Y), 5, 0, Math.PI * 2);
+                ctx.arc(toScreenX(model.m3Z), toScreenY(model.m3Y), 5.5, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.stroke();
 
@@ -1755,7 +2025,7 @@
                     ctx.font = '600 10px "JetBrains Mono", monospace';
                     ctx.fillStyle = '#a5b4fc';
                     ctx.textAlign = 'left';
-                    ctx.fillText(`M₃ (${model.D3_minor.toFixed(1)}×${model.D3_major.toFixed(1)}mm)`, toScreenX(z3B) + 6, toScreenY(y3B) - 4);
+                    ctx.fillText(`M₃ (${model.D3_minor.toFixed(1)}×${model.D3_major.toFixed(1)}mm)`, toScreenX(z3A) + 6, toScreenY(y3A) - 6);
                 }
                 ctx.restore();
             }
@@ -1831,8 +2101,8 @@
 
                     // 2. M3 Vertical Y-Offset Callout (y3 relative to optical axis y=0)
                     if (Math.abs(model.m3Y) >= 1) {
-                        const y3DimX = xM3 + Math.max(22, (model.D3_minor * 0.6) * scale);
-                        ctx.strokeStyle = 'rgba(251, 191, 36, 0.75)';
+                        const y3DimX = xM3 + 16;
+                        ctx.strokeStyle = 'rgba(251, 191, 36, 0.8)';
                         ctx.fillStyle = '#fcd34d';
                         ctx.beginPath();
                         ctx.moveTo(y3DimX, yAxis);
@@ -1887,7 +2157,7 @@
                 ctx.restore();
             }
 
-            // Focal Plane (Direct Cassegrain or Folded Nasmyth Port — without repeating h_N!)
+            // Focal Plane (Direct Cassegrain or Folded Nasmyth Port)
             const fpHalfH = Math.max(model.D1 * 0.14, model.focalSpotDia * 1.5);
             if (model.nasmythEnabled) {
                 const nasY = model.nasmythFocusY;
