@@ -67,7 +67,7 @@
             background-size: 24px 24px;
         }
         .resizer-v {
-            width: 8px;
+            width: 12px;
             cursor: col-resize;
             display: flex;
             align-items: center;
@@ -75,21 +75,41 @@
             flex-shrink: 0;
             user-select: none;
             z-index: 20;
+            position: relative;
+        }
+        .resizer-v::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            bottom: 8px;
+            width: 1px;
+            background-color: rgba(51, 65, 85, 0.45);
+            transition: background-color 0.15s ease, width 0.15s ease;
         }
         .resizer-v::after {
-            content: '';
+            content: '⋮';
+            font-size: 11px;
+            line-height: 1;
+            color: #64748b;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            padding: 4px 1px;
+            z-index: 1;
+            transition: all 0.15s ease;
+        }
+        .resizer-v:hover::before, .resizer-v.dragging::before {
+            background-color: #38bdf8;
             width: 2px;
-            height: 36px;
-            background-color: #334155;
-            border-radius: 999px;
-            transition: background-color 0.15s ease, height 0.15s ease;
         }
         .resizer-v:hover::after, .resizer-v.dragging::after {
-            background-color: #38bdf8;
-            height: 56px;
+            color: #38bdf8;
+            border-color: #38bdf8;
+            background-color: #090d16;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
         }
         .resizer-h {
-            height: 8px;
+            height: 12px;
             cursor: row-resize;
             display: flex;
             align-items: center;
@@ -97,18 +117,38 @@
             flex-shrink: 0;
             user-select: none;
             z-index: 20;
+            position: relative;
+        }
+        .resizer-h::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            height: 1px;
+            background-color: rgba(51, 65, 85, 0.45);
+            transition: background-color 0.15s ease, height 0.15s ease;
         }
         .resizer-h::after {
-            content: '';
+            content: '⋯';
+            font-size: 11px;
+            line-height: 0.6;
+            color: #64748b;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            padding: 1px 5px;
+            z-index: 1;
+            transition: all 0.15s ease;
+        }
+        .resizer-h:hover::before, .resizer-h.dragging::before {
+            background-color: #38bdf8;
             height: 2px;
-            width: 36px;
-            background-color: #334155;
-            border-radius: 999px;
-            transition: background-color 0.15s ease, width 0.15s ease;
         }
         .resizer-h:hover::after, .resizer-h.dragging::after {
-            background-color: #38bdf8;
-            width: 56px;
+            color: #38bdf8;
+            border-color: #38bdf8;
+            background-color: #090d16;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
         }
     </style>
 </head>
@@ -116,20 +156,20 @@
 
     <!-- Top Navigation / Header -->
     <header class="border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-md shrink-0 z-30 px-3 lg:px-6 py-2 lg:py-2.5">
-        <div class="max-w-[1600px] mx-auto flex items-center justify-between gap-2">
-            <div class="flex items-center space-x-2.5 min-w-0">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between gap-3">
+            <div class="flex items-center space-x-2.5 shrink-0">
                 <div class="w-8 h-8 lg:w-9 lg:h-9 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 border border-sky-400/30 shrink-0">
                     <svg class="w-4 h-4 lg:w-5 lg:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
                 </div>
-                <div class="truncate">
-                    <div class="flex items-center gap-1.5">
-                        <h1 class="text-sm lg:text-base font-bold tracking-tight text-white truncate">OptiCom</h1>
-                        <span class="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 shrink-0">Optical CAD</span>
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-sm lg:text-base font-bold tracking-tight text-white whitespace-nowrap">OptiCom</h1>
+                        <span class="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 whitespace-nowrap shrink-0">Optical CAD</span>
                     </div>
-                    <p class="text-[11px] text-slate-400 hidden sm:block truncate">Cassegrain &amp; Free-Space Optical Terminal Designer</p>
+                    <p class="text-[11px] text-slate-400 hidden sm:block whitespace-nowrap">Cassegrain &amp; Free-Space Optical Terminal Designer</p>
                 </div>
             </div>
 
@@ -155,15 +195,27 @@
                     <option value="deep_space">Deep-Space (500mm)</option>
                 </select>
 
-                <div class="hidden md:flex items-center gap-1.5">
+                <div class="hidden 2xl:flex items-center gap-1.5">
                     <span class="text-xs text-slate-400 mr-1">Presets:</span>
-                    <button onclick="loadPreset('cubesat')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">CubeSat (100mm)</button>
-                    <button onclick="loadPreset('leo_ogs')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">LEO OGS (250mm)</button>
-                    <button onclick="loadPreset('deep_space')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">Deep-Space (500mm)</button>
+                    <button onclick="loadPreset('cubesat')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition whitespace-nowrap">CubeSat (100mm)</button>
+                    <button onclick="loadPreset('leo_ogs')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition whitespace-nowrap">LEO OGS (250mm)</button>
+                    <button onclick="loadPreset('deep_space')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition whitespace-nowrap">Deep-Space (500mm)</button>
                     <div class="h-4 w-[1px] bg-slate-800 mx-1"></div>
                 </div>
 
-                <button onclick="openZemaxModal()" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-sky-400 border border-sky-500/30 flex items-center gap-1.5 transition">
+                <select onchange="loadPreset(this.value)" class="hidden md:block 2xl:hidden bg-slate-800 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:border-sky-500">
+                    <option value="" disabled>Presets...</option>
+                    <option value="cubesat">CubeSat (100mm)</option>
+                    <option value="leo_ogs" selected>LEO OGS (250mm)</option>
+                    <option value="deep_space">Deep-Space (500mm)</option>
+                </select>
+
+                <button onclick="resetLayoutSizes()" title="Reset Panel Layout Proportions" class="hidden lg:flex px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 items-center gap-1 transition whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
+                    <span class="hidden xl:inline">Reset Layout</span>
+                </button>
+
+                <button onclick="openZemaxModal()" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-sky-400 border border-sky-500/30 flex items-center gap-1.5 transition whitespace-nowrap">
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
                     <span class="hidden sm:inline">Zemax Table</span>
                     <span class="sm:hidden">Zemax</span>
@@ -238,7 +290,7 @@
                     <button onclick="switchMobileTab('params')" class="lg:hidden text-[11px] font-medium text-sky-400 hover:text-sky-300 flex items-center gap-1 bg-sky-500/10 px-2 py-0.5 rounded-lg border border-sky-500/20">
                         <span>+ Pin / Edit All</span>
                     </button>
-                    <span class="hidden lg:inline text-[11px] text-slate-400">Drag bars to resize panels</span>
+                    <span class="hidden lg:inline text-[11px] text-slate-400">Double-click divider to reset</span>
                 </div>
                 <div id="active-sliders-container" class="space-y-2.5 overflow-y-auto pr-1 flex-1 min-h-0"></div>
             </div>
@@ -383,7 +435,7 @@
                     <!-- SUB-TAB 1: OPTICS, TURBULENCE & THERMAL -->
                     <div id="subtab-optics" class="flex-1 min-h-0 overflow-y-auto pr-1 flex flex-col justify-between space-y-3">
                         <div>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-2">
                                 <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-2">
                                     <div class="text-[10px] text-slate-400">Effective Focal Length</div>
                                     <div class="text-xs lg:text-sm font-mono font-semibold text-white mt-0.5"><span id="val-efl">2000.0</span> <span class="text-[10px] font-normal text-slate-400">mm</span></div>
@@ -431,10 +483,12 @@
                                     <div class="text-xs font-mono font-semibold text-emerald-400 mt-0.5" title="Seeing at 500nm and at Laser Wavelength λ">
                                         <span id="val-seeing-arcsec">1.01″</span> <span class="text-[10px] font-normal text-slate-400">(@λ: <span id="val-seeing-lambda" class="text-emerald-300">0.80″</span>)</span>
                                     </div>
-                                    <div class="text-[10px] text-slate-400 mt-0.5 truncate">r₀(λ): <span id="val-r0-lambda" class="text-emerald-300 font-mono">38.9</span>cm | r₀(500): <span id="val-r0" class="text-slate-200 font-mono">10.0</span>cm</div>
+                                    <div class="text-[10px] text-slate-400 mt-0.5 leading-snug break-words">
+                                        r₀(λ): <span id="val-r0-lambda" class="text-emerald-300 font-mono">38.9</span>cm <span class="text-slate-600">|</span> r₀(500): <span id="val-r0" class="text-slate-200 font-mono">10.0</span>cm
+                                    </div>
                                 </div>
 
-                                <div id="card-nasmyth" class="bg-slate-850/90 border border-indigo-500/30 rounded-xl p-2 col-span-2 sm:col-span-1 lg:col-span-2">
+                                <div id="card-nasmyth" class="bg-slate-850/90 border border-indigo-500/30 rounded-xl p-2 col-span-2 sm:col-span-1 xl:col-span-2">
                                     <div class="flex items-center justify-between">
                                         <span class="text-[10px] text-indigo-300 font-medium">Tertiary Flat M₃ (Nasmyth Port)</span>
                                         <span id="val-m3-status" class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">Disabled (Direct)</span>
@@ -442,8 +496,8 @@
                                     <div class="text-xs font-mono font-semibold text-white mt-0.5">
                                         Ellipse: <span id="val-m3-size" class="text-indigo-300">33.9 × 47.9</span> <span class="text-[10px] font-normal text-slate-400">mm</span>
                                     </div>
-                                    <div class="text-[10px] text-slate-400 mt-0.5 truncate">
-                                        z₃: <span id="val-m3-z" class="text-slate-200 font-mono">-120</span>mm | Throw (h_N): <span id="val-nasmyth-h" class="text-indigo-300 font-mono">220.0</span>mm (<span id="val-nasmyth-clear" class="text-emerald-400">Outside Tube</span>)
+                                    <div class="text-[10px] text-slate-400 mt-0.5 leading-snug break-words">
+                                        z₃: <span id="val-m3-z" class="text-slate-200 font-mono">-100</span>mm | Throw (h_N): <span id="val-nasmyth-h" class="text-indigo-300 font-mono">200.0</span>mm (<span id="val-nasmyth-clear" class="text-emerald-400">Outside Tube</span>)
                                     </div>
                                 </div>
                             </div>
@@ -657,12 +711,12 @@
                         <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 shrink-0">
                             <h4 class="text-indigo-400 font-semibold uppercase tracking-wider text-[11px] mb-1">5. Tertiary Flat Mirror (M₃) &amp; Nasmyth Port Geometry</h4>
                             <p class="text-[11px] text-slate-400 mb-1.5">
-                                Placing a 45° flat fold mirror (<code class="text-indigo-300">M₃</code>) centered at <code class="text-indigo-300">(z₃, y₃)</code> with surface equation <code class="text-indigo-300">y - y₃ = z - z₃</code> (normal <code class="text-indigo-300">n = (-1/√2, 1/√2)</code>) reflects the converging beam by 90° downward (<code class="text-indigo-300">-Y</code>) when <code class="text-indigo-300">M₃</code> intercepts the beam ahead of the unfolded focus:
+                                Placing a -45° flat fold mirror (<code class="text-indigo-300">M₃</code>) centered on the optical axis at <code class="text-indigo-300">(z₃, 0)</code> with surface equation <code class="text-indigo-300">z + y = z₃</code> reflects the converging beam by 90° downward (<code class="text-indigo-300">-Y</code>) when <code class="text-indigo-300">M₃</code> intercepts the beam ahead of the unfolded focus:
                             </p>
                             <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800 break-words whitespace-pre-wrap">
-                                <div>2D Reflection Mapping across M₃:   (z', y') = (z₃ + (y - y₃) , y₃ + (z - z₃))</div>
-                                <div>Unfolded Focus (b, y_img) → Folded: z_N = z₃ - y₃ + y_img ,   y_N = y₃ - (b - z₃)</div>
-                                <div>On-Axis Path to Nasmyth Focus:     L_N = (b - z₃) - y₃   (Vertical Throw h_N = -y_N = b - z₃ - y₃)</div>
+                                <div>2D Reflection Mapping across M₃:   (z', y') = (z₃ - y , z₃ - z)</div>
+                                <div>Unfolded Focus (b, y_img) → Folded: z_N = z₃ - y_img ,   y_N = -(b - z₃)</div>
+                                <div>On-Axis Path to Nasmyth Focus:     L_N = b - z₃   (Vertical Throw h_N = -y_N = b - z₃)</div>
                                 <div>Beam Footprint Minor Axis (D₃_min): D₃_min = D₂_axial · (L_N / L₂) + 2 · (d + z₃) · tan(θ_FOV)</div>
                                 <div>45° Elliptical Major Axis (D₃_maj): D₃_maj = √2 · D₃_min   | Tube Clearance: ΔR = h_N - (D₁ / 2)</div>
                             </div>
@@ -771,8 +825,7 @@
             { id: 'F1', name: 'Primary Focal Ratio (f/#₁)', unit: '', min: 1.0, max: 5.0, step: 0.05, value: 2.0, sliderActive: true, desc: 'Focal ratio of primary mirror alone' },
             { id: 'm', name: 'Secondary Magnification (m)', unit: '×', min: 2.0, max: 15.0, step: 0.1, value: 4.0, sliderActive: true, desc: 'Effective focal length multiplier' },
             { id: 'b', name: 'Back Working Distance (BWD)', unit: 'mm', min: 0, max: 500, step: 5, value: 100, sliderActive: false, desc: 'Distance from M1 vertex behind to focal plane' },
-            { id: 'm3Z', name: 'Nasmyth M₃ X-Pos (z₃)', unit: 'mm', min: -350, max: 50, step: 5, value: -100, sliderActive: true, desc: 'Axial X/Z position of 45° M3 fold mirror relative to M1 vertex' },
-            { id: 'm3Y', name: 'Nasmyth M₃ Y-Pos (y₃)', unit: 'mm', min: -120, max: 120, step: 2, value: 0, sliderActive: true, desc: 'Vertical Y offset of M3 fold mirror relative to optical axis (y=0)' },
+            { id: 'm3Z', name: 'Nasmyth M₃ Axial Pos (z₃)', unit: 'mm', min: -350, max: 50, step: 5, value: -100, sliderActive: true, desc: 'Axial Z position of 45° M3 fold mirror relative to M1 vertex' },
             { id: 'seeing_arcsec', name: 'Astronomical Seeing (@500nm)', unit: 'arcsec', min: 0.35, max: 5.0, step: 0.05, value: 1.01, sliderActive: true, desc: 'Atmospheric seeing FWHM (coupled with r₀ = 0.98λ/θ)' },
             { id: 'r0_500', name: 'Fried Parameter r₀ (@500nm)', unit: 'cm', min: 2.0, max: 30.0, step: 0.2, value: 10.0, sliderActive: false, desc: 'Atmospheric coherence diameter at zenith (synced w/ seeing)' },
             { id: 'aoModes', name: 'AO Corrected Modes (N_AO)', unit: 'modes', min: 0, max: 150, step: 1, value: 15, sliderActive: false, desc: '0=No AO, 2=Tip/Tilt FSM, >2=Deformable Mirror Zernikes' },
@@ -840,17 +893,19 @@
         }
 
         function setupDesktopResizers() {
-            const makeResizer = (resizerId, onDrag) => {
+            const makeResizer = (resizerId, axis, onDrag, onReset) => {
                 const resizer = document.getElementById(resizerId);
                 if (!resizer) return;
                 let active = false;
 
                 resizer.addEventListener('pointerdown', e => {
-                    if (window.innerWidth < 1024) return;
+                    if (window.innerWidth < 1024 || e.button !== 0) return;
+                    e.preventDefault();
                     active = true;
                     resizer.setPointerCapture(e.pointerId);
                     resizer.classList.add('dragging');
                     document.body.style.userSelect = 'none';
+                    document.body.style.cursor = axis === 'v' ? 'col-resize' : 'row-resize';
                 });
 
                 resizer.addEventListener('pointermove', e => {
@@ -859,57 +914,91 @@
                     requestAnimationFrame(() => recalculate());
                 });
 
-                const stop = () => {
+                const stop = e => {
                     if (!active) return;
                     active = false;
+                    if (e && e.pointerId !== undefined && resizer.hasPointerCapture(e.pointerId)) {
+                        resizer.releasePointerCapture(e.pointerId);
+                    }
                     resizer.classList.remove('dragging');
                     document.body.style.userSelect = '';
+                    document.body.style.cursor = '';
                     requestAnimationFrame(() => recalculate());
                 };
 
                 resizer.addEventListener('pointerup', stop);
                 resizer.addEventListener('pointercancel', stop);
+                resizer.addEventListener('dblclick', () => {
+                    if (window.innerWidth < 1024) return;
+                    onReset();
+                    requestAnimationFrame(() => recalculate());
+                });
             };
 
             // 1. Main Vertical Split: Left Column vs Right Column
-            makeResizer('resizer-main-v', e => {
+            makeResizer('resizer-main-v', 'v', e => {
                 const main = document.getElementById('main-workspace');
                 const leftCol = document.getElementById('left-col');
                 if (!main || !leftCol) return;
                 const rect = main.getBoundingClientRect();
-                const pct = Math.max(20, Math.min(58, ((e.clientX - rect.left) / rect.width) * 100));
+                const pct = Math.max(22, Math.min(55, ((e.clientX - rect.left) / rect.width) * 100));
                 leftCol.style.width = `${pct}%`;
+            }, () => {
+                const leftCol = document.getElementById('left-col');
+                if (leftCol) leftCol.style.width = '33%';
             });
 
             // 2. Left Column Horizontal Split: Sliders vs System Parameters
-            makeResizer('resizer-left-h', e => {
+            makeResizer('resizer-left-h', 'h', e => {
                 const leftCol = document.getElementById('left-col');
                 const sliders = document.getElementById('panel-sliders');
                 if (!leftCol || !sliders) return;
                 const rect = leftCol.getBoundingClientRect();
-                const pct = Math.max(18, Math.min(72, ((e.clientY - rect.top) / rect.height) * 100));
+                const pct = Math.max(20, Math.min(70, ((e.clientY - rect.top) / rect.height) * 100));
                 sliders.style.height = `${pct}%`;
+            }, () => {
+                const sliders = document.getElementById('panel-sliders');
+                if (sliders) sliders.style.height = '42%';
             });
 
             // 3. Right Column Horizontal Split: Ray Trace Canvas vs Bottom Sub-Row
-            makeResizer('resizer-right-h', e => {
+            makeResizer('resizer-right-h', 'h', e => {
                 const rightCol = document.getElementById('right-col');
                 const raytrace = document.getElementById('panel-raytrace');
                 if (!rightCol || !raytrace) return;
                 const rect = rightCol.getBoundingClientRect();
-                const pct = Math.max(25, Math.min(75, ((e.clientY - rect.top) / rect.height) * 100));
+                const pct = Math.max(28, Math.min(72, ((e.clientY - rect.top) / rect.height) * 100));
                 raytrace.style.height = `${pct}%`;
+            }, () => {
+                const raytrace = document.getElementById('panel-raytrace');
+                if (raytrace) raytrace.style.height = '52%';
             });
 
             // 4. Bottom Sub-Row Vertical Split: Metrics Panel vs Pupil/PSF Panel
-            makeResizer('resizer-bottom-v', e => {
+            makeResizer('resizer-bottom-v', 'v', e => {
                 const bottomRow = document.getElementById('right-bottom-row');
                 const metrics = document.getElementById('panel-metrics');
                 if (!bottomRow || !metrics) return;
                 const rect = bottomRow.getBoundingClientRect();
-                const pct = Math.max(32, Math.min(75, ((e.clientX - rect.left) / rect.width) * 100));
+                const pct = Math.max(35, Math.min(72, ((e.clientX - rect.left) / rect.width) * 100));
                 metrics.style.width = `${pct}%`;
+            }, () => {
+                const metrics = document.getElementById('panel-metrics');
+                if (metrics) metrics.style.width = '58%';
             });
+        }
+
+        function resetLayoutSizes() {
+            const leftCol = document.getElementById('left-col');
+            const sliders = document.getElementById('panel-sliders');
+            const raytrace = document.getElementById('panel-raytrace');
+            const metrics = document.getElementById('panel-metrics');
+            if (leftCol) leftCol.style.width = '33%';
+            if (sliders) sliders.style.height = '42%';
+            if (raytrace) raytrace.style.height = '52%';
+            if (metrics) metrics.style.width = '58%';
+            requestAnimationFrame(() => recalculate());
+            showToast('Workspace panel layout reset to default!');
         }
 
         function switchMobileTab(tabId) {
@@ -1117,7 +1206,6 @@
             const m = getParam('m');
             const b = getParam('b');
             const m3ZRaw = getParam('m3Z');
-            const m3YRaw = getParam('m3Y');
             const r0_500 = getParam('r0_500'); // cm at 500nm
             const seeingArcsec = getParam('seeing_arcsec'); // arcsec at 500nm
             const aoModes = Math.round(getParam('aoModes'));
@@ -1149,92 +1237,22 @@
             const D2_fov = 2 * d * Math.tan(fovRad);
             const D2 = D2_axial + D2_fov;
 
-            // Tertiary Flat Mirror (M3) & Nasmyth Fold Calculations (including both X=z3 and Y=y3 offsets)
-            // M3 lies on the 45° plane: y - m3Y = z - m3Z  <=>  z - y = m3Z - m3Y
-            // Reflection of any point (z, y) across this line maps to:
-            //   z' = m3Z + (y - m3Y)
-            //   y' = m3Y + (z - m3Z)
-            // Wait: if a ray travels in +z (from M2 at z=-d toward unfolded focus at z=b > m3Z),
-            // reflecting off a mirror tilted at +45° (y - m3Y = z - m3Z, normal n = (-1/sqrt(2), +1/sqrt(2)))
-            // would reflect a +z ray UPWARD (+y)!
-            // To fold the +z beam DOWNWARD (-y) toward the bottom Nasmyth port, the mirror must be tilted at -45°:
-            //   y - m3Y = -(z - m3Z)  <=>  z + y = m3Z + m3Y
-            // Let's verify reflection of a point (z, y) across the line z + y = C (where C = m3Z + m3Y):
-            //   z' = C - y = m3Z + m3Y - y
-            //   y' = C - z = m3Z + m3Y - z
-            // Let's check what happens to the unfolded on-axis focus (z = b, y = 0):
-            //   z_N = m3Z + m3Y
-            //   y_N = m3Y - (b - m3Z)
-            // And what happens to an off-axis focus at (z = b, y = y_img)?
-            //   z_N(y_img) = m3Z + m3Y - y_img
-            //   y_N(y_img) = m3Y - (b - m3Z)
-            // Notice why the user saw:
-            // 1) "Nasmyth Y-pos does not seem to work correctly looking at the 2D plot":
-            //    Previously, the mirror graphic was drawn with slope +1 ((z3A, y3A) to (z3B, y3B) where y increased with z),
-            //    AND the reflection formula used `y - m3Y = z - m3Z` for the plane intersection, which meant moving M3 up (+y3)
-            //    shifted the focus horizontally in the WRONG direction (`m3Z - m3Y`) and didn't match a downward-reflecting mirror!
-            // 2) "The Nasmyth focus position is mirrored about the y axis in the 2D plot":
-            //    Wait: in the 2D plot, when M3 is centered at (z3, y3), the center of the beam on M3 is at y = 0 (the optical axis)!
-            //    If the user moves M3 vertically to y3 != 0, does M3 slide in Y while keeping its angle, or is M3's center at (z3, y3)?
-            //    Let's check! If M3 is a flat mirror at angle -45° passing through (m3Z, m3Y), its plane is z + y = m3Z + m3Y.
-            //    Wait: if you draw M3 with slope +1 (from bottom-left to top-right, i.e. y - y3 = z - z3), a ray coming from the LEFT (+z direction)
-            //    hits the underside/front of that +45° mirror and reflects UPWARD (+y), NOT downward (-y)!
-            //    Wait—or if the ray reflects DOWNWARD (-y), the mirror surface MUST go from TOP-LEFT to BOTTOM-RIGHT (slope -1: y - y3 = -(z - z3))!
-            //    Let's double check this!
-            //    In our 2D canvas:
-            //    - Z (optical axis) goes from LEFT (negative Z, where M2 is at z = -d) to RIGHT (positive Z, where M1 is at z = 0 and BWD is at z = +b).
-            //    - Rays from M2 to Focus travel from LEFT to RIGHT (+Z direction)!
-            //    - Y goes UPWARD on the screen (`toScreenY(y) = originY - y * scale`).
-            //    - The Nasmyth port is drawn at the BOTTOM of the telescope (`y < 0`, downward on the screen).
-            //    Now, think about a ray traveling from LEFT to RIGHT (+Z direction) that needs to bounce DOWNWARD (-Y direction):
-            //    By the law of reflection, the mirror normal must point in the `(-Z, -Y)` direction (bottom-left)!
-            //    Therefore, the mirror surface tangent must run from **TOP-LEFT to BOTTOM-RIGHT** (`dz > 0, dy < 0`, i.e., `y - y3 = -(z - z3)`),
-            //    OR if the user's M3 is positioned at `(z3, y3)`:
-            //    Let's trace a horizontal ray `y = 0` traveling right (`+Z`) hitting the mirror `y - y3 = -(z - z3)`:
-            //    It hits the mirror at `0 - y3 = -(z_hit - z3) => z_hit = z3 + y3`.
-            //    Wait: what if the user wants `(z3, y3)` to specify the Nasmyth mirror / port, OR what if M3 is centered at `(z3, y3)`?
-            //    Let's check what happened in the previous code when `y3 = 0`:
-            //    In the previous code:
-            //    1. `nasmythFocusZ = m3Z - m3Y` and `nasmythFocusY = m3Y - (b - m3Z)`.
-            //    2. In `foldRayOnM3(z1, y1, z2, y2)`:
-            //       The previous code intersected the ray with `y - z + (m3Z - m3Y) = 0` (which is the +45° line `y - m3Y = z - m3Z`),
-            //       resulting in `zHit` on the +45° line, and then mapped `(z2, y2)` to `zFoldFocus = y2 + m3Z - m3Y` and `yFoldFocus = z2 - (m3Z - m3Y)`!
-            //       HOLD ON! Look at `yFoldFocus = z2 - (m3Z - m3Y)` in the previous code:
-            //       Since `z2 = b = +100` and `m3Z = -100` (with `m3Y = 0`), `yFoldFocus = +100 - (-100) = +200` (UPWARD, `+Y`)!
-            //       Meanwhile, `nasmythFocusY` was set to `m3Y - (b - m3Z) = -200` (DOWNWARD, `-Y`)!
-            //       LOOK AT LINES 823 vs 1084 in the existing code:
-            //       - Line 823: `yFoldFocus = z2 - offsetC` = `b - m3Z` = `+200` (rays went UPWARD to `y = +200`!)
-            //       - Line 1084: `nasY = model.nasmythFocusY` = `-(b - m3Z)` = `-200` (the green Nasmyth Focal Plane was drawn at `y = -200` DOWNWARD!)
-            //       BINGO!! That's a massive bug in the previous code:
-            //       In the previous code, `foldRayOnM3` sent all the rays UPWARD to `y = +200` (`z2 - offsetC`), whereas the green `Nasmyth Port Focus` line and `h_N` callout were drawn DOWNWARD at `y = -200` (`nasmythFocusY = m3Y - (b - m3Z)`)! They were literally mirrored across the horizontal optical axis (the y=0 axis)!
-            //       AND when `m3Y` was changed, `nasmythFocusY` moved by `+m3Y` while `zHit` moved along the wrong diagonal!
-
+            // Tertiary Flat Mirror (M3) & Nasmyth Fold Calculations (centered on optical axis y3 = 0)
+            // Exact -45° M3 Mirror Plane passing through (m3Z, 0):
+            // Surface equation: z + y = m3Z  (tilted at -45° so a +z beam reflects into -y)
+            // Reflection of any target point (z, y) across z + y = m3Z:
+            //   z' = m3Z - y
+            //   y' = m3Z - z
             const m3Z = Math.max(-d + 15, Math.min(b - 15, m3ZRaw));
-            const m3Y = Math.max(-D1 * 0.45, Math.min(D1 * 0.45, m3YRaw));
-
-            // Exact -45° M3 Mirror Plane passing through (m3Z, m3Y):
-            // Surface equation: z + y = m3Z + m3Y  (tilted at -45° so a +z beam reflects into -y)
-            // Unit normal pointing toward incoming M2 beam: n = (-1/√2, -1/√2)
-            // Reflection of any target point (z, y) across z + y = m3Z + m3Y:
-            //   z' = m3Z + m3Y - y
-            //   y' = m3Z + m3Y - z
-            // Consequently, the unfolded on-axis focus (z = b, y = 0) reflects to the exact Nasmyth Focus:
-            //   nasmythFocusZ = m3Z + m3Y
-            //   nasmythFocusY = m3Z + m3Y - b = m3Y - (b - m3Z)
-            // Notice that when m3Y = 0, the beam center hits (m3Z, 0) and goes straight down to (m3Z, -(b - m3Z)).
-            // When M3 is shifted vertically by m3Y, the mirror plane z + y = m3Z + m3Y intercepts the optical axis (y = 0)
-            // at z_axis_int = m3Z + m3Y, and folds the beam straight down along z = m3Z + m3Y to y = m3Z + m3Y - b!
-            const m3PlaneSum = m3Z + m3Y;
-            const zAxisIntercept = Math.max(-d + 10, Math.min(b - 5, m3PlaneSum));
-            const distM2ToM3 = zAxisIntercept - (-d); // Axial travel from M2 to M3 intercept
-            const nasmythAxialRem = Math.max(5, b - zAxisIntercept); // Remaining axial optical path from M3 intercept to focus
-            const nasmythFocusZ = m3PlaneSum;
-            const nasmythFocusY = m3PlaneSum - b;
+            const m3Y = 0;
+            const distM2ToM3 = m3Z - (-d); // Axial travel from M2 to M3 intercept
+            const nasmythAxialRem = Math.max(5, b - m3Z); // Remaining axial optical path from M3 intercept to focus
+            const nasmythFocusZ = m3Z;
+            const nasmythFocusY = m3Z - b;
             const nasmythThrow = -nasmythFocusY; // Vertical distance below optical axis (y=0)
 
             const D3_axial = D2_axial * (nasmythAxialRem / L2);
             const focalSpotDia = 2 * EFL * Math.tan(fovRad);
-            // Include any vertical offset |m3Y| of the mirror center relative to the beam intersection so M3 is sized or positioned accurately
             const D3_minor = D3_axial + focalSpotDia * (distM2ToM3 / L2);
             const D3_major = D3_minor * Math.SQRT2; // 45-deg tilt footprint
             const nasmythTubeClearance = nasmythThrow - (D1 / 2); // >0 means focus lies outside primary mirror radius
@@ -1472,7 +1490,7 @@
                 }
             }
             setText('val-m3-size', `${model.D3_minor.toFixed(1)} × ${model.D3_major.toFixed(1)}`);
-            setText('val-m3-z', `${model.m3Z.toFixed(0)} (y₃:${model.m3Y >= 0 ? '+' : ''}${model.m3Y.toFixed(0)})`);
+            setText('val-m3-z', `${model.m3Z.toFixed(0)}`);
             setText('val-nasmyth-h', model.nasmythThrow.toFixed(1));
             const clearEl = document.getElementById('val-nasmyth-clear');
             if (clearEl) {
@@ -2099,25 +2117,7 @@
                     ctx.textAlign = 'center';
                     ctx.fillText(`z₃ = ${model.m3Z.toFixed(0)} mm`, (xM3 + xM1) / 2, z3DimY - 5);
 
-                    // 2. M3 Vertical Y-Offset Callout (y3 relative to optical axis y=0)
-                    if (Math.abs(model.m3Y) >= 1) {
-                        const y3DimX = xM3 + 16;
-                        ctx.strokeStyle = 'rgba(251, 191, 36, 0.8)';
-                        ctx.fillStyle = '#fcd34d';
-                        ctx.beginPath();
-                        ctx.moveTo(y3DimX, yAxis);
-                        ctx.lineTo(y3DimX, yM3);
-                        ctx.moveTo(y3DimX - 3, yAxis);
-                        ctx.lineTo(y3DimX + 3, yAxis);
-                        ctx.moveTo(y3DimX - 3, yM3);
-                        ctx.lineTo(y3DimX + 3, yM3);
-                        ctx.stroke();
-
-                        ctx.textAlign = 'left';
-                        ctx.fillText(`y₃ = ${model.m3Y > 0 ? '+' : ''}${model.m3Y.toFixed(0)} mm`, y3DimX + 5, (yAxis + yM3) / 2 + 3);
-                    }
-
-                    // 3. Vertical Y-Distance Callout from Optical Axis to Nasmyth Focus (h_N) — Single concise label
+                    // 2. Vertical Y-Distance Callout from Optical Axis to Nasmyth Focus (h_N) — Single concise label
                     const fpHalfH = Math.max(model.D1 * 0.14, model.focalSpotDia * 1.5);
                     const yDimX = xNas - Math.max(24, fpHalfH * scale + 14);
 
@@ -2553,19 +2553,19 @@
             canvas.addEventListener('pointermove', e => {
                 if (viewState.draggingM3) {
                     const dx = e.clientX - viewState.lastMouseX;
-                    const dy = e.clientY - viewState.lastMouseY;
                     viewState.lastMouseX = e.clientX;
                     viewState.lastMouseY = e.clientY;
                     if (viewState.lastScale > 0) {
                         const dzMm = dx / viewState.lastScale;
-                        const dyMm = -dy / viewState.lastScale;
                         const curM3Z = getParam('m3Z');
-                        const curM3Y = getParam('m3Y');
                         const nextM3Z = Math.round(Math.max(-350, Math.min(50, curM3Z + dzMm)));
-                        const nextM3Y = Math.round(Math.max(-120, Math.min(120, curM3Y + dyMm)));
                         updateParamValue('m3Z', nextM3Z, 'canvas');
-                        updateParamValue('m3Y', nextM3Y, 'canvas');
                     }
+                    return;
+                }
+
+                if (!viewState.isDragging) {
+                    canvas.style.cursor = isNearM3Node(e.clientX, e.clientY) ? 'ew-resize' : 'grab';
                     return;
                 }
 
@@ -2649,9 +2649,9 @@
 
         function loadPreset(type) {
             const presets = {
-                cubesat: { D1: 100, F1: 1.5, m: 5.0, b: 35, m3Z: -35, m3Y: 0, seeing_arcsec: 1.26, r0_500: 8.0, aoModes: 2, linkDist: 600, txPower: 30, jitterUr: 2.5, deltaT: 35, fov: 2.5, lambda: 1550, detSize: 15, type: 'rc' },
-                leo_ogs: { D1: 250, F1: 2.0, m: 4.0, b: 100, m3Z: -100, m3Y: 0, seeing_arcsec: 1.01, r0_500: 10.0, aoModes: 15, linkDist: 1000, txPower: 33, jitterUr: 1.5, deltaT: 20, fov: 2.0, lambda: 1550, detSize: 30, type: 'classical' },
-                deep_space: { D1: 500, F1: 2.2, m: 6.0, b: 180, m3Z: -180, m3Y: 0, seeing_arcsec: 0.67, r0_500: 15.0, aoModes: 65, linkDist: 36000, txPower: 40, jitterUr: 0.8, deltaT: 15, fov: 1.0, lambda: 1064, detSize: 50, type: 'rc' }
+                cubesat: { D1: 100, F1: 1.5, m: 5.0, b: 35, m3Z: -35, seeing_arcsec: 1.26, r0_500: 8.0, aoModes: 2, linkDist: 600, txPower: 30, jitterUr: 2.5, deltaT: 35, fov: 2.5, lambda: 1550, detSize: 15, type: 'rc' },
+                leo_ogs: { D1: 250, F1: 2.0, m: 4.0, b: 100, m3Z: -100, seeing_arcsec: 1.01, r0_500: 10.0, aoModes: 15, linkDist: 1000, txPower: 33, jitterUr: 1.5, deltaT: 20, fov: 2.0, lambda: 1550, detSize: 30, type: 'classical' },
+                deep_space: { D1: 500, F1: 2.2, m: 6.0, b: 180, m3Z: -180, seeing_arcsec: 0.67, r0_500: 15.0, aoModes: 65, linkDist: 36000, txPower: 40, jitterUr: 0.8, deltaT: 15, fov: 1.0, lambda: 1064, detSize: 50, type: 'rc' }
             };
             const p = presets[type];
             if (!p) return;
