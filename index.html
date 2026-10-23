@@ -66,14 +66,35 @@
                 linear-gradient(to bottom, rgba(30, 41, 59, 0.35) 1px, transparent 1px);
             background-size: 24px 24px;
         }
+
+        /* Responsive Layout Grid & Resize Constraints */
+        @media (min-width: 1024px) {
+            #left-col { flex: 0 0 var(--left-col-size, 33%); max-width: var(--left-col-size, 33%); }
+            #panel-sliders { flex: 0 0 var(--panel-sliders-size, 42%); max-height: var(--panel-sliders-size, 42%); }
+            #panel-raytrace { flex: 0 0 var(--panel-raytrace-size, 52%); max-height: var(--panel-raytrace-size, 52%); }
+            #panel-metrics { flex: 0 0 var(--panel-metrics-size, 58%); max-width: var(--panel-metrics-size, 58%); }
+        }
+
+        /* Resizer Drag Protection Overlays */
+        body.resizing-active {
+            user-select: none !important;
+            -webkit-user-select: none !important;
+        }
+        body.resizing-col { cursor: col-resize !important; }
+        body.resizing-row { cursor: row-resize !important; }
+        body.resizing-active canvas,
+        body.resizing-active iframe {
+            pointer-events: none !important;
+        }
+
+        /* Enhanced Resizer Handles */
         .resizer-v {
-            width: 12px;
+            width: 16px;
             cursor: col-resize;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            user-select: none;
             z-index: 20;
             position: relative;
         }
@@ -109,13 +130,12 @@
             box-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
         }
         .resizer-h {
-            height: 12px;
+            height: 16px;
             cursor: row-resize;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            user-select: none;
             z-index: 20;
             position: relative;
         }
@@ -156,7 +176,7 @@
 
     <!-- Top Navigation / Header -->
     <header class="border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-md shrink-0 z-30 px-3 lg:px-6 py-2 lg:py-2.5">
-        <div class="max-w-[1600px] mx-auto flex items-center justify-between gap-3">
+        <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-y-2 gap-x-3">
             <div class="flex items-center space-x-2.5 shrink-0">
                 <div class="w-8 h-8 lg:w-9 lg:h-9 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 border border-sky-400/30 shrink-0">
                     <svg class="w-4 h-4 lg:w-5 lg:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,7 +207,7 @@
             </div>
 
             <!-- Preset Loader & Export Buttons -->
-            <div class="flex items-center gap-1.5 lg:gap-2 shrink-0">
+            <div class="flex flex-wrap items-center justify-end gap-1.5 lg:gap-2 shrink-0 ml-auto">
                 <select id="mobile-preset-select" onchange="loadPreset(this.value)" class="md:hidden bg-slate-800 text-xs text-slate-200 rounded-lg px-2 py-1.5 border border-slate-700 focus:outline-none focus:border-sky-500">
                     <option value="" disabled>Presets...</option>
                     <option value="cubesat">CubeSat (100mm)</option>
@@ -211,7 +231,7 @@
                 </select>
 
                 <button onclick="resetLayoutSizes()" title="Reset Panel Layout Proportions" class="hidden lg:flex px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 items-center gap-1 transition whitespace-nowrap">
-                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
                     <span class="hidden xl:inline">Reset Layout</span>
                 </button>
 
@@ -278,10 +298,10 @@
     <main id="main-workspace" class="max-w-[1600px] w-full mx-auto flex-1 min-h-0 flex flex-col lg:flex-row p-2.5 lg:p-4 overflow-hidden">
 
         <!-- LEFT COLUMN -->
-        <div id="left-col" class="contents lg:flex lg:flex-col lg:w-[33%] lg:min-w-[260px] lg:max-w-[60%] lg:min-h-0 lg:overflow-hidden shrink-0">
+        <div id="left-col" class="contents lg:flex lg:flex-col lg:min-w-[260px] lg:min-h-0 lg:overflow-hidden shrink-0">
             
             <!-- Panel 1B: Active Sliders Tray -->
-            <div id="panel-sliders" class="order-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-3 lg:p-4 shadow-xl flex lg:flex flex-col max-h-[42%] lg:max-h-none lg:h-[42%] lg:min-h-[130px] shrink-0 overflow-hidden">
+            <div id="panel-sliders" class="order-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-3 lg:p-4 shadow-xl flex lg:flex flex-col lg:min-h-[130px] shrink-0 overflow-hidden">
                 <div class="flex items-center justify-between mb-2 shrink-0">
                     <div class="flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-sky-400"></span>
@@ -351,7 +371,7 @@
         <div id="right-col" class="contents lg:flex-1 lg:flex lg:flex-col lg:min-w-[400px] lg:min-h-0 lg:overflow-hidden">
 
             <!-- Panel 1A: Ray Trace Viewport -->
-            <div id="panel-raytrace" class="order-1 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex lg:flex flex-col flex-1 lg:flex-none lg:h-[52%] min-h-[180px] relative shrink-0">
+            <div id="panel-raytrace" class="order-1 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex lg:flex flex-col flex-1 lg:flex-none min-h-[180px] relative shrink-0">
                 
                 <div class="px-3 lg:px-4 py-2 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between gap-2 z-10 shrink-0">
                     <div class="flex items-center space-x-3 min-w-0">
@@ -413,7 +433,7 @@
             <div id="right-bottom-row" class="contents lg:flex lg:flex-row lg:flex-1 lg:min-h-[160px] lg:overflow-hidden">
                 
                 <!-- Panel 3: Optical Prescription, AO, Link Budget & Theory Tabs -->
-                <div id="panel-metrics" class="hidden lg:flex order-4 lg:w-[58%] lg:min-w-[260px] bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 lg:p-4 shadow-xl flex-1 lg:flex-none min-h-0 flex-col justify-between overflow-hidden shrink-0">
+                <div id="panel-metrics" class="hidden lg:flex order-4 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 lg:p-4 shadow-xl flex-1 lg:flex-none min-h-0 flex-col justify-between overflow-hidden shrink-0">
                     
                     <!-- Sub-Navigation Tabs inside Panel 3 -->
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5 mb-2.5 shrink-0">
@@ -893,110 +913,93 @@
         }
 
         function setupDesktopResizers() {
-            const makeResizer = (resizerId, axis, onDrag, onReset) => {
-                const resizer = document.getElementById(resizerId);
-                if (!resizer) return;
-                let active = false;
+            let isResizing = false;
 
-                resizer.addEventListener('pointerdown', e => {
+            const makeResizer = (resizerId, axis, targetElementId, minPct, maxPct) => {
+                const resizer = document.getElementById(resizerId);
+                const targetEl = document.getElementById(targetElementId);
+                if (!resizer || !targetEl) return;
+
+                let startMousePos = 0;
+                let startSize = 0;
+                let parentSize = 0;
+
+                const onPointerDown = (e) => {
                     if (window.innerWidth < 1024 || e.button !== 0) return;
                     e.preventDefault();
-                    active = true;
+                    isResizing = true;
                     resizer.setPointerCapture(e.pointerId);
                     resizer.classList.add('dragging');
-                    document.body.style.userSelect = 'none';
-                    document.body.style.cursor = axis === 'v' ? 'col-resize' : 'row-resize';
-                });
+                    
+                    // Overlay class prevents canvases from catching hover states/causing lag
+                    document.body.classList.add('resizing-active', axis === 'v' ? 'resizing-col' : 'resizing-row');
 
-                resizer.addEventListener('pointermove', e => {
-                    if (!active) return;
-                    onDrag(e);
-                    requestAnimationFrame(() => recalculate());
-                });
+                    startMousePos = axis === 'v' ? e.clientX : e.clientY;
+                    const rect = targetEl.getBoundingClientRect();
+                    startSize = axis === 'v' ? rect.width : rect.height;
+                    const parentRect = targetEl.parentElement.getBoundingClientRect();
+                    parentSize = axis === 'v' ? parentRect.width : parentRect.height;
+                };
 
-                const stop = e => {
-                    if (!active) return;
-                    active = false;
-                    if (e && e.pointerId !== undefined && resizer.hasPointerCapture(e.pointerId)) {
+                const onPointerMove = (e) => {
+                    if (!isResizing || !resizer.hasPointerCapture(e.pointerId)) return;
+                    
+                    const currentMousePos = axis === 'v' ? e.clientX : e.clientY;
+                    const delta = currentMousePos - startMousePos;
+                    let newPct = ((startSize + delta) / parentSize) * 100;
+                    
+                    newPct = Math.max(minPct, Math.min(maxPct, newPct));
+                    
+                    // Bind using CSS variables ensuring 100% decoupling from mobile classes
+                    targetEl.style.setProperty(`--${targetElementId}-size`, `${newPct}%`);
+                    
+                    // Throttle intensive redraws during fluid drag via requestAnimationFrame
+                    if (!resizer.dataset.ticking) {
+                        requestAnimationFrame(() => {
+                            recalculate();
+                            resizer.dataset.ticking = '';
+                        });
+                        resizer.dataset.ticking = 'true';
+                    }
+                };
+
+                const onPointerUp = (e) => {
+                    if (!isResizing) return;
+                    isResizing = false;
+                    if (resizer.hasPointerCapture(e.pointerId)) {
                         resizer.releasePointerCapture(e.pointerId);
                     }
                     resizer.classList.remove('dragging');
-                    document.body.style.userSelect = '';
-                    document.body.style.cursor = '';
+                    document.body.classList.remove('resizing-active', 'resizing-col', 'resizing-row');
                     requestAnimationFrame(() => recalculate());
                 };
 
-                resizer.addEventListener('pointerup', stop);
-                resizer.addEventListener('pointercancel', stop);
+                resizer.addEventListener('pointerdown', onPointerDown);
+                resizer.addEventListener('pointermove', onPointerMove);
+                resizer.addEventListener('pointerup', onPointerUp);
+                resizer.addEventListener('pointercancel', onPointerUp);
+                
+                // Double click resizer handler to reset
                 resizer.addEventListener('dblclick', () => {
                     if (window.innerWidth < 1024) return;
-                    onReset();
+                    targetEl.style.removeProperty(`--${targetElementId}-size`);
                     requestAnimationFrame(() => recalculate());
                 });
             };
 
-            // 1. Main Vertical Split: Left Column vs Right Column
-            makeResizer('resizer-main-v', 'v', e => {
-                const main = document.getElementById('main-workspace');
-                const leftCol = document.getElementById('left-col');
-                if (!main || !leftCol) return;
-                const rect = main.getBoundingClientRect();
-                const pct = Math.max(22, Math.min(55, ((e.clientX - rect.left) / rect.width) * 100));
-                leftCol.style.width = `${pct}%`;
-            }, () => {
-                const leftCol = document.getElementById('left-col');
-                if (leftCol) leftCol.style.width = '33%';
-            });
-
-            // 2. Left Column Horizontal Split: Sliders vs System Parameters
-            makeResizer('resizer-left-h', 'h', e => {
-                const leftCol = document.getElementById('left-col');
-                const sliders = document.getElementById('panel-sliders');
-                if (!leftCol || !sliders) return;
-                const rect = leftCol.getBoundingClientRect();
-                const pct = Math.max(20, Math.min(70, ((e.clientY - rect.top) / rect.height) * 100));
-                sliders.style.height = `${pct}%`;
-            }, () => {
-                const sliders = document.getElementById('panel-sliders');
-                if (sliders) sliders.style.height = '42%';
-            });
-
-            // 3. Right Column Horizontal Split: Ray Trace Canvas vs Bottom Sub-Row
-            makeResizer('resizer-right-h', 'h', e => {
-                const rightCol = document.getElementById('right-col');
-                const raytrace = document.getElementById('panel-raytrace');
-                if (!rightCol || !raytrace) return;
-                const rect = rightCol.getBoundingClientRect();
-                const pct = Math.max(28, Math.min(72, ((e.clientY - rect.top) / rect.height) * 100));
-                raytrace.style.height = `${pct}%`;
-            }, () => {
-                const raytrace = document.getElementById('panel-raytrace');
-                if (raytrace) raytrace.style.height = '52%';
-            });
-
-            // 4. Bottom Sub-Row Vertical Split: Metrics Panel vs Pupil/PSF Panel
-            makeResizer('resizer-bottom-v', 'v', e => {
-                const bottomRow = document.getElementById('right-bottom-row');
-                const metrics = document.getElementById('panel-metrics');
-                if (!bottomRow || !metrics) return;
-                const rect = bottomRow.getBoundingClientRect();
-                const pct = Math.max(35, Math.min(72, ((e.clientX - rect.left) / rect.width) * 100));
-                metrics.style.width = `${pct}%`;
-            }, () => {
-                const metrics = document.getElementById('panel-metrics');
-                if (metrics) metrics.style.width = '58%';
-            });
+            // Delta-based constraint mappings
+            makeResizer('resizer-main-v', 'v', 'left-col', 20, 60);
+            makeResizer('resizer-left-h', 'h', 'panel-sliders', 20, 70);
+            makeResizer('resizer-right-h', 'h', 'panel-raytrace', 25, 75);
+            makeResizer('resizer-bottom-v', 'v', 'panel-metrics', 30, 75);
         }
 
         function resetLayoutSizes() {
-            const leftCol = document.getElementById('left-col');
-            const sliders = document.getElementById('panel-sliders');
-            const raytrace = document.getElementById('panel-raytrace');
-            const metrics = document.getElementById('panel-metrics');
-            if (leftCol) leftCol.style.width = '33%';
-            if (sliders) sliders.style.height = '42%';
-            if (raytrace) raytrace.style.height = '52%';
-            if (metrics) metrics.style.width = '58%';
+            const panels = ['left-col', 'panel-sliders', 'panel-raytrace', 'panel-metrics'];
+            panels.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.style.removeProperty(`--${id}-size`);
+            });
             requestAnimationFrame(() => recalculate());
             showToast('Workspace panel layout reset to default!');
         }
@@ -1657,13 +1660,8 @@
             return (c * y) / Math.sqrt(arg);
         }
 
-        // Exact 2D ray-conic intersection and vector reflection:
-        // Conic vertex at (zVertex, 0), radius R, conic constant k.
-        // Ray starts at (z0, y0) with unit direction (dz, dy).
         function intersectAndReflectConic(z0, y0, dz, dy, zVertex, R, k) {
-            // Initial linear estimate to plane z = zVertex
             let t = Math.abs(dz) > 1e-9 ? (zVertex - z0) / dz : 0;
-            // 5 Newton-Raphson iterations for machine-precision intersection with exact conic sag
             for (let iter = 0; iter < 5; iter++) {
                 const z = z0 + t * dz;
                 const y = y0 + t * dy;
@@ -1674,14 +1672,11 @@
             const zHit = z0 + t * dz;
             const yHit = y0 + t * dy;
 
-            // Surface implicit equation: F(z, y) = (z - zVertex) - sag(y) = 0
-            // Gradient vector: (1, -dsag/dy)
             const slope = getConicSlope(yHit, R, k);
             const normLen = Math.hypot(1, slope);
             let nz = 1 / normLen;
             let ny = -slope / normLen;
 
-            // Ensure surface normal points against incident ray (dot < 0)
             let dot = dz * nz + dy * ny;
             if (dot > 0) {
                 nz = -nz;
@@ -1689,7 +1684,6 @@
                 dot = -dot;
             }
 
-            // Exact vector reflection: r = d - 2 (d · n) n
             const rdz = dz - 2 * dot * nz;
             const rdy = dy - 2 * dot * ny;
             return { zHit, yHit, rdz, rdy };
@@ -1755,7 +1749,7 @@
             ctx.stroke();
             ctx.restore();
 
-            // Outer Telescope Tube Outline (with Nasmyth port opening centered on the folded beam z = nasmythFocusZ)
+            // Outer Telescope Tube Outline
             const tubeTopY = toScreenY(model.D1 / 2 + 8);
             const tubeBotY = toScreenY(-model.D1 / 2 - 8);
             const tubeLeftX = toScreenX(-model.d * 1.08);
@@ -1785,24 +1779,21 @@
             const zStart = -model.d * 1.22;
             const r1HoleRadius = Math.min(model.D1 * 0.45, Math.max(model.holeDia / 2, model.D2_axial * 0.35));
 
-            // Helper to intersect a ray segment (z1, y1) -> (z2, y2) with the -45° M3 plane (z + y = m3Z + m3Y)
-            // and reflect the endpoint (z2, y2) across that exact plane so rays fold downward (-Y) to the Nasmyth focal plane:
             const planeSum = model.m3Z + model.m3Y;
             const foldRayOnM3 = (z1, y1, z2, y2) => {
                 const dz = z2 - z1;
                 const dy = y2 - y1;
-                const denom = dz + dy; // Plane: z + y - (m3Z + m3Y) = 0
+                const denom = dz + dy;
                 if (Math.abs(denom) < 1e-9) return null;
                 const t = (planeSum - z1 - y1) / denom;
                 const zHit = z1 + t * dz;
                 const yHit = y1 + t * dy;
-                // Exact 2D reflection across the line z + y = planeSum maps (z, y) -> (planeSum - y, planeSum - z)
                 const zFoldFocus = planeSum - y2;
                 const yFoldFocus = planeSum - z2;
                 return { zHit, yHit, zFoldFocus, yFoldFocus };
             };
 
-            // Internal Stray-Light Baffles (M1 central baffle tube + M2 conical baffle)
+            // Internal Stray-Light Baffles
             if (showBaffles) {
                 ctx.save();
                 ctx.strokeStyle = 'rgba(148, 163, 184, 0.65)';
@@ -1856,11 +1847,8 @@
                     return;
                 }
 
-                // 1. Trace incident collimated ray (dz=1, dy=0) to Primary Mirror M1 (vertex at z=0)
                 const hit1 = intersectAndReflectConic(zStart, y0, 1.0, 0.0, 0.0, model.R1, model.k1);
-                // 2. Trace reflected ray from M1 to Secondary Mirror M2 (vertex at z=-d)
                 const hit2 = intersectAndReflectConic(hit1.zHit, hit1.yHit, hit1.rdz, hit1.rdy, -model.d, model.R2, model.k2);
-                // 3. Propagate reflected ray from M2 to focal plane z = b
                 const tFocus = (model.b - hit2.zHit) / hit2.rdz;
                 const zFocus = model.b;
                 const yFocus = hit2.yHit + tFocus * hit2.rdy;
@@ -1888,17 +1876,15 @@
                 ctx.restore();
             });
 
-            // Exact Conic Ray Tracing: Off-Axis Field Rays (+FOV angle)
+            // Exact Conic Ray Tracing: Off-Axis Field Rays
             if (showOffAxis && model.fovMrad > 0) {
                 const dz0 = Math.cos(model.fovRad);
                 const dy0 = Math.sin(model.fovRad);
 
                 [-1, 0, 1].forEach(sign => {
                     const yPupil = sign * (model.D1 * 0.46);
-                    // Back-project from entrance pupil (z=0, y=yPupil) to zStart
                     const yIn = yPupil + (zStart - 0) * (dy0 / dz0);
 
-                    // Check if blocked by M2 at z = -d
                     const yAtM2Plane = yPupil + (-model.d - 0) * (dy0 / dz0);
                     if (Math.abs(yAtM2Plane) <= model.D2 / 2) return;
 
@@ -1983,9 +1969,7 @@
             ctx.stroke();
             ctx.restore();
 
-            // M3 Flat Fold Mirror (-45° Nasmyth Tertiary: z + y = m3Z + m3Y)
-            // Reflective front face runs from TOP-LEFT (z3 - halfProj, y3 + halfProj) to BOTTOM-RIGHT (z3 + halfProj, y3 - halfProj)
-            // so rays traveling right (+z) reflect downward (-y)!
+            // M3 Flat Fold Mirror
             if (model.nasmythEnabled) {
                 const halfProj = Math.max(model.D3_minor / 2, Math.abs(model.m3Y) + model.D3_minor * 0.35);
                 const z3A = model.m3Z - halfProj;
@@ -1994,7 +1978,6 @@
                 const y3B = model.m3Y - halfProj;
                 const m3Thick = Math.max(3.5, model.D3_minor * 0.08);
 
-                // Ghosted unfolded reference line from M3 optical-axis intercept to unfolded Cassegrain focus
                 ctx.save();
                 ctx.strokeStyle = 'rgba(148, 163, 184, 0.22)';
                 ctx.lineWidth = 1;
@@ -2005,7 +1988,6 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // Vertical Nasmyth Elevation Axis passing through folded beam center (z = nasmythFocusZ)
                 ctx.save();
                 ctx.strokeStyle = 'rgba(129, 140, 248, 0.35)';
                 ctx.lineWidth = 1;
@@ -2016,7 +1998,6 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // M3 Mirror Substrate (back side is towards +z, +y) & Reflective Face
                 ctx.save();
                 ctx.fillStyle = 'rgba(79, 70, 229, 0.45)';
                 ctx.strokeStyle = '#a5b4fc';
@@ -2030,7 +2011,6 @@
                 ctx.fill();
                 ctx.stroke();
 
-                // Interactive M3 2D Drag Handle Node at (m3Z, m3Y)
                 ctx.fillStyle = viewState.draggingM3 ? '#fbbf24' : '#818cf8';
                 ctx.strokeStyle = '#0f172a';
                 ctx.lineWidth = 1.5;
@@ -2048,7 +2028,7 @@
                 ctx.restore();
             }
 
-            // Dimension Callouts (Single clean label per distance — no duplicates!)
+            // Dimension Callouts
             if (showDims) {
                 ctx.save();
                 ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
@@ -2061,7 +2041,6 @@
                 const xM1 = toScreenX(0);
                 const xFP = toScreenX(model.b);
 
-                // Separation d line
                 const sepDimY = model.nasmythEnabled ? toScreenY(model.D1 / 2 + 22) : dimY;
                 ctx.beginPath();
                 ctx.moveTo(xM2, sepDimY);
@@ -2084,7 +2063,6 @@
                     ctx.fillText(`BWD = ${model.b.toFixed(0)} mm`, (xM1 + xFP) / 2, sepDimY - 6);
                 }
 
-                // Nasmyth M3 X-Distance (z3), Y-Offset (y3), and Nasmyth Throw (h_N) Callouts (Each shown ONCE)
                 if (model.nasmythEnabled) {
                     const xM3 = toScreenX(model.m3Z);
                     const yM3 = toScreenY(model.m3Y);
@@ -2092,7 +2070,6 @@
                     const yNas = toScreenY(model.nasmythFocusY);
                     const xNas = toScreenX(model.nasmythFocusZ);
 
-                    // 1. Axial X-Distance Callout for M3 relative to M1 vertex (z3)
                     const z3DimY = toScreenY(model.D1 / 2 + 42);
                     ctx.strokeStyle = 'rgba(129, 140, 248, 0.65)';
                     ctx.fillStyle = '#a5b4fc';
@@ -2117,7 +2094,6 @@
                     ctx.textAlign = 'center';
                     ctx.fillText(`z₃ = ${model.m3Z.toFixed(0)} mm`, (xM3 + xM1) / 2, z3DimY - 5);
 
-                    // 2. Vertical Y-Distance Callout from Optical Axis to Nasmyth Focus (h_N) — Single concise label
                     const fpHalfH = Math.max(model.D1 * 0.14, model.focalSpotDia * 1.5);
                     const yDimX = xNas - Math.max(24, fpHalfH * scale + 14);
 
@@ -2147,7 +2123,6 @@
                     ctx.fillText(`h_N = ${model.nasmythThrow.toFixed(1)} mm`, yDimX - 6, (yAxis + yNas) / 2 + 3);
                 }
 
-                // M1 & M2 Labels
                 ctx.fillStyle = '#38bdf8';
                 ctx.textAlign = 'left';
                 ctx.fillText(`M₁ (Ø${model.D1}mm)`, xM1 + 8, toScreenY(model.D1 / 2) + 12);
@@ -2157,7 +2132,7 @@
                 ctx.restore();
             }
 
-            // Focal Plane (Direct Cassegrain or Folded Nasmyth Port)
+            // Focal Plane
             const fpHalfH = Math.max(model.D1 * 0.14, model.focalSpotDia * 1.5);
             if (model.nasmythEnabled) {
                 const nasY = model.nasmythFocusY;
@@ -2273,7 +2248,6 @@
                 const rDet = (model.detUm / 2) * pxPerUm;
                 const rComa = model.comaSpotUm * pxPerUm;
 
-                // Off-axis Coma teardrop flare (if Classical or Dall-Kirkham)
                 if (rComa > 1.5) {
                     ctx.save();
                     ctx.beginPath();
@@ -2283,14 +2257,12 @@
                     ctx.restore();
                 }
 
-                // First Diffraction Ring (brightened by central obstruction ε)
                 ctx.beginPath();
                 ctx.arc(cx, cy, rAiry * 1.35, 0, Math.PI * 2);
                 ctx.strokeStyle = `rgba(56, 189, 248, ${Math.min(0.85, 0.25 + model.epsLinear * 0.7)})`;
                 ctx.lineWidth = Math.max(2, rAiry * 0.22);
                 ctx.stroke();
 
-                // Central Airy Core
                 const psfGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(2, rAiry));
                 psfGrad.addColorStop(0, 'rgba(224, 242, 254, 0.95)');
                 psfGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.65)');
@@ -2301,7 +2273,6 @@
                 ctx.fillStyle = psfGrad;
                 ctx.fill();
 
-                // Detector / SMF Mode Field Diameter
                 ctx.save();
                 ctx.beginPath();
                 ctx.arc(cx, cy, Math.max(2, rDet), 0, Math.PI * 2);
@@ -2334,7 +2305,6 @@
                 ctx.lineTo(W, H - 6);
                 ctx.stroke();
 
-                // Ideal Unobstructed Airy Reference Curve (Dashed Gray)
                 ctx.save();
                 ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
                 ctx.lineWidth = 1.2;
@@ -2350,7 +2320,6 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // Actual Obstructed + Turbulence-Attenuated PSF Curve (Solid Sky Blue)
                 ctx.save();
                 ctx.strokeStyle = '#38bdf8';
                 ctx.lineWidth = 1.75;
@@ -2370,7 +2339,6 @@
                 document.getElementById('psf-ring-penalty').textContent = `Peak S: ${model.netStrehl.toFixed(2)}`;
             }
 
-            // Chart 3: Modulation Transfer Function (MTF) vs Normalized Spatial Frequency (f / f_c)
             const mtfCanvas = document.getElementById('mtfCanvas');
             if (mtfCanvas) {
                 const ctx = mtfCanvas.getContext('2d');
@@ -2382,12 +2350,10 @@
                 const pW = W - padL - padR;
                 const pH = H - padT - padB;
 
-                // Cutoff spatial frequency f_c = 1 / (lambda * f/#) in lp/mm
                 const fcLpMm = 1000 / ((model.lambdaNm * 1e-3) * model.Feff);
                 const mtfLbl = document.getElementById('mtf-cutoff-label');
                 if (mtfLbl) mtfLbl.textContent = `f_c: ${fcLpMm.toFixed(0)} lp/mm`;
 
-                // Grid
                 ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
                 ctx.lineWidth = 1;
                 [0, 0.5, 1.0].forEach(v => {
@@ -2402,7 +2368,6 @@
                     ctx.fillText(v.toFixed(1), padL - 3, y + 3);
                 });
 
-                // Ideal Unobstructed Diffraction-Limited MTF (Dashed Gray)
                 ctx.save();
                 ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
                 ctx.lineWidth = 1.2;
@@ -2419,7 +2384,6 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // Actual Annular + Turbulence MTF (Solid Amber/Sky)
                 const eps = Math.min(0.85, model.epsLinear);
                 ctx.save();
                 ctx.strokeStyle = '#38bdf8';
@@ -2428,7 +2392,6 @@
                 for (let i = 0; i <= 50; i++) {
                     const s = i / 50;
                     const mtf0 = (2 / Math.PI) * (Math.acos(s) - s * Math.sqrt(1 - s * s));
-                    // Mid-frequency central obscuration sag around s = (1 - eps)/2
                     const midSag = eps > 0.05 ? eps * 0.65 * Math.sin(Math.PI * Math.min(1, s / Math.max(0.15, 1 - eps * 0.5))) : 0;
                     const atmoAtten = Math.pow(model.netStrehl, 0.55 * Math.min(1, s * 2.2));
                     const mtfActual = Math.max(0, Math.min(1, (mtf0 - midSag * (1 - s)) / Math.max(0.2, 1 - eps * eps * 0.5))) * atmoAtten;
@@ -2441,7 +2404,6 @@
                 ctx.restore();
             }
 
-            // Chart 4: Encircled Energy (EE) & SMF Coupling Efficiency vs Spot Radius
             const eeCanvas = document.getElementById('eeCanvas');
             if (eeCanvas) {
                 const ctx = eeCanvas.getContext('2d');
@@ -2467,11 +2429,10 @@
                     ctx.fillText(`${Math.round(v * 100)}%`, padL - 2, y + 3);
                 });
 
-                const maxRatio = 2.5; // r / r_Airy
+                const maxRatio = 2.5; 
                 const eps = Math.min(0.85, model.epsLinear);
                 const coreEnergy = Math.max(0.1, (1 - eps * eps) * model.netStrehl);
 
-                // Encircled Energy Curve (Solid Sky Blue)
                 ctx.save();
                 ctx.strokeStyle = '#38bdf8';
                 ctx.lineWidth = 1.75;
@@ -2489,7 +2450,6 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // Detector / SMF Radius Marker
                 const detRatio = Math.min(maxRatio, model.detUm / Math.max(1, model.airyDiaUm));
                 const detX = padL + (detRatio / maxRatio) * pW;
                 const eeAtDet = Math.min(0.99, 0.838 * coreEnergy * (1 - Math.exp(-2.6 * detRatio * detRatio)) + (1 - 0.838 * coreEnergy) * (1 - Math.exp(-0.75 * Math.max(0, detRatio - 0.85))));
@@ -2533,7 +2493,6 @@
                 return dist <= 18;
             };
 
-            // Pointer Events for smooth desktop & mobile dragging (both whole 2D drawing pan & 2D M3 fold drag)
             canvas.addEventListener('pointerdown', e => {
                 if (e.button !== undefined && e.button !== 0) return;
                 canvas.setPointerCapture(e.pointerId);
@@ -2569,17 +2528,12 @@
                     return;
                 }
 
-                if (!viewState.isDragging) {
-                    canvas.style.cursor = isNearM3Node(e.clientX, e.clientY) ? 'move' : 'grab';
-                    return;
-                }
-
                 canvas.style.cursor = 'grabbing';
                 viewState.panX += e.clientX - viewState.lastMouseX;
                 viewState.panY += e.clientY - viewState.lastMouseY;
                 viewState.lastMouseX = e.clientX;
                 viewState.lastMouseY = e.clientY;
-                recalculate();
+                requestAnimationFrame(() => recalculate());
             });
 
             const endPointerDrag = e => {
@@ -2587,17 +2541,15 @@
                     viewState.isDragging = false;
                     viewState.draggingM3 = false;
                     canvas.style.cursor = 'grab';
-                    recalculate();
+                    requestAnimationFrame(() => recalculate());
                 }
             };
 
             canvas.addEventListener('pointerup', endPointerDrag);
             canvas.addEventListener('pointercancel', endPointerDrag);
 
-            // Double-click to reset view
             canvas.addEventListener('dblclick', () => resetView());
 
-            // Mouse wheel zoom centered on cursor
             canvas.addEventListener('wheel', e => {
                 e.preventDefault();
                 const rect = canvas.getBoundingClientRect();
@@ -2607,7 +2559,6 @@
                 zoomCanvas(factor, mouseX, mouseY);
             }, { passive: false });
 
-            // Window resize listener for responsive redraw
             window.addEventListener('resize', () => {
                 requestAnimationFrame(() => recalculate());
             });
