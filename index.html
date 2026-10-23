@@ -251,6 +251,12 @@
                     <span class="hidden sm:inline">Copy Spec JSON</span>
                     <span class="sm:hidden">JSON</span>
                 </button>
+                <button onclick="document.getElementById('import-json-input').click()" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 transition whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                    <span class="hidden sm:inline">Import JSON</span>
+                    <span class="sm:hidden">Load</span>
+                </button>
+                <input type="file" id="import-json-input" class="hidden" accept=".json" onchange="importJSON(event)">
             </div>
         </div>
     </header>
@@ -768,12 +774,22 @@
                         </div>
                     </div>
 
-                    <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-2 shrink-0">
-                        <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1 px-1">
-                            <span>Radial PSF (Blue: Actual w/ r₀ &amp; ε | Gray: Ideal)</span>
-                            <span class="font-mono text-sky-400" id="psf-ring-penalty">Peak S: 0.85</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 shrink-0">
+                        <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-2 flex flex-col justify-between">
+                            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+                                <span>Radial PSF Profile</span>
+                                <span class="font-mono text-sky-400" id="psf-ring-penalty">Peak S: 0.85</span>
+                            </div>
+                            <canvas id="psfProfileCanvas" width="180" height="72" class="w-full h-16"></canvas>
                         </div>
-                        <canvas id="psfProfileCanvas" width="320" height="54" class="w-full h-12"></canvas>
+                        
+                        <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-2 flex flex-col justify-between">
+                            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+                                <span class="font-medium text-slate-300">Geo Spot Diagram</span>
+                                <span class="font-mono text-amber-400" id="spot-rms-label">RMS: 0.0 µm</span>
+                            </div>
+                            <canvas id="spotCanvas" width="180" height="72" class="w-full h-16"></canvas>
+                        </div>
                     </div>
 
                     <!-- Additional Optical Performance Charts: MTF & Encircled Energy -->
@@ -905,6 +921,7 @@
         // 2. INITIALIZATION & UI
         // ============================================================================
         function initUI() {
+            loadState();
             renderParameterList();
             renderActiveSliders();
             setupCanvasInteractions();
@@ -1682,12 +1699,20 @@
             ctx.restore();
         }
 
+        let saveTimeout;
+        function debouncedSaveState() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(saveState, 500);
+        }
+
         function recalculate() {
             const model = computeOpticalModel();
             updateDOMMetrics(model);
             drawRayTrace(model);
             drawPupilAndPSF(model);
+            drawSpotDiagram(model);
             drawAOCurve(model);
+            debouncedSaveState();
         }
 
         // ============================================================================
@@ -1735,6 +1760,39 @@
             const rdz = dz - 2 * dot * nz;
             const rdy = dy - 2 * dot * ny;
             return { zHit, yHit, rdz, rdy };
+        }
+
+        function intersectAndReflectConic3D(x0, y0, z0, dx, dy, dz, zVertex, R, k) {
+            let t = Math.abs(dz) > 1e-9 ? (zVertex - z0) / dz : 0;
+            for (let iter = 0; iter < 5; iter++) {
+                const x = x0 + t * dx;
+                const y = y0 + t * dy;
+                const z = z0 + t * dz;
+                const r = Math.hypot(x, y);
+                const f = (z - zVertex) - getConicSag(r, R, k, true);
+                const drdt = r === 0 ? 0 : (x * dx + y * dy) / r;
+                const dfdt = dz - getConicSlope(r, R, k) * drdt;
+                if (Math.abs(dfdt) > 1e-12) t -= f / dfdt;
+            }
+            const xHit = x0 + t * dx;
+            const yHit = y0 + t * dy;
+            const zHit = z0 + t * dz;
+            const rHit = Math.hypot(xHit, yHit);
+
+            const slope = getConicSlope(rHit, R, k);
+            let nx = rHit === 0 ? 0 : -slope * xHit / rHit;
+            let ny = rHit === 0 ? 0 : -slope * yHit / rHit;
+            let nz = 1;
+            const normLen = Math.hypot(nx, ny, nz);
+            nx /= normLen; ny /= normLen; nz /= normLen;
+
+            let dot = dx * nx + dy * ny + dz * nz;
+            if (dot > 0) { nx = -nx; ny = -ny; nz = -nz; dot = -dot; }
+
+            const rdx = dx - 2 * dot * nx;
+            const rdy = dy - 2 * dot * ny;
+            const rdz = dz - 2 * dot * nz;
+            return { xHit, yHit, zHit, rdx, rdy, rdz };
         }
 
         function drawRayTrace(model) {
@@ -2387,6 +2445,112 @@
                 document.getElementById('psf-ring-penalty').textContent = `Peak S: ${model.netStrehl.toFixed(2)}`;
             }
 
+            // Chart 2B: Geometric Spot Diagram Visualizer
+            function drawSpotDiagram(model) {
+                const canvas = document.getElementById('spotCanvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const W = canvas.width;
+                const H = canvas.height;
+                ctx.clearRect(0, 0, W, H);
+
+                const pad = 8;
+                const cx = W / 2;
+                const cy = H / 2;
+
+                // Generate hexapolar ray grid at the entrance pupil
+                const rays = [];
+                const nRings = 6;
+                for (let rIdx = 1; rIdx <= nRings; rIdx++) {
+                    const r = (model.D2 / 2) + (model.D1 / 2 - model.D2 / 2) * (rIdx / nRings);
+                    const nPoints = Math.round(rIdx * 6);
+                    for (let i = 0; i < nPoints; i++) {
+                        const theta = (i / nPoints) * Math.PI * 2;
+                        rays.push({ x: r * Math.cos(theta), y: r * Math.sin(theta) });
+                    }
+                }
+
+                const traceSpots = (fovRad) => {
+                    const dz0 = Math.cos(fovRad);
+                    const dy0 = Math.sin(fovRad);
+                    const zStart = -model.d * 1.22;
+                    
+                    const spots = [];
+                    rays.forEach(ray => {
+                        const yIn = ray.y + (zStart - 0) * (dy0 / dz0);
+                        const yAtM2 = ray.y + (-model.d - 0) * (dy0 / dz0);
+                        if (Math.hypot(ray.x, yAtM2) <= model.D2 / 2) return;
+
+                        const hit1 = intersectAndReflectConic3D(ray.x, yIn, zStart, 0, dy0, dz0, 0.0, model.R1, model.k1);
+                        const hit2 = intersectAndReflectConic3D(hit1.xHit, hit1.yHit, hit1.zHit, hit1.rdx, hit1.rdy, hit1.rdz, -model.d, model.R2, model.k2);
+                        
+                        const tFocus = (model.b - hit2.zHit) / hit2.rdz;
+                        const xFocus = hit2.xHit + tFocus * hit2.rdx;
+                        const yFocus = hit2.yHit + tFocus * hit2.rdy;
+                        spots.push({ x: xFocus * 1000, y: yFocus * 1000 });
+                    });
+
+                    if (spots.length === 0) return { spots: [], rms: 0, centroid: {x:0, y:0} };
+
+                    let sumX = 0, sumY = 0;
+                    spots.forEach(s => { sumX += s.x; sumY += s.y; });
+                    const centroid = { x: sumX / spots.length, y: sumY / spots.length };
+                    
+                    let sumSq = 0;
+                    spots.forEach(s => {
+                        const dx = s.x - centroid.x;
+                        const dy = s.y - centroid.y;
+                        sumSq += dx * dx + dy * dy;
+                    });
+                    return { spots, centroid, rms: Math.sqrt(sumSq / spots.length) };
+                };
+
+                const onAxis = traceSpots(0);
+                const offAxis = traceSpots(model.fovRad);
+
+                const maxRMS = Math.max(onAxis.rms, offAxis.rms, model.airyDiaUm / 2);
+                const scaleExtentUm = Math.max(15, maxRMS * 3.5, model.comaSpotUm * 1.5, model.airyDiaUm * 1.5); 
+                const pxPerUm = Math.min((W / 2 - pad) / scaleExtentUm, (H / 2 - pad) / scaleExtentUm);
+
+                // Grid & Center Target
+                ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(cx, 0); ctx.lineTo(cx, H);
+                ctx.moveTo(0, cy); ctx.lineTo(W, cy);
+                ctx.stroke();
+
+                // Reference Airy Disk Ring
+                ctx.beginPath();
+                ctx.arc(cx, cy, (model.airyDiaUm / 2) * pxPerUm, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                const drawGroup = (group, color) => {
+                    ctx.fillStyle = color;
+                    group.spots.forEach(s => {
+                        const sx = cx + (s.x - group.centroid.x) * pxPerUm;
+                        const sy = cy - (s.y - group.centroid.y) * pxPerUm;
+                        ctx.fillRect(sx, sy, 1.5, 1.5);
+                    });
+                };
+
+                drawGroup(onAxis, 'rgba(56, 189, 248, 0.75)');
+                
+                let rmsLabel = `RMS(0): ${onAxis.rms.toFixed(1)}µm`;
+                if (model.fovRad > 0 && offAxis.spots.length > 0) {
+                    drawGroup(offAxis, 'rgba(251, 191, 36, 0.75)');
+                    rmsLabel = `RMS(θ): ${offAxis.rms.toFixed(1)}µm`;
+                }
+
+                const lbl = document.getElementById('spot-rms-label');
+                if (lbl) lbl.textContent = rmsLabel;
+            }
+            
+            drawSpotDiagram(model);
+
+            // Chart 3: Modulation Transfer Function (MTF) vs Normalized Spatial Frequency (f / f_c)
             const mtfCanvas = document.getElementById('mtfCanvas');
             if (mtfCanvas) {
                 const ctx = mtfCanvas.getContext('2d');
@@ -2669,6 +2833,78 @@
             renderActiveSliders();
             resetView();
         }
+        
+        function saveState() {
+            const state = {
+                params: parameters.map(p => ({ id: p.id, value: p.value, min: p.min, max: p.max, sliderActive: p.sliderActive })),
+                prescription: document.getElementById('prescription-type').value,
+                strutMaterial: document.getElementById('strut-material')?.value,
+                modScheme: document.getElementById('mod-scheme')?.value,
+                nasmythEnabled: document.getElementById('enable-nasmyth')?.checked,
+                showOffaxis: document.getElementById('show-offaxis')?.checked,
+                showCaustics: document.getElementById('show-caustics')?.checked,
+                showBaffles: document.getElementById('show-baffles')?.checked,
+                showDims: document.getElementById('show-dimensions')?.checked
+            };
+            localStorage.setItem('opticom_state', JSON.stringify(state));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('opticom_state');
+            if (saved) {
+                try {
+                    const state = JSON.parse(saved);
+                    applyStateData(state);
+                } catch (e) {
+                    console.error("Failed to load state", e);
+                }
+            }
+        }
+
+        function applyStateData(state) {
+            if (state.params) {
+                state.params.forEach(sp => {
+                    const p = parameters.find(p => p.id === sp.id);
+                    if (p) {
+                        p.value = sp.value;
+                        if (sp.min !== undefined) p.min = sp.min;
+                        if (sp.max !== undefined) p.max = sp.max;
+                        if (sp.sliderActive !== undefined) p.sliderActive = sp.sliderActive;
+                    }
+                });
+            }
+            if (state.prescription) document.getElementById('prescription-type').value = state.prescription;
+            if (state.strutMaterial) document.getElementById('strut-material').value = state.strutMaterial;
+            if (state.modScheme) document.getElementById('mod-scheme').value = state.modScheme;
+            if (state.nasmythEnabled !== undefined) document.getElementById('enable-nasmyth').checked = state.nasmythEnabled;
+            if (state.showOffaxis !== undefined) document.getElementById('show-offaxis').checked = state.showOffaxis;
+            if (state.showCaustics !== undefined) document.getElementById('show-caustics').checked = state.showCaustics;
+            if (state.showBaffles !== undefined) document.getElementById('show-baffles').checked = state.showBaffles;
+            if (state.showDims !== undefined) document.getElementById('show-dimensions').checked = state.showDims;
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const state = data.appState || data; 
+                    applyStateData(state);
+                    
+                    renderParameterList();
+                    renderActiveSliders();
+                    recalculate();
+                    resetView();
+                    showToast('Configuration loaded successfully!');
+                } catch (err) {
+                    showToast('Invalid configuration JSON file!');
+                }
+                event.target.value = ''; // Reset file input
+            };
+            reader.readAsText(file);
+        }
 
         function openZemaxModal() {
             const model = computeOpticalModel();
@@ -2741,6 +2977,17 @@ ${m3SurfaceBlock}
                         tubeClearanceMargin_mm: Number(model.nasmythTubeClearance.toFixed(2))
                     },
                     atmosphericStrehlRatio: Number(model.netStrehl.toFixed(3))
+                },
+                appState: {
+                    params: parameters.map(p => ({ id: p.id, value: p.value, min: p.min, max: p.max, sliderActive: p.sliderActive })),
+                    prescription: document.getElementById('prescription-type').value,
+                    strutMaterial: document.getElementById('strut-material')?.value,
+                    modScheme: document.getElementById('mod-scheme')?.value,
+                    nasmythEnabled: document.getElementById('enable-nasmyth')?.checked,
+                    showOffaxis: document.getElementById('show-offaxis')?.checked,
+                    showCaustics: document.getElementById('show-caustics')?.checked,
+                    showBaffles: document.getElementById('show-baffles')?.checked,
+                    showDims: document.getElementById('show-dimensions')?.checked
                 }
             };
 
