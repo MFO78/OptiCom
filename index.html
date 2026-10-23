@@ -365,9 +365,11 @@
                                 </div>
 
                                 <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-2 border-emerald-500/30">
-                                    <div class="text-[10px] text-slate-400">Seeing &amp; Fried r₀(λ)</div>
-                                    <div class="text-xs lg:text-sm font-mono font-semibold text-emerald-400 mt-0.5"><span id="val-seeing-arcsec">1.01″</span> <span class="text-[10px] font-normal text-slate-400">@500nm</span></div>
-                                    <div class="text-[10px] text-slate-400 mt-0.5">r₀(λ): <span id="val-r0-lambda" class="text-emerald-300 font-mono">38.9</span>cm | r₀: <span id="val-r0" class="text-slate-200 font-mono">10.0</span>cm</div>
+                                    <div class="text-[10px] text-slate-400">Seeing &amp; Fried r₀</div>
+                                    <div class="text-xs font-mono font-semibold text-emerald-400 mt-0.5" title="Seeing at 500nm and at Laser Wavelength λ">
+                                        <span id="val-seeing-arcsec">1.01″</span> <span class="text-[10px] font-normal text-slate-400">(@λ: <span id="val-seeing-lambda" class="text-emerald-300">0.80″</span>)</span>
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 mt-0.5 truncate">r₀(λ): <span id="val-r0-lambda" class="text-emerald-300 font-mono">38.9</span>cm | r₀(500): <span id="val-r0" class="text-slate-200 font-mono">10.0</span>cm</div>
                                 </div>
                             </div>
                         </div>
@@ -530,69 +532,51 @@
                     </div>
 
                     <!-- SUB-TAB 3: THEORY, EQUATIONS & ENGINEERING ASSUMPTIONS -->
-                    <div id="subtab-theory" class="hidden flex-1 min-h-0 overflow-y-auto pr-1 space-y-2.5 text-xs text-slate-300 leading-relaxed">
-                        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
-                            <h4 class="text-emerald-400 font-semibold uppercase tracking-wider text-[11px] mb-1">2. Seeing (arcsec) &amp; Fried Parameter (r₀) vs. Adaptive Optics (AO)</h4>
+                    <div id="subtab-theory" class="hidden flex-1 min-h-0 flex-col overflow-y-auto pr-1.5 space-y-2.5 text-xs text-slate-300 leading-relaxed">
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 shrink-0">
+                            <h4 class="text-sky-400 font-semibold uppercase tracking-wider text-[11px] mb-1">1. Cassegrain Paraxial &amp; Conic Prescription Geometry</h4>
                             <p class="text-[11px] text-slate-400 mb-1.5">
-                                Astronomical seeing FWHM angle <code class="text-emerald-300">θ_seeing</code> (in arcseconds at 500 nm) and Fried coherence length <code class="text-emerald-300">r₀</code> are directly coupled via <code class="text-emerald-300">θ_seeing = 0.98 · λ / r₀</code> (so <code class="text-emerald-300">r₀ = 10 cm</code> equals <code class="text-emerald-300">1.01″</code> seeing at 500 nm). Across wavelength, <code class="text-emerald-300">r₀(λ) = r₀(500nm) · (λ / 500nm)^(6/5)</code>. Using <strong>Noll’s (1976) Zernike expansion</strong> plus realistic AO servo-lag/WFS noise floor:
+                                Primary focal length is <code class="text-sky-300">f₁ = D₁ · (f/#₁)</code> and system Effective Focal Length is <code class="text-sky-300">EFL = m · f₁</code>. For a chosen Back Working Distance (<code class="text-sky-300">BWD = b</code>), the secondary mirror intercept distance <code class="text-sky-300">p₁</code> and mirror separation <code class="text-sky-300">d</code> are:
                             </p>
-                            <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800">
-                                <div>θ_seeing(500nm) [arcsec] = 10.107 / r₀(500nm) [cm] &nbsp; (Bidirectionally synced)</div>
-                                <div>Spatial Fitting Error: &nbsp;&nbsp;σ²_fit(N) = C_N · (D₁ / r₀(λ))^(5/3) [rad²]</div>
-                                <div>Temporal Lag + WFS Noise: σ²_servo  ≈ 0.06 · (D₁ / r₀(λ))^(5/3) + 0.04 [rad²] (when N &gt; 0)</div>
-                                <div>Net Strehl Ratio: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;S_net = exp(-(σ²_fit + σ²_servo)) · (1 - ε²)</div>
+                            <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800 break-words whitespace-pre-wrap">
+                                <div>p₁ = (f₁ + b) / (m + 1) ,  d = f₁ - p₁ ,  R₁ = -2·f₁ ,  R₂ = -2·m·p₁ / (m - 1)</div>
+                                <div>Classical: k₁ = -1.0 ,  k₂ = -((m + 1)/(m - 1))²  [Zero Spherical, Coma present]</div>
+                                <div>Ritchey-Chrétien (RC): k₁ &lt; -1 , k₂ &lt; k₂_class  [Aplanatic: Zero Spherical &amp; Zero Coma]</div>
                             </div>
-                            <p class="text-[10px] text-slate-400 mt-1.5">
-                                <strong>Why ideal Noll isn't enough:</strong> Even with 100+ Zernike modes, finite Greenwood frequency bandwidth (~1–2 kHz loop rate vs wind speed) and WFS subaperture aliasing impose a non-zero residual phase floor (<code class="text-slate-200">σ²_servo</code>).
-                            </p>
                         </div>
 
-                        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
-                            <h4 class="text-amber-400 font-semibold uppercase tracking-wider text-[11px] mb-1">3. Realistic 99%-Availability FSOC Link Budget &amp; BER</h4>
-                            <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800">
-                                <div>G_Tx = 10·log₁₀((π·D_Tx/λ)²) - 1.8 dB (Clipped Gaussian beam efficiency)</div>
-                                <div>L_pointing(99%) = 4.343 · 2 · (-ln(0.01)) · (σ_jitter / θ_e^-2)² &nbsp; [99% availability]</div>
-                                <div>L_scint(99%) = 2.0 + 3.8 · (1 + 0.35·(D₁/r₀(λ)))^(-7/6) dB &nbsp; [Aperture-averaged fade]</div>
-                                <div>L_optics = -3.5 dB (Tx/Rx mirror coatings, dichroics, WFS splitters &amp; window)</div>
-                            </div>
-                            <p class="text-[10px] text-slate-400 mt-1.5">
-                                <strong>Engineering Realism:</strong> Unlike optimistic back-of-the-envelope link budgets that only compute mean irradiance, an operational 10 Gbps FSOC link without deep interleaving must survive 99% probability fades from <strong>pointing jitter bursts</strong> (<code class="text-slate-200">-ln(0.01) = 4.6×</code> mean pointing loss) and <strong>scintillation fades</strong>, plus <code class="text-slate-200">-3.5 dB</code> of internal optical train throughput loss.
-                            </p>
-                        </div>
-
-                        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
-                            <h4 class="text-emerald-400 font-semibold uppercase tracking-wider text-[11px] mb-1">2. Atmospheric Seeing (r₀) vs. Adaptive Optics (AO) Noll Modes</h4>
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 shrink-0">
+                            <h4 class="text-emerald-400 font-semibold uppercase tracking-wider text-[11px] mb-1">2. Seeing (θ) vs. Fried Parameter (r₀) &amp; Wavelength Scaling</h4>
                             <p class="text-[11px] text-slate-400 mb-1.5">
-                                Atmospheric coherence length (Fried parameter <code class="text-emerald-300">r₀</code>) scales with wavelength as <code class="text-emerald-300">r₀(λ) = r₀(500nm) · (λ / 500nm)^(6/5)</code>. Using <strong>Noll’s (1976) Zernike expansion</strong> for Kolmogorov turbulence:
+                                By Roddier (1981) and Fried (1966), long-exposure astronomical seeing FWHM is <code class="text-emerald-300">θ(λ) = 0.98 · λ / r₀(λ)</code>. Astronomical sites quote seeing and <code class="text-emerald-300">r₀</code> at <code class="text-emerald-300">λ₀ = 500 nm</code>, where <code class="text-emerald-300">0.98 × 500nm × 206265″/rad = 10.107″·cm</code>:
                             </p>
-                            <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800">
-                                <div>Uncorrected (N = 0): &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;σ²_0  = 1.0299 · (D₁ / r₀(λ))^(5/3) [rad²]</div>
-                                <div>Tip/Tilt Corrected (N = 2): σ²_2  = 0.1340 · (D₁ / r₀(λ))^(5/3) [rad²] (~87% variance removed)</div>
-                                <div>High-Order AO (N &gt; 2): &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;σ²_N  ≈ 0.2944 · N^(-√3/2) · (D₁ / r₀(λ))^(5/3) [rad²]</div>
-                                <div>Net Strehl Ratio: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;S_net = exp(-σ²_N) · (1 - ε²)</div>
+                            <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800 break-words whitespace-pre-wrap">
+                                <div>At 500 nm:  θ_500 [arcsec] = 10.107 / r₀_500 [cm]   (e.g. r₀ = 10 cm ⇔ θ = 1.01″)</div>
+                                <div>At Laser λ: r₀(λ) = r₀_500 · (λ / 500nm)^(6/5)      (e.g. at 1550nm, r₀ = 3.89 × r₀_500)</div>
+                                <div>At Laser λ: θ(λ)  = 0.98 · λ / r₀(λ) = θ_500 · (λ / 500nm)^(-1/5)  (at 1550nm, θ = 0.80 × θ_500)</div>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1.5">
-                                <strong>Assumption:</strong> AO bandwidth lag and WFS measurement noise are assumed negligible compared to spatial fitting error <code class="text-slate-200">σ²_N</code>. Notice that when <code class="text-slate-200">D₁/r₀ &lt; 1</code>, a single Tip/Tilt FSM (<code class="text-slate-200">N = 2</code>) achieves near-diffraction performance, whereas large apertures (<code class="text-slate-200">D₁/r₀ &gt; 4</code>) require high-order Deformable Mirrors (<code class="text-slate-200">N ≥ 35</code>) to couple efficiently into a single-mode fiber (SMF).
+                                <strong>Key Insight:</strong> Because <code class="text-slate-200">r₀ ∝ λ^(1.2)</code> grows faster than <code class="text-slate-200">λ¹</code>, angular seeing <code class="text-slate-200">θ(λ) ∝ λ^(-0.2)</code> actually improves by ~20% at 1550 nm compared to 500 nm, while turbulence ratio <code class="text-slate-200">D₁/r₀(λ)</code> drops by almost 4×!
                             </p>
                         </div>
 
-                        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
-                            <h4 class="text-amber-400 font-semibold uppercase tracking-wider text-[11px] mb-1">3. Annular SMF Coupling, Link Budget &amp; Bit Error Rate (BER)</h4>
-                            <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800">
-                                <div>FSPL = 20·log₁₀(4π·L / λ) , &nbsp; G_Rx = 10·log₁₀((π·D₁/λ)²) + 10·log₁₀(1 - ε²)</div>
-                                <div>L_pointing = 4.3429 · (θ_jitter / θ_diff)² , &nbsp; η_SMF ≈ 0.8145 · (1 - ε²)² · exp(-1.2ε²) · S_net</div>
-                                <div>BER (DPSK) = 0.5 · exp(-SNR_opt) , &nbsp; BER (OOK) = 0.5 · erfc(√SNR_opt / (2√2))</div>
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 shrink-0">
+                            <h4 class="text-purple-400 font-semibold uppercase tracking-wider text-[11px] mb-1">3. Adaptive Optics (AO) Noll Zernikes &amp; Servo-Lag Floor</h4>
+                            <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800 break-words whitespace-pre-wrap">
+                                <div>Uncorrected (N=0): σ²_0 = 1.0299 · (D₁/r₀(λ))^(5/3) | Tip/Tilt (N=2): σ²_fit = 0.1340 · (D₁/r₀(λ))^(5/3)</div>
+                                <div>High-Order (N&gt;5):  σ²_fit = 0.2944 · N^(-√3/2) · (D₁/r₀(λ))^(5/3) [rad²]</div>
+                                <div>AO Servo + WFS Floor: σ²_servo ≈ 0.055 · (D₁/r₀(λ))^(5/3) + 0.035 [rad²] (for N &gt; 0)</div>
+                                <div>Net Strehl Ratio:  S_net = exp(-(σ²_fit + σ²_servo)) · (1 - ε²)</div>
                             </div>
-                            <p class="text-[10px] text-slate-400 mt-1.5">
-                                <strong>Assumptions:</strong> Unobstructed circular pupil has a maximum theoretical SMF mode-overlap integral of <code class="text-slate-200">81.45% (-0.89 dB)</code>. Central obstruction <code class="text-slate-200">ε = D₂/D₁</code> diverts energy from the Airy core into the first diffraction ring. Transmitter assumes a reference <code class="text-slate-200">Ø100 mm</code> terminal aperture, <code class="text-slate-200">1.5 dB</code> clear-sky atmospheric attenuation, and an optically pre-amplified receiver baseline sensitivity of <code class="text-slate-200">-38 dBm</code> at 10 Gbps.
-                            </p>
                         </div>
 
-                        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
-                            <h4 class="text-rose-400 font-semibold uppercase tracking-wider text-[11px] mb-1">4. Thermal Despace Magnification &amp; Depth of Focus</h4>
-                            <p class="text-[10px] text-slate-400">
-                                In a Cassegrain telescope, an axial thermal expansion <code class="text-slate-200">Δd = d · CTE · ΔT</code> of the metering truss shifts the Cassegrain focal plane by <code class="text-slate-200">ΔBWD = (m² + 1)·Δd</code>. This shift is compared against the Marechal quarter-wave Depth of Focus <code class="text-slate-200">DoF = ±2·λ·F_eff²</code>.
-                            </p>
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 shrink-0">
+                            <h4 class="text-amber-400 font-semibold uppercase tracking-wider text-[11px] mb-1">4. Realistic 99%-Availability FSOC Link Budget &amp; Thermal Despace</h4>
+                            <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800 break-words whitespace-pre-wrap">
+                                <div>G_Tx = 10·log₁₀((π·D_Tx/λ)²) - 1.8 dB (Clipped Gaussian) | L_optics = -3.5 dB (Coatings/Splitters)</div>
+                                <div>L_ptg(99%) = 4.343 · 2 · (-ln(0.01)) · (σ_j / θ_e2)² | L_scint(99%) = 1.8 + 4.2·(D₁/r₀)^0.45 · Avg(D₁)</div>
+                                <div>Thermal Focus Shift: ΔBWD = (m² + 1) · d · CTE · ΔT  vs.  Quarter-Wave DoF = ±2·λ·(f/#_eff)²</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1100,7 +1084,7 @@
             document.getElementById('top-efl').textContent = model.EFL.toFixed(0);
             document.getElementById('top-fnum').textContent = `f/${model.Feff.toFixed(1)}`;
             document.getElementById('top-obs').textContent = `${linPct}% lin (${areaPct}% area)`;
-            document.getElementById('top-r0').textContent = `${model.seeingArcsec.toFixed(2)}″ / ${model.r0_lambda_cm.toFixed(1)}cm`;
+            document.getElementById('top-r0').textContent = `${model.seeingArcsec.toFixed(2)}″ (${model.seeingLambdaArcsec.toFixed(2)}″@λ) / ${model.r0_lambda_cm.toFixed(1)}cm`;
             document.getElementById('top-strehl').textContent = model.netStrehl.toFixed(2);
 
             // Sub-header Ribbon (Mobile/Tablet)
@@ -1128,6 +1112,8 @@
             document.getElementById('val-dof').textContent = `±${model.dofUm.toFixed(0)} µm`;
 
             document.getElementById('val-seeing-arcsec').textContent = `${model.seeingArcsec.toFixed(2)}″`;
+            const seeingLamEl = document.getElementById('val-seeing-lambda');
+            if (seeingLamEl) seeingLamEl.textContent = `${model.seeingLambdaArcsec.toFixed(2)}″`;
             document.getElementById('val-r0').textContent = model.r0_500.toFixed(1);
             document.getElementById('val-r0-lambda').textContent = model.r0_lambda_cm.toFixed(1);
 
