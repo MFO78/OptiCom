@@ -336,6 +336,7 @@
                             <option value="classical">Classical Cassegrain</option>
                             <option value="rc">Ritchey-Chrétien (RC)</option>
                             <option value="dall_kirkham">Dall-Kirkham</option>
+                            <option value="custom">Custom Conic Constants</option>
                         </select>
                     </div>
 
@@ -863,6 +864,8 @@
             { id: 'd', name: 'M1-M2 Separation (d)', unit: 'mm', min: 50, max: 2000, step: 5, value: 380, sliderActive: true, desc: 'Axial distance between M1 and M2 vertices' },
             { id: 'R1', name: 'Primary RoC (R₁)', unit: 'mm', min: -10000, max: -100, step: 10, value: -1000, sliderActive: false, desc: 'Alternative to f/#. Radius of Curvature of M1' },
             { id: 'R2', name: 'Secondary RoC (R₂)', unit: 'mm', min: -5000, max: -10, step: 5, value: -333.3, sliderActive: false, desc: 'Alternative to m. Radius of Curvature of M2' },
+            { id: 'k1', name: 'Primary Conic (k₁)', unit: '', min: -5.0, max: 2.0, step: 0.005, value: -1.0, sliderActive: false, desc: 'Shape of M1 (0=sphere, -1=parabola)' },
+            { id: 'k2', name: 'Secondary Conic (k₂)', unit: '', min: -10.0, max: 5.0, step: 0.005, value: -2.778, sliderActive: false, desc: 'Shape of M2' },
             { id: 'm3Z', name: 'Nasmyth M₃ Axial Pos (z₃)', unit: 'mm', min: -350, max: 50, step: 5, value: -100, sliderActive: true, desc: 'Axial Z position of 45° M3 fold mirror relative to M1 vertex' },
             { id: 'seeing_arcsec', name: 'Astronomical Seeing (@500nm)', unit: 'arcsec', min: 0.35, max: 5.0, step: 0.05, value: 1.01, sliderActive: true, desc: 'Atmospheric seeing FWHM (coupled with r₀ = 0.98λ/θ)' },
             { id: 'r0_500', name: 'Fried Parameter r₀ (@500nm)', unit: 'cm', min: 2.0, max: 30.0, step: 0.2, value: 10.0, sliderActive: false, desc: 'Atmospheric coherence diameter at zenith (synced w/ seeing)' },
@@ -1198,98 +1201,30 @@
         }
 
         function updateParamValue(id, rawVal, source) {
-            let val = parseFloat(rawVal);
+            const val = parseFloat(rawVal);
             if (isNaN(val)) return;
+
+            if (id === 'k1' || id === 'k2') {
+                const pSelect = document.getElementById('prescription-type');
+                if (pSelect && pSelect.value !== 'custom') {
+                    pSelect.value = 'custom';
+                }
+            }
 
             const param = parameters.find(p => p.id === id);
             if (!param) return;
-            
-            const clampedVal = Math.max(param.min, Math.min(param.max, val));
-            param.value = clampedVal;
+            param.value = val;
 
-            const syncControl = (targetId, targetVal, sourceTrigger) => {
-                if (sourceTrigger !== 'number') {
-                    const numEl = document.getElementById(`input-${targetId}`);
-                    if (numEl) numEl.value = targetVal;
-                }
-                if (sourceTrigger !== 'slider') {
-                    const rangeEl = document.getElementById(`slider-${targetId}`);
-                    if (rangeEl) rangeEl.value = targetVal;
-                }
-                const lblEl = document.getElementById(`slider-val-${targetId}`);
-                if (lblEl) lblEl.textContent = targetVal;
-            };
-
-            syncControl(id, clampedVal, source);
-
-            // Backward Sync for Alternative Inputs
-            if (id === 'R1') {
-                const D1 = getParam('D1');
-                const F1_new = Math.abs(clampedVal) / (2 * D1);
-                const p_F1 = parameters.find(p => p.id === 'F1');
-                if (p_F1) {
-                    p_F1.value = Math.max(p_F1.min, Math.min(p_F1.max, F1_new));
-                    syncControl('F1', Number(p_F1.value.toFixed(3)), null);
-                }
-            } else if (id === 'R2') {
-                const D1 = getParam('D1');
-                const F1 = getParam('F1');
-                const d = getParam('d');
-                const f1 = D1 * F1;
-                const f2 = -Math.abs(clampedVal) / 2;
-                const denom = f2 + f1 - d;
-                let m_new = getParam('m');
-                if (Math.abs(denom) > 1e-4) {
-                    m_new = f2 / denom;
-                }
-                const p_m = parameters.find(p => p.id === 'm');
-                if (p_m) {
-                    p_m.value = Math.max(p_m.min, Math.min(p_m.max, m_new));
-                    syncControl('m', Number(p_m.value.toFixed(3)), null);
-                }
+            if (source !== 'number') {
+                const numInput = document.getElementById(`input-${id}`);
+                if (numInput) numInput.value = val;
             }
-
-            // Forward Sync for R1 and R2 when driving parameters change
-            if (['D1', 'F1', 'm', 'd', 'R1', 'R2'].includes(id)) {
-                const c_D1 = getParam('D1');
-                const c_F1 = getParam('F1');
-                const c_m = getParam('m');
-                const c_d = getParam('d');
-                
-                const c_f1 = c_D1 * c_F1;
-                const c_R1 = -2 * c_f1;
-                
-                const p1 = c_f1 - c_d;
-                const c_f2 = -(c_m * p1) / (c_m - 1);
-                const c_R2 = -2 * Math.abs(c_f2);
-
-                const p_R1 = parameters.find(p => p.id === 'R1');
-                if (p_R1 && id !== 'R1') {
-                    p_R1.value = c_R1;
-                    syncControl('R1', Number(c_R1.toFixed(1)), null);
-                }
-                const p_R2 = parameters.find(p => p.id === 'R2');
-                if (p_R2 && id !== 'R2') {
-                    p_R2.value = c_R2;
-                    syncControl('R2', Number(c_R2.toFixed(1)), null);
-                }
+            if (source !== 'slider') {
+                const rangeInput = document.getElementById(`slider-${id}`);
+                if (rangeInput) rangeInput.value = val;
             }
-
-            if (id === 'seeing_arcsec' && clampedVal > 0.05) {
-                const r0Param = parameters.find(p => p.id === 'r0_500');
-                if (r0Param) {
-                    const syncedR0 = Number(Math.max(r0Param.min, Math.min(r0Param.max, 10.107 / clampedVal)).toFixed(2));
-                    r0Param.value = syncedR0;
-                    syncControl('r0_500', syncedR0, null);
-                }
-            } else if (id === 'r0_500' && clampedVal > 0.1) {
-                const seeingParam = parameters.find(p => p.id === 'seeing_arcsec');
-                if (seeingParam) {
-                    const syncedSeeing = Number(Math.max(seeingParam.min, Math.min(seeingParam.max, 10.107 / clampedVal)).toFixed(2));
-                    seeingParam.value = syncedSeeing;
-                    syncControl('seeing_arcsec', syncedSeeing, null);
-                }
-            }
+            const labelVal = document.getElementById(`slider-val-${id}`);
+            if (labelVal) labelVal.textContent = val;
 
             recalculate();
         }
@@ -1347,16 +1282,49 @@
             const nasmythEnabled = document.getElementById('enable-nasmyth')?.checked ?? false;
 
             const f1 = D1 * F1;
-            const R1 = -2 * f1;
-            const EFL = f1 * m;
-            const Feff = F1 * m;
-
-            const d = Math.min(dInput, f1 - 5);
+            const R1 = getParam('R1');
+            const d = dInput;
             const p1 = f1 - d;
-            const b = (m * p1) - d;
             const L2 = m * p1;
             const f2 = -(m * p1) / (m - 1);
-            const R2 = -2 * Math.abs(f2);
+            const R2 = getParam('R2');
+
+            let k1 = getParam('k1');
+            let k2 = getParam('k2');
+
+            if (prescription === 'rc') {
+                k1 = -1.0 - (2.0 * p1 * Math.pow(1.0 / m, 2)) / (d * m);
+                k2 = -Math.pow((m + 1.0) / (m - 1.0), 2) - (2.0 * Math.pow(m, 2) * (m + 1.0)) / ((d / p1) * Math.pow(m - 1.0, 3));
+            } else if (prescription === 'dall_kirkham') {
+                k2 = 0.0;
+                k1 = -1.0 + Math.pow((m * m - 1.0) / Math.pow(m, 2), 2) * (p1 / f1);
+            } else if (prescription === 'classical') {
+                k1 = -1.0;
+                k2 = -Math.pow((m + 1) / (m - 1), 2);
+            }
+            
+            if (prescription !== 'custom') {
+                const pk1 = parameters.find(p => p.id === 'k1');
+                const pk2 = parameters.find(p => p.id === 'k2');
+                if (pk1) pk1.value = k1;
+                if (pk2) pk2.value = k2;
+            }
+
+            // AUTO-FOCUS: Exact zonal ray trace to find optimal Back Working Distance (b) and EFL
+            let b = p1 * (m + 1) - f1; // Default to paraxial
+            let EFL = f1 * m;
+            
+            const zStartFocus = -d * 2.0; 
+            const yZone = (D1 / 2) * 0.70710678; // 70.7% aperture zone (best focus for spherical aberration)
+            const hit1Focus = intersectAndReflectConic(zStartFocus, yZone, 1.0, 0.0, 0.0, R1, k1);
+            const hit2Focus = intersectAndReflectConic(hit1Focus.zHit, hit1Focus.yHit, hit1Focus.rdz, hit1Focus.rdy, -d, R2, k2);
+            
+            if (Math.abs(hit2Focus.rdy) > 1e-7) {
+                const tCross = -hit2Focus.yHit / hit2Focus.rdy;
+                b = hit2Focus.zHit + tCross * hit2Focus.rdz;
+                EFL = Math.abs(yZone / hit2Focus.rdy);
+            }
+            const Feff = EFL / D1;
 
             const fovRad = fovMrad * 1e-3;
             const D2_axial = D1 * (p1 / f1);
@@ -1380,17 +1348,6 @@
             const effectiveObsDia = nasmythEnabled ? Math.max(D2, D3_minor) : D2;
             const epsLinear = effectiveObsDia / D1;
             const epsArea = epsLinear * epsLinear;
-
-            let k1 = -1.0;
-            let k2 = -Math.pow((m + 1) / (m - 1), 2);
-
-            if (prescription === 'rc') {
-                k1 = -1.0 - (2.0 * p1 * Math.pow(1.0 / m, 2)) / (d * m);
-                k2 = -Math.pow((m + 1.0) / (m - 1.0), 2) - (2.0 * Math.pow(m, 2) * (m + 1.0)) / ((d / p1) * Math.pow(m - 1.0, 3));
-            } else if (prescription === 'dall_kirkham') {
-                k2 = 0.0;
-                k1 = -1.0 + Math.pow((m * m - 1.0) / Math.pow(m, 2), 2) * (p1 / f1);
-            }
 
             const classicalComaRad = (3 * fovRad) / (16 * Feff * Feff);
             let comaFactor = 1.0;
@@ -1556,10 +1513,25 @@
                 } else if (model.prescription === 'dall_kirkham') {
                     badge.textContent = 'Dall-Kirkham (Spherical M₂)';
                     badge.className = 'text-[10px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 hidden sm:inline';
+                } else if (model.prescription === 'custom') {
+                    badge.textContent = 'Custom Conic Constants';
+                    badge.className = 'text-[10px] font-mono text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20 hidden sm:inline';
                 } else {
                     badge.textContent = 'Classical (M₁ Parabola)';
                     badge.className = 'text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 hidden sm:inline';
                 }
+            }
+            
+            if (model.prescription !== 'custom') {
+                ['k1', 'k2'].forEach(id => {
+                    const val = model[id];
+                    const numInput = document.getElementById(`input-${id}`);
+                    if (numInput) numInput.value = Number(val.toFixed(4));
+                    const rangeInput = document.getElementById(`slider-${id}`);
+                    if (rangeInput) rangeInput.value = val;
+                    const labelVal = document.getElementById(`slider-val-${id}`);
+                    if (labelVal) labelVal.textContent = Number(val.toFixed(4));
+                });
             }
 
             setText('val-efl', model.EFL.toFixed(1));
@@ -2826,7 +2798,7 @@
             const presets = {
                 cubesat: { D1: 100, F1: 1.5, m: 5.0, d: 119, m3Z: -35, seeing_arcsec: 1.26, r0_500: 8.0, aoModes: 2, linkDist: 600, txPower: 30, jitterUr: 2.5, deltaT: 35, fov: 2.5, lambda: 1550, detSize: 15, type: 'rc' },
                 leo_ogs: { D1: 250, F1: 2.0, m: 4.0, d: 380, m3Z: -100, seeing_arcsec: 1.01, r0_500: 10.0, aoModes: 15, linkDist: 1000, txPower: 33, jitterUr: 1.5, deltaT: 20, fov: 2.0, lambda: 1550, detSize: 30, type: 'classical' },
-                deep_space: { D1: 500, F1: 2.2, m: 6.0, d: 917, m3Z: -180, seeing_arcsec: 0.67, r0_500: 15.0, aoModes: 65, linkDist: 36000, txPower: 40, jitterUr: 0.8, deltaT: 15, fov: 1.0, lambda: 1064, detSize: 50, type: 'rc' }
+                deep_space: { D1: 600, F1: 2.0, m: 6.0, d: 864, m3Z: -180, seeing_arcsec: 0.67, r0_500: 15.0, aoModes: 65, linkDist: 36000, txPower: 40, jitterUr: 0.8, deltaT: 15, fov: 1.0, lambda: 1064, detSize: 50, type: 'rc' }
             };
             const p = presets[type];
             if (!p) return;
