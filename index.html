@@ -927,33 +927,12 @@
         // ============================================================================
         function initUI() {
             loadState();
-            forceSyncRadii();
             renderParameterList();
             renderActiveSliders();
             setupCanvasInteractions();
             setupDesktopResizers();
             switchMobileTab('trace');
             recalculate();
-        }
-
-        function forceSyncRadii() {
-            const D1 = getParam('D1');
-            const F1 = getParam('F1');
-            const m = getParam('m');
-            const d = getParam('d');
-            
-            const f1 = D1 * F1;
-            const R1 = -2 * f1;
-            
-            const p1 = f1 - d;
-            const f2 = -(m * p1) / (m - 1);
-            const R2 = -2 * Math.abs(f2);
-            
-            const pR1 = parameters.find(p => p.id === 'R1');
-            if (pR1) pR1.value = R1;
-            
-            const pR2 = parameters.find(p => p.id === 'R2');
-            if (pR2) pR2.value = R2;
         }
 
         function setupDesktopResizers() {
@@ -2796,9 +2775,9 @@
 
         function loadPreset(type) {
             const presets = {
-                cubesat: { D1: 100, F1: 1.5, m: 5.0, d: 119, m3Z: -35, seeing_arcsec: 1.26, r0_500: 8.0, aoModes: 2, linkDist: 600, txPower: 30, jitterUr: 2.5, deltaT: 35, fov: 2.5, lambda: 1550, detSize: 15, type: 'rc' },
-                leo_ogs: { D1: 250, F1: 2.0, m: 4.0, d: 380, m3Z: -100, seeing_arcsec: 1.01, r0_500: 10.0, aoModes: 15, linkDist: 1000, txPower: 33, jitterUr: 1.5, deltaT: 20, fov: 2.0, lambda: 1550, detSize: 30, type: 'classical' },
-                deep_space: { D1: 600, F1: 2.0, m: 6.0, d: 864, m3Z: -180, seeing_arcsec: 0.67, r0_500: 15.0, aoModes: 65, linkDist: 36000, txPower: 40, jitterUr: 0.8, deltaT: 15, fov: 1.0, lambda: 1064, detSize: 50, type: 'rc' }
+                cubesat: { D1: 100, F1: 1.5, m: 5.0, d: 119, R1: -300.0, R2: -77.5, m3Z: -35, seeing_arcsec: 1.26, r0_500: 8.0, aoModes: 2, linkDist: 600, txPower: 30, jitterUr: 2.5, deltaT: 35, fov: 2.5, lambda: 1550, detSize: 15, type: 'rc' },
+                leo_ogs: { D1: 250, F1: 2.0, m: 4.0, d: 380, R1: -1000.0, R2: -320.0, m3Z: -100, seeing_arcsec: 1.01, r0_500: 10.0, aoModes: 15, linkDist: 1000, txPower: 33, jitterUr: 1.5, deltaT: 20, fov: 2.0, lambda: 1550, detSize: 30, type: 'classical' },
+                deep_space: { D1: 600, F1: 2.0, m: 6.0, d: 864, R1: -2400.0, R2: -806.4, m3Z: -180, seeing_arcsec: 0.67, r0_500: 15.0, aoModes: 65, linkDist: 36000, txPower: 40, jitterUr: 0.8, deltaT: 15, fov: 1.0, lambda: 1064, detSize: 50, type: 'rc' }
             };
             const p = presets[type];
             if (!p) return;
@@ -2813,7 +2792,6 @@
                 if (param) param.value = p[key];
             });
 
-            forceSyncRadii();
             renderParameterList();
             renderActiveSliders();
             resetView();
@@ -2883,7 +2861,6 @@
                     const state = data.appState || data; 
                     applyStateData(state);
                     
-                    forceSyncRadii();
                     renderParameterList();
                     renderActiveSliders();
                     recalculate();
