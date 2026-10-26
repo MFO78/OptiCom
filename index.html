@@ -212,14 +212,14 @@
                     <option value="" disabled>Presets...</option>
                     <option value="cubesat">CubeSat (100mm)</option>
                     <option value="leo_ogs" selected>LEO OGS (250mm)</option>
-                    <option value="deep_space">Deep-Space (500mm)</option>
+                    <option value="deep_space">Deep-Space (600mm)</option>
                 </select>
 
                 <div class="hidden 2xl:flex items-center gap-1.5">
                     <span class="text-xs text-slate-400 mr-1">Presets:</span>
                     <button onclick="loadPreset('cubesat')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition whitespace-nowrap">CubeSat (100mm)</button>
                     <button onclick="loadPreset('leo_ogs')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition whitespace-nowrap">LEO OGS (250mm)</button>
-                    <button onclick="loadPreset('deep_space')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition whitespace-nowrap">Deep-Space (500mm)</button>
+                    <button onclick="loadPreset('deep_space')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition whitespace-nowrap">Deep-Space (600mm)</button>
                     <div class="h-4 w-[1px] bg-slate-800 mx-1"></div>
                 </div>
 
@@ -227,7 +227,7 @@
                     <option value="" disabled>Presets...</option>
                     <option value="cubesat">CubeSat (100mm)</option>
                     <option value="leo_ogs" selected>LEO OGS (250mm)</option>
-                    <option value="deep_space">Deep-Space (500mm)</option>
+                    <option value="deep_space">Deep-Space (600mm)</option>
                 </select>
 
                 <button onclick="resetLayoutSizes()" title="Reset Panel Layout Proportions" class="hidden lg:flex px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 items-center gap-1 transition whitespace-nowrap">
@@ -1183,7 +1183,7 @@
             const val = parseFloat(rawVal);
             if (isNaN(val)) return;
 
-            if (id === 'k1' || id === 'k2') {
+            if (id === 'k1' || id === 'k2' || id === 'R1' || id === 'R2') {
                 const pSelect = document.getElementById('prescription-type');
                 if (pSelect && pSelect.value !== 'custom') {
                     pSelect.value = 'custom';
@@ -1261,34 +1261,41 @@
             const nasmythEnabled = document.getElementById('enable-nasmyth')?.checked ?? false;
 
             const f1 = D1 * F1;
-            const R1 = getParam('R1');
+            let R1 = getParam('R1');
             const d = dInput;
             const p1 = f1 - d;
             const L2 = m * p1;
             const f2 = -(m * p1) / (m - 1);
-            const R2 = getParam('R2');
+            let R2 = getParam('R2');
 
             let k1 = getParam('k1');
             let k2 = getParam('k2');
 
-            if (prescription === 'rc') {
-                k1 = -1.0 - (2.0 * p1 * Math.pow(1.0 / m, 2)) / (d * m);
-                k2 = -Math.pow((m + 1.0) / (m - 1.0), 2) - (2.0 * Math.pow(m, 2) * (m + 1.0)) / ((d / p1) * Math.pow(m - 1.0, 3));
-            } else if (prescription === 'dall_kirkham') {
-                k2 = 0.0;
-                k1 = -1.0 + Math.pow((m * m - 1.0) / Math.pow(m, 2), 2) * (p1 / f1);
-            } else if (prescription === 'classical') {
-                k1 = -1.0;
-                k2 = -Math.pow((m + 1) / (m - 1), 2);
+            if (prescription !== 'custom') {
+                R1 = -2 * f1;
+                R2 = 2 * f2;
+                
+                if (prescription === 'rc') {
+                    k1 = -1.0 - (2.0 * p1 * Math.pow(1.0 / m, 2)) / (d * m);
+                    k2 = -Math.pow((m + 1.0) / (m - 1.0), 2) - (2.0 * Math.pow(m, 2) * (m + 1.0)) / ((d / p1) * Math.pow(m - 1.0, 3));
+                } else if (prescription === 'dall_kirkham') {
+                    k2 = 0.0;
+                    k1 = -1.0 + Math.pow((m * m - 1.0) / Math.pow(m, 2), 2) * (p1 / f1);
+                } else if (prescription === 'classical') {
+                    k1 = -1.0;
+                    k2 = -Math.pow((m + 1) / (m - 1), 2);
+                }
+
+                const syncParam = (pid, pval) => {
+                    const p = parameters.find(x => x.id === pid);
+                    if (p) p.value = pval;
+                };
+                syncParam('R1', R1);
+                syncParam('R2', R2);
+                syncParam('k1', k1);
+                syncParam('k2', k2);
             }
             
-            if (prescription !== 'custom') {
-                const pk1 = parameters.find(p => p.id === 'k1');
-                const pk2 = parameters.find(p => p.id === 'k2');
-                if (pk1) pk1.value = k1;
-                if (pk2) pk2.value = k2;
-            }
-
             // AUTO-FOCUS: Exact zonal ray trace to find optimal Back Working Distance (b) and EFL
             let b = p1 * (m + 1) - f1; // Default to paraxial
             let EFL = f1 * m;
@@ -1502,7 +1509,7 @@
             }
             
             if (model.prescription !== 'custom') {
-                ['k1', 'k2'].forEach(id => {
+                ['k1', 'k2', 'R1', 'R2'].forEach(id => {
                     const val = model[id];
                     const numInput = document.getElementById(`input-${id}`);
                     if (numInput) numInput.value = Number(val.toFixed(4));
