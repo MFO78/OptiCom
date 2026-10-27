@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OptiCom — Cassegrain Telescope Designer</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
@@ -170,6 +171,33 @@
             background-color: #090d16;
             box-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
         }
+        
+        /* Light Theme Overrides */
+        html.light { background-color: #f8fafc; color: #0f172a; color-scheme: light; }
+        html.light body { background-color: #f8fafc; }
+        html.light .bg-slate-950 { background-color: #f1f5f9; }
+        html.light .bg-slate-900 { background-color: #ffffff; }
+        html.light .bg-slate-850 { background-color: #f8fafc; }
+        html.light .bg-slate-800 { background-color: #e2e8f0; color: #1e293b; }
+        html.light .border-slate-800 { border-color: #cbd5e1; }
+        html.light .border-slate-700 { border-color: #94a3b8; }
+        html.light .text-slate-100, html.light .text-white { color: #0f172a; }
+        html.light .text-slate-200 { color: #1e293b; }
+        html.light .text-slate-300 { color: #334155; }
+        html.light .text-slate-400 { color: #475569; }
+        html.light .text-slate-500 { color: #64748b; }
+        html.light input[type="number"], html.light select { background-color: #ffffff; color: #0f172a; border-color: #cbd5e1; }
+        html.light .canvas-grid {
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(to right, rgba(148, 163, 184, 0.25) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.25) 1px, transparent 1px);
+        }
+        html.light .resizer-v::after, html.light .resizer-h::after { background-color: #ffffff; color: #475569; border-color: #94a3b8; }
+        html.light .resizer-v::before, html.light .resizer-h::before { background-color: rgba(148, 163, 184, 0.45); }
+        html.light .bg-slate-950\/60, html.light .bg-slate-950\/70, html.light .bg-slate-950\/80, html.light .bg-slate-950\/90 { background-color: rgba(241, 245, 249, 0.9); }
+        html.light .bg-slate-900\/80, html.light .bg-slate-900\/85, html.light .bg-slate-900\/90, html.light .bg-slate-900\/95 { background-color: rgba(255, 255, 255, 0.9); }
+        html.light .bg-slate-850\/90, html.light .bg-slate-850\/80 { background-color: rgba(248, 250, 252, 0.9); }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans h-[100dvh] overflow-hidden flex flex-col selection:bg-sky-500 selection:text-white">
@@ -207,7 +235,7 @@
             </div>
 
             <!-- Preset Loader & Export Buttons -->
-            <div class="flex flex-wrap items-center justify-end gap-1.5 lg:gap-2 shrink-0 ml-auto">
+            <div id="action-buttons-group" class="flex flex-wrap items-center justify-end gap-1.5 lg:gap-2 shrink-0 ml-auto">
                 <select id="mobile-preset-select" onchange="loadPreset(this.value)" class="md:hidden bg-slate-800 text-xs text-slate-200 rounded-lg px-2 py-1.5 border border-slate-700 focus:outline-none focus:border-sky-500">
                     <option value="" disabled>Presets...</option>
                     <option value="cubesat">CubeSat (100mm)</option>
@@ -257,6 +285,24 @@
                     <span class="sm:hidden">Load</span>
                 </button>
                 <input type="file" id="import-json-input" class="hidden" accept=".json" onchange="importJSON(event)">
+
+                <div class="h-4 w-[1px] bg-slate-800 mx-0.5"></div>
+                
+                <label class="flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700/80 px-2.5 py-1.5 rounded-lg border border-slate-700 cursor-pointer text-xs text-slate-200 transition whitespace-nowrap" title="Include Turbulence, Adaptive Optics & FSOC Link Budget in PDF Report">
+                    <input type="checkbox" id="pdf-include-ao-link" class="rounded bg-slate-900 border-slate-600 text-rose-500 focus:ring-0 cursor-pointer">
+                    <span>+ AO &amp; Link</span>
+                </label>
+
+                <button onclick="exportToPDF()" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs font-medium bg-rose-600 hover:bg-rose-500 text-white shadow-sm shadow-rose-500/30 flex items-center gap-1.5 transition whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span class="hidden sm:inline">Export PDF</span>
+                    <span class="sm:hidden">PDF</span>
+                </button>
+                
+                <button onclick="toggleTheme()" class="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition" title="Toggle Light/Dark Theme">
+                    <svg id="theme-icon-dark" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    <svg id="theme-icon-light" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                </button>
             </div>
         </div>
     </header>
@@ -365,6 +411,10 @@
                         <label class="flex items-center space-x-2 bg-indigo-950/40 p-2 rounded-lg border border-indigo-500/40 cursor-pointer hover:border-indigo-400 col-span-2">
                             <input type="checkbox" id="enable-nasmyth" onchange="recalculate()" checked class="rounded bg-slate-900 border-indigo-500 text-indigo-500 focus:ring-0">
                             <span class="text-indigo-200 font-medium text-[11px]">Enable Flat M₃ (45° Nasmyth Port Fold)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-rose-950/30 p-2 rounded-lg border border-rose-500/30 cursor-pointer hover:border-rose-400 col-span-2">
+                            <input type="checkbox" id="pdf-include-ao-link-panel" onchange="document.getElementById('pdf-include-ao-link').checked = this.checked" class="rounded bg-slate-900 border-rose-500 text-rose-500 focus:ring-0">
+                            <span class="text-rose-200 font-medium text-[11px]">Include Turbulence, AO &amp; FSOC Link Budget in PDF Report</span>
                         </label>
                     </div>
                 </div>
@@ -1643,11 +1693,13 @@
             const H = canvas.height;
             ctx.clearRect(0, 0, W, H);
 
+            const isLight = window.isPdfExporting || document.documentElement.classList.contains('light');
+
             const padL = 24, padR = 8, padT = 8, padB = 14;
             const pW = W - padL - padR;
             const pH = H - padT - padB;
 
-            ctx.strokeStyle = 'rgba(51, 65, 85, 0.45)';
+            ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.6)' : 'rgba(51, 65, 85, 0.45)';
             ctx.lineWidth = 1;
             [0, 0.5, 1.0].forEach(val => {
                 const y = padT + pH * (1 - val);
@@ -1655,7 +1707,7 @@
                 ctx.moveTo(padL, y);
                 ctx.lineTo(W - padR, y);
                 ctx.stroke();
-                ctx.fillStyle = '#64748b';
+                ctx.fillStyle = isLight ? '#475569' : '#64748b';
                 ctx.font = '8px "JetBrains Mono", monospace';
                 ctx.textAlign = 'right';
                 ctx.fillText(val.toFixed(1), padL - 3, y + 3);
@@ -1665,7 +1717,7 @@
             const obsFactor = Math.max(0.05, 1.0 - model.epsArea);
 
             ctx.save();
-            ctx.strokeStyle = '#38bdf8';
+            ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
             ctx.lineWidth = 1.75;
             ctx.beginPath();
             for (let i = 0; i <= 60; i++) {
@@ -1678,20 +1730,15 @@
             }
             ctx.stroke();
 
+            // Active Operating Point Marker
             const activeN = Math.min(maxModes, model.aoModes);
             const activeX = padL + (activeN / maxModes) * pW;
             const activeY = padT + pH * (1 - model.netStrehl);
-            ctx.fillStyle = '#34d399';
+            ctx.fillStyle = isLight ? '#059669' : '#34d399';
             ctx.beginPath();
             ctx.arc(activeX, activeY, 3.5, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
-        }
-
-        let saveTimeout;
-        function debouncedSaveState() {
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(saveState, 500);
         }
 
         function recalculate() {
@@ -1701,7 +1748,6 @@
             drawPupilAndPSF(model);
             drawSpotDiagram(model);
             drawAOCurve(model);
-            debouncedSaveState();
         }
 
         // ============================================================================
@@ -1784,25 +1830,34 @@
             return { xHit, yHit, zHit, rdx, rdy, rdz };
         }
 
-        function drawRayTrace(model) {
-            const canvas = document.getElementById('rayCanvas');
-            const wrapper = document.getElementById('canvas-wrapper');
-            if (!canvas || !wrapper) return;
+        function drawRayTrace(model, targetCanvas = null, targetW = 0, targetH = 0) {
+            let canvas = targetCanvas || document.getElementById('rayCanvas');
+            let wrapper = targetCanvas ? null : document.getElementById('canvas-wrapper');
+            if (!canvas) return;
 
-            const rect = wrapper.getBoundingClientRect();
-            if (rect.width === 0 || rect.height === 0) return;
+            let W, H, dpr;
+            if (targetCanvas) {
+                W = targetW;
+                H = targetH;
+                dpr = 1;
+            } else {
+                if (!wrapper) return;
+                const rect = wrapper.getBoundingClientRect();
+                if (rect.width === 0 || rect.height === 0) return;
+                W = rect.width;
+                H = rect.height;
+                dpr = window.devicePixelRatio || 1;
+            }
 
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
+            canvas.width = W * dpr;
+            canvas.height = H * dpr;
 
             const ctx = canvas.getContext('2d');
             ctx.save();
             ctx.scale(dpr, dpr);
-
-            const W = rect.width;
-            const H = rect.height;
             ctx.clearRect(0, 0, W, H);
+
+            const isLight = window.isPdfExporting || document.documentElement.classList.contains('light');
 
             const showOffAxis = document.getElementById('show-offaxis')?.checked ?? true;
             const showDense = document.getElementById('show-caustics')?.checked ?? true;
@@ -1819,21 +1874,28 @@
             const scaleZ = (W * 0.78) / totalZ;
             const scaleY = (H * 0.75) / totalY;
             const baseScale = Math.min(scaleZ, scaleY);
-            const scale = baseScale * viewState.zoom;
+            
+            const currentZoom = targetCanvas ? 1.0 : viewState.zoom;
+            const currentPanX = targetCanvas ? 0 : viewState.panX;
+            const currentPanY = targetCanvas ? 0 : viewState.panY;
 
-            const originX = W * 0.52 - ((zMax + zMin) / 2) * scale + viewState.panX;
+            const scale = baseScale * currentZoom;
+            const originX = W * 0.52 - ((zMax + zMin) / 2) * scale + currentPanX;
             const yCenterOffset = model.nasmythEnabled ? Math.min(0, (model.nasmythFocusY + model.D1 * 0.45) * 0.35) : 0;
-            const originY = H * 0.5 + yCenterOffset * scale + viewState.panY;
+            const originY = H * 0.5 + yCenterOffset * scale + currentPanY;
 
-            viewState.lastScale = scale;
-            viewState.lastOriginX = originX;
-            viewState.lastOriginY = originY;
+            if (!targetCanvas) {
+                viewState.lastScale = scale;
+                viewState.lastOriginX = originX;
+                viewState.lastOriginY = originY;
+            }
 
             const toScreenX = z => originX + z * scale;
             const toScreenY = y => originY - y * scale;
 
+            // Optical Axis
             ctx.save();
-            ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+            ctx.strokeStyle = isLight ? 'rgba(15, 23, 42, 0.2)' : 'rgba(148, 163, 184, 0.25)';
             ctx.lineWidth = 1;
             ctx.setLineDash([6, 4]);
             ctx.beginPath();
@@ -1842,13 +1904,14 @@
             ctx.stroke();
             ctx.restore();
 
+            // Outer Telescope Tube Outline
             const tubeTopY = toScreenY(model.D1 / 2 + 8);
             const tubeBotY = toScreenY(-model.D1 / 2 - 8);
             const tubeLeftX = toScreenX(-model.d * 1.08);
             const tubeRightX = toScreenX(0);
 
             ctx.save();
-            ctx.strokeStyle = 'rgba(71, 85, 105, 0.5)';
+            ctx.strokeStyle = isLight ? 'rgba(15, 23, 42, 0.3)' : 'rgba(71, 85, 105, 0.5)';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(tubeLeftX, tubeTopY);
@@ -1885,10 +1948,11 @@
                 return { zHit, yHit, zFoldFocus, yFoldFocus };
             };
 
+            // Internal Stray-Light Baffles
             if (showBaffles) {
                 ctx.save();
-                ctx.strokeStyle = 'rgba(148, 163, 184, 0.65)';
-                ctx.fillStyle = 'rgba(30, 41, 59, 0.55)';
+                ctx.strokeStyle = isLight ? '#000000' : 'rgba(148, 163, 184, 0.65)';
+                ctx.fillStyle = isLight ? 'rgba(15, 23, 42, 0.8)' : 'rgba(30, 41, 59, 0.55)';
                 ctx.lineWidth = 1.5;
 
                 const b1Len = model.d * 0.52;
@@ -1912,6 +1976,7 @@
                 ctx.restore();
             }
 
+            // Exact Conic Ray Tracing: On-Axis Rays
             const numRaysPerHalf = showDense ? 6 : 2;
             const rayFractions = [];
             for (let i = 1; i <= numRaysPerHalf; i++) {
@@ -1926,7 +1991,7 @@
                 if (absY0 <= model.D2 / 2) {
                     const zStop = -model.d + getConicSag(y0, model.R2, model.k2, exactConic) - 4;
                     ctx.save();
-                    ctx.strokeStyle = 'rgba(244, 63, 94, 0.55)';
+                    ctx.strokeStyle = isLight ? 'rgba(225, 29, 72, 0.5)' : 'rgba(244, 63, 94, 0.55)';
                     ctx.lineWidth = 1.1;
                     ctx.setLineDash([3, 3]);
                     ctx.beginPath();
@@ -1944,8 +2009,13 @@
                 const yFocus = hit2.yHit + tFocus * hit2.rdy;
 
                 ctx.save();
-                ctx.strokeStyle = Math.abs(frac) > 0.95 ? 'rgba(56, 189, 248, 0.92)' : 'rgba(56, 189, 248, 0.42)';
-                ctx.lineWidth = Math.abs(frac) > 0.95 ? 1.5 : 1.0;
+                if (Math.abs(frac) > 0.95) {
+                    ctx.strokeStyle = isLight ? 'rgba(37, 99, 235, 0.8)' : 'rgba(56, 189, 248, 0.92)';
+                    ctx.lineWidth = 1.5;
+                } else {
+                    ctx.strokeStyle = isLight ? 'rgba(37, 99, 235, 0.3)' : 'rgba(56, 189, 248, 0.42)';
+                    ctx.lineWidth = 1.0;
+                }
                 ctx.beginPath();
                 ctx.moveTo(toScreenX(zStart), toScreenY(y0));
                 ctx.lineTo(toScreenX(hit1.zHit), toScreenY(hit1.yHit));
@@ -1966,6 +2036,7 @@
                 ctx.restore();
             });
 
+            // Exact Conic Ray Tracing: Off-Axis Field Rays (+FOV angle)
             if (showOffAxis && model.fovMrad > 0) {
                 const dz0 = Math.cos(model.fovRad);
                 const dy0 = Math.sin(model.fovRad);
@@ -1984,7 +2055,7 @@
                     const yFocus = hit2.yHit + tFocus * hit2.rdy;
 
                     ctx.save();
-                    ctx.strokeStyle = 'rgba(251, 191, 36, 0.82)';
+                    ctx.strokeStyle = isLight ? 'rgba(217, 119, 6, 0.7)' : 'rgba(251, 191, 36, 0.82)';
                     ctx.lineWidth = 1.25;
                     ctx.setLineDash([5, 3]);
                     ctx.beginPath();
@@ -2008,11 +2079,12 @@
                 });
             }
 
+            // M1 Mirror
             const m1Thickness = Math.max(8, model.D1 * 0.06);
             [1, -1].forEach(dir => {
                 ctx.save();
-                ctx.fillStyle = 'rgba(30, 58, 138, 0.45)';
-                ctx.strokeStyle = '#38bdf8';
+                ctx.fillStyle = isLight ? 'rgba(186, 230, 253, 0.5)' : 'rgba(30, 58, 138, 0.45)';
+                ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 const steps = 30;
@@ -2034,10 +2106,11 @@
                 ctx.restore();
             });
 
+            // M2 Mirror
             const m2Thickness = Math.max(5, model.D2 * 0.08);
             ctx.save();
-            ctx.fillStyle = 'rgba(51, 65, 85, 0.75)';
-            ctx.strokeStyle = '#7dd3fc';
+            ctx.fillStyle = isLight ? 'rgba(203, 213, 225, 0.8)' : 'rgba(51, 65, 85, 0.75)';
+            ctx.strokeStyle = isLight ? '#334155' : '#7dd3fc';
             ctx.lineWidth = 2;
             ctx.beginPath();
             const m2Steps = 30;
@@ -2056,6 +2129,7 @@
             ctx.stroke();
             ctx.restore();
 
+            // M3 Flat Fold Mirror
             if (model.nasmythEnabled) {
                 const halfProj = Math.max(model.D3_minor / 2, Math.abs(model.m3Y) + model.D3_minor * 0.35);
                 const z3A = model.m3Z - halfProj;
@@ -2065,7 +2139,7 @@
                 const m3Thick = Math.max(3.5, model.D3_minor * 0.08);
 
                 ctx.save();
-                ctx.strokeStyle = 'rgba(148, 163, 184, 0.22)';
+                ctx.strokeStyle = isLight ? 'rgba(15, 23, 42, 0.15)' : 'rgba(148, 163, 184, 0.22)';
                 ctx.lineWidth = 1;
                 ctx.setLineDash([3, 3]);
                 ctx.beginPath();
@@ -2075,7 +2149,7 @@
                 ctx.restore();
 
                 ctx.save();
-                ctx.strokeStyle = 'rgba(129, 140, 248, 0.35)';
+                ctx.strokeStyle = isLight ? 'rgba(79, 70, 229, 0.5)' : 'rgba(129, 140, 248, 0.35)';
                 ctx.lineWidth = 1;
                 ctx.setLineDash([4, 4]);
                 ctx.beginPath();
@@ -2085,8 +2159,8 @@
                 ctx.restore();
 
                 ctx.save();
-                ctx.fillStyle = 'rgba(79, 70, 229, 0.45)';
-                ctx.strokeStyle = '#a5b4fc';
+                ctx.fillStyle = isLight ? 'rgba(165, 180, 252, 0.5)' : 'rgba(79, 70, 229, 0.45)';
+                ctx.strokeStyle = isLight ? '#4f46e5' : '#a5b4fc';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(toScreenX(z3A), toScreenY(y3A));
@@ -2097,8 +2171,8 @@
                 ctx.fill();
                 ctx.stroke();
 
-                ctx.fillStyle = viewState.draggingM3 ? '#fbbf24' : '#818cf8';
-                ctx.strokeStyle = '#0f172a';
+                ctx.fillStyle = viewState.draggingM3 ? '#fbbf24' : (isLight ? '#6366f1' : '#818cf8');
+                ctx.strokeStyle = isLight ? '#ffffff' : '#0f172a';
                 ctx.lineWidth = 1.5;
                 ctx.beginPath();
                 ctx.arc(toScreenX(model.m3Z), toScreenY(model.m3Y), 5.5, 0, Math.PI * 2);
@@ -2107,17 +2181,18 @@
 
                 if (showDims) {
                     ctx.font = '600 10px "JetBrains Mono", monospace';
-                    ctx.fillStyle = '#a5b4fc';
+                    ctx.fillStyle = isLight ? '#4f46e5' : '#a5b4fc';
                     ctx.textAlign = 'left';
                     ctx.fillText(`M₃ (${model.D3_minor.toFixed(1)}×${model.D3_major.toFixed(1)}mm)`, toScreenX(z3A) + 6, toScreenY(y3A) - 6);
                 }
                 ctx.restore();
             }
 
+            // Dimension Callouts
             if (showDims) {
                 ctx.save();
-                ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
-                ctx.fillStyle = '#94a3b8';
+                ctx.strokeStyle = isLight ? 'rgba(71, 85, 105, 0.6)' : 'rgba(148, 163, 184, 0.45)';
+                ctx.fillStyle = isLight ? '#334155' : '#94a3b8';
                 ctx.font = '500 10px "JetBrains Mono", monospace';
                 ctx.lineWidth = 1;
 
@@ -2156,8 +2231,8 @@
                     const xNas = toScreenX(model.nasmythFocusZ);
 
                     const z3DimY = toScreenY(model.D1 / 2 + 42);
-                    ctx.strokeStyle = 'rgba(129, 140, 248, 0.65)';
-                    ctx.fillStyle = '#a5b4fc';
+                    ctx.strokeStyle = isLight ? 'rgba(79, 70, 229, 0.5)' : 'rgba(129, 140, 248, 0.65)';
+                    ctx.fillStyle = isLight ? '#4f46e5' : '#a5b4fc';
                     ctx.beginPath();
                     ctx.moveTo(xM3, z3DimY);
                     ctx.lineTo(xM1, z3DimY);
@@ -2168,7 +2243,7 @@
                     ctx.stroke();
 
                     ctx.save();
-                    ctx.strokeStyle = 'rgba(129, 140, 248, 0.22)';
+                    ctx.strokeStyle = isLight ? 'rgba(15, 23, 42, 0.15)' : 'rgba(129, 140, 248, 0.22)';
                     ctx.setLineDash([2, 3]);
                     ctx.beginPath();
                     ctx.moveTo(xM3, yM3);
@@ -2182,8 +2257,8 @@
                     const fpHalfH = Math.max(model.D1 * 0.14, model.focalSpotDia * 1.5);
                     const yDimX = xNas - Math.max(24, fpHalfH * scale + 14);
 
-                    ctx.strokeStyle = 'rgba(52, 211, 153, 0.7)';
-                    ctx.fillStyle = '#6ee7b7';
+                    ctx.strokeStyle = isLight ? 'rgba(5, 150, 105, 0.7)' : 'rgba(52, 211, 153, 0.7)';
+                    ctx.fillStyle = isLight ? '#059669' : '#6ee7b7';
                     ctx.beginPath();
                     ctx.moveTo(yDimX, yAxis);
                     ctx.lineTo(yDimX, yNas);
@@ -2194,7 +2269,7 @@
                     ctx.stroke();
 
                     ctx.save();
-                    ctx.strokeStyle = 'rgba(52, 211, 153, 0.25)';
+                    ctx.strokeStyle = isLight ? 'rgba(5, 150, 105, 0.25)' : 'rgba(52, 211, 153, 0.25)';
                     ctx.setLineDash([2, 3]);
                     ctx.beginPath();
                     ctx.moveTo(xNas, yAxis);
@@ -2208,55 +2283,56 @@
                     ctx.fillText(`h_N = ${model.nasmythThrow.toFixed(1)} mm`, yDimX - 6, (yAxis + yNas) / 2 + 3);
                 }
 
-                ctx.fillStyle = '#38bdf8';
+                ctx.fillStyle = isLight ? '#0284c7' : '#38bdf8';
                 ctx.textAlign = 'left';
                 ctx.fillText(`M₁ (Ø${model.D1}mm)`, xM1 + 8, toScreenY(model.D1 / 2) + 12);
-                ctx.fillStyle = '#7dd3fc';
+                ctx.fillStyle = isLight ? '#334155' : '#7dd3fc';
                 ctx.textAlign = 'right';
                 ctx.fillText(`M₂ (Ø${model.D2.toFixed(1)}mm)`, xM2 - 8, toScreenY(model.D2 / 2) + 4);
                 ctx.restore();
             }
 
+            // Focal Plane
             const fpHalfH = Math.max(model.D1 * 0.14, model.focalSpotDia * 1.5);
             if (model.nasmythEnabled) {
                 const nasY = model.nasmythFocusY;
                 const nasX = model.nasmythFocusZ;
 
                 ctx.save();
-                ctx.strokeStyle = '#34d399';
+                ctx.strokeStyle = isLight ? '#059669' : '#34d399';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(toScreenX(nasX - fpHalfH), toScreenY(nasY));
                 ctx.lineTo(toScreenX(nasX + fpHalfH), toScreenY(nasY));
                 ctx.stroke();
 
-                ctx.fillStyle = '#34d399';
+                ctx.fillStyle = isLight ? '#059669' : '#34d399';
                 ctx.beginPath();
                 ctx.arc(toScreenX(nasX), toScreenY(nasY), 3.5, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.font = '600 10px "JetBrains Mono", monospace';
-                ctx.fillStyle = '#6ee7b7';
+                ctx.fillStyle = isLight ? '#059669' : '#6ee7b7';
                 ctx.textAlign = 'left';
                 ctx.fillText('Nasmyth Port Focus', toScreenX(nasX + fpHalfH) + 6, toScreenY(nasY) + 3);
                 ctx.restore();
             } else {
                 const fpX = toScreenX(model.b);
                 ctx.save();
-                ctx.strokeStyle = '#34d399';
+                ctx.strokeStyle = isLight ? '#059669' : '#34d399';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(fpX, toScreenY(fpHalfH));
                 ctx.lineTo(fpX, toScreenY(-fpHalfH));
                 ctx.stroke();
 
-                ctx.fillStyle = '#34d399';
+                ctx.fillStyle = isLight ? '#059669' : '#34d399';
                 ctx.beginPath();
                 ctx.arc(fpX, originY, 3.5, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.font = '600 10px "JetBrains Mono", monospace';
-                ctx.fillStyle = '#6ee7b7';
+                ctx.fillStyle = isLight ? '#059669' : '#6ee7b7';
                 ctx.textAlign = 'left';
                 ctx.fillText('Rx Focal Plane', fpX + 6, originY - 6);
                 ctx.restore();
@@ -2269,6 +2345,8 @@
         // 6. PUPIL & PSF VISUALIZER
         // ============================================================================
         function drawPupilAndPSF(model) {
+            const isLight = window.isPdfExporting || document.documentElement.classList.contains('light');
+
             const pCanvas = document.getElementById('pupilCanvas');
             if (pCanvas) {
                 const ctx = pCanvas.getContext('2d');
@@ -2281,18 +2359,18 @@
 
                 ctx.clearRect(0, 0, W, H);
                 const grad = ctx.createRadialGradient(cx, cy, rInner * 0.5, cx, cy, rOuter);
-                grad.addColorStop(0, 'rgba(56, 189, 248, 0.25)');
-                grad.addColorStop(1, 'rgba(37, 99, 235, 0.55)');
+                grad.addColorStop(0, isLight ? 'rgba(186, 230, 253, 0.5)' : 'rgba(56, 189, 248, 0.25)');
+                grad.addColorStop(1, isLight ? 'rgba(56, 189, 248, 0.8)' : 'rgba(37, 99, 235, 0.55)');
 
                 ctx.beginPath();
                 ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
                 ctx.fillStyle = grad;
                 ctx.fill();
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = '#38bdf8';
+                ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
                 ctx.stroke();
 
-                ctx.strokeStyle = 'rgba(15, 23, 42, 0.85)';
+                ctx.strokeStyle = isLight ? '#0f172a' : 'rgba(15, 23, 42, 0.85)';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(cx - rOuter, cy);
@@ -2303,10 +2381,10 @@
 
                 ctx.beginPath();
                 ctx.arc(cx, cy, rInner, 0, Math.PI * 2);
-                ctx.fillStyle = '#090d16';
+                ctx.fillStyle = isLight ? '#f8fafc' : '#090d16'; // Match container background
                 ctx.fill();
                 ctx.lineWidth = 1.5;
-                ctx.strokeStyle = '#f59e0b';
+                ctx.strokeStyle = isLight ? '#d97706' : '#f59e0b';
                 ctx.stroke();
 
                 const netArea = Math.max(0, (Math.PI * Math.pow(model.D1 / 2, 2)) * (1 - model.epsArea));
@@ -2334,21 +2412,21 @@
                     ctx.save();
                     ctx.beginPath();
                     ctx.ellipse(cx + rComa * 0.45, cy, rAiry + rComa * 0.55, rAiry * 0.85, 0, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(251, 191, 36, 0.28)';
+                    ctx.fillStyle = isLight ? 'rgba(217, 119, 6, 0.3)' : 'rgba(251, 191, 36, 0.28)';
                     ctx.fill();
                     ctx.restore();
                 }
 
                 ctx.beginPath();
                 ctx.arc(cx, cy, rAiry * 1.35, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(56, 189, 248, ${Math.min(0.85, 0.25 + model.epsLinear * 0.7)})`;
+                ctx.strokeStyle = isLight ? `rgba(2, 132, 199, ${Math.min(0.85, 0.35 + model.epsLinear * 0.7)})` : `rgba(56, 189, 248, ${Math.min(0.85, 0.25 + model.epsLinear * 0.7)})`;
                 ctx.lineWidth = Math.max(2, rAiry * 0.22);
                 ctx.stroke();
 
                 const psfGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(2, rAiry));
-                psfGrad.addColorStop(0, 'rgba(224, 242, 254, 0.95)');
-                psfGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.65)');
-                psfGrad.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
+                psfGrad.addColorStop(0, isLight ? 'rgba(14, 165, 233, 0.9)' : 'rgba(224, 242, 254, 0.95)');
+                psfGrad.addColorStop(0.5, isLight ? 'rgba(14, 165, 233, 0.5)' : 'rgba(56, 189, 248, 0.65)');
+                psfGrad.addColorStop(1, isLight ? 'rgba(14, 165, 233, 0.0)' : 'rgba(56, 189, 248, 0.0)');
 
                 ctx.beginPath();
                 ctx.arc(cx, cy, Math.max(2, rAiry), 0, Math.PI * 2);
@@ -2358,7 +2436,7 @@
                 ctx.save();
                 ctx.beginPath();
                 ctx.arc(cx, cy, Math.max(2, rDet), 0, Math.PI * 2);
-                ctx.strokeStyle = '#10b981';
+                ctx.strokeStyle = isLight ? '#059669' : '#10b981';
                 ctx.lineWidth = 1.75;
                 ctx.setLineDash([4, 3]);
                 ctx.stroke();
@@ -2380,7 +2458,7 @@
                     return (Math.sin(x) / (x * x) - Math.cos(x) / x) * 0.72 + (Math.sin(x * 0.88) / (x * 1.8));
                 };
 
-                ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.6)' : 'rgba(51, 65, 85, 0.4)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(0, H - 6);
@@ -2388,7 +2466,7 @@
                 ctx.stroke();
 
                 ctx.save();
-                ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.8)' : 'rgba(148, 163, 184, 0.35)';
                 ctx.lineWidth = 1.2;
                 ctx.setLineDash([3, 3]);
                 ctx.beginPath();
@@ -2403,7 +2481,7 @@
                 ctx.restore();
 
                 ctx.save();
-                ctx.strokeStyle = '#38bdf8';
+                ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
                 ctx.lineWidth = 1.75;
                 ctx.beginPath();
                 for (let px = 0; px < W; px++) {
@@ -2436,7 +2514,7 @@
                 const mtfLbl = document.getElementById('mtf-cutoff-label');
                 if (mtfLbl) mtfLbl.textContent = `f_c: ${fcLpMm.toFixed(0)} lp/mm`;
 
-                ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.6)' : 'rgba(51, 65, 85, 0.4)';
                 ctx.lineWidth = 1;
                 [0, 0.5, 1.0].forEach(v => {
                     const y = padT + pH * (1 - v);
@@ -2444,14 +2522,14 @@
                     ctx.moveTo(padL, y);
                     ctx.lineTo(W - padR, y);
                     ctx.stroke();
-                    ctx.fillStyle = '#64748b';
+                    ctx.fillStyle = isLight ? '#475569' : '#64748b';
                     ctx.font = '8px "JetBrains Mono", monospace';
                     ctx.textAlign = 'right';
                     ctx.fillText(v.toFixed(1), padL - 3, y + 3);
                 });
 
                 ctx.save();
-                ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.8)' : 'rgba(148, 163, 184, 0.35)';
                 ctx.lineWidth = 1.2;
                 ctx.setLineDash([3, 2]);
                 ctx.beginPath();
@@ -2468,7 +2546,7 @@
 
                 const eps = Math.min(0.85, model.epsLinear);
                 ctx.save();
-                ctx.strokeStyle = '#38bdf8';
+                ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
                 ctx.lineWidth = 1.75;
                 ctx.beginPath();
                 for (let i = 0; i <= 50; i++) {
@@ -2497,7 +2575,7 @@
                 const pW = W - padL - padR;
                 const pH = H - padT - padB;
 
-                ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.6)' : 'rgba(51, 65, 85, 0.4)';
                 ctx.lineWidth = 1;
                 [0, 0.5, 1.0].forEach(v => {
                     const y = padT + pH * (1 - v);
@@ -2505,7 +2583,7 @@
                     ctx.moveTo(padL, y);
                     ctx.lineTo(W - padR, y);
                     ctx.stroke();
-                    ctx.fillStyle = '#64748b';
+                    ctx.fillStyle = isLight ? '#475569' : '#64748b';
                     ctx.font = '8px "JetBrains Mono", monospace';
                     ctx.textAlign = 'right';
                     ctx.fillText(`${Math.round(v * 100)}%`, padL - 2, y + 3);
@@ -2516,7 +2594,7 @@
                 const coreEnergy = Math.max(0.1, (1 - eps * eps) * model.netStrehl);
 
                 ctx.save();
-                ctx.strokeStyle = '#38bdf8';
+                ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
                 ctx.lineWidth = 1.75;
                 ctx.beginPath();
                 for (let i = 0; i <= 50; i++) {
@@ -2539,7 +2617,7 @@
                 if (eeLbl) eeLbl.textContent = `EE(Det): ${(eeAtDet * 100).toFixed(0)}%`;
 
                 ctx.save();
-                ctx.strokeStyle = '#10b981';
+                ctx.strokeStyle = isLight ? '#059669' : '#10b981';
                 ctx.lineWidth = 1.25;
                 ctx.setLineDash([2, 2]);
                 ctx.beginPath();
@@ -2547,7 +2625,7 @@
                 ctx.lineTo(detX, H - padB);
                 ctx.stroke();
 
-                ctx.fillStyle = '#10b981';
+                ctx.fillStyle = isLight ? '#059669' : '#10b981';
                 ctx.beginPath();
                 ctx.arc(detX, padT + pH * (1 - eeAtDet), 3, 0, Math.PI * 2);
                 ctx.fill();
@@ -2555,7 +2633,6 @@
             }
         }
 
-        // Geometric Spot Diagram Visualizer - Correctly scoped externally
         function drawSpotDiagram(model) {
             const canvas = document.getElementById('spotCanvas');
             if (!canvas) return;
@@ -2563,6 +2640,8 @@
             const W = canvas.width;
             const H = canvas.height;
             ctx.clearRect(0, 0, W, H);
+
+            const isLight = window.isPdfExporting || document.documentElement.classList.contains('light');
 
             const pad = 8;
             const cx = W / 2;
@@ -2621,7 +2700,7 @@
             const scaleExtentUm = Math.max(15, maxRMS * 3.5, model.comaSpotUm * 1.5, model.airyDiaUm * 1.5); 
             const pxPerUm = Math.min((W / 2 - pad) / scaleExtentUm, (H / 2 - pad) / scaleExtentUm);
 
-            ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+            ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.6)' : 'rgba(51, 65, 85, 0.4)';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(cx, 0); ctx.lineTo(cx, H);
@@ -2630,7 +2709,7 @@
 
             ctx.beginPath();
             ctx.arc(cx, cy, (model.airyDiaUm / 2) * pxPerUm, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+            ctx.strokeStyle = isLight ? 'rgba(100, 116, 139, 0.7)' : 'rgba(100, 116, 139, 0.45)';
             ctx.lineWidth = 1;
             ctx.stroke();
 
@@ -2643,11 +2722,11 @@
                 });
             };
 
-            drawGroup(onAxis, 'rgba(56, 189, 248, 0.75)');
+            drawGroup(onAxis, isLight ? 'rgba(2, 132, 199, 0.8)' : 'rgba(56, 189, 248, 0.75)');
             
             let rmsLabel = `RMS(0): ${onAxis.rms.toFixed(1)}µm`;
             if (model.fovRad > 0 && offAxis.spots.length > 0) {
-                drawGroup(offAxis, 'rgba(251, 191, 36, 0.75)');
+                drawGroup(offAxis, isLight ? 'rgba(217, 119, 6, 0.8)' : 'rgba(251, 191, 36, 0.75)');
                 rmsLabel = `RMS(θ): ${offAxis.rms.toFixed(1)}µm`;
             }
 
@@ -2814,7 +2893,8 @@
                 showOffaxis: document.getElementById('show-offaxis')?.checked,
                 showCaustics: document.getElementById('show-caustics')?.checked,
                 showBaffles: document.getElementById('show-baffles')?.checked,
-                showDims: document.getElementById('show-dimensions')?.checked
+                showDims: document.getElementById('show-dimensions')?.checked,
+                isLightMode: document.documentElement.classList.contains('light')
             };
             localStorage.setItem('opticom_state', JSON.stringify(state));
         }
@@ -2856,6 +2936,15 @@
             if (state.showCaustics !== undefined) setChk('show-caustics', state.showCaustics);
             if (state.showBaffles !== undefined) setChk('show-baffles', state.showBaffles);
             if (state.showDims !== undefined) setChk('show-dimensions', state.showDims);
+            
+            if (state.isLightMode) {
+                document.documentElement.classList.add('light');
+                document.documentElement.classList.remove('dark');
+                const iconLight = document.getElementById('theme-icon-light');
+                const iconDark = document.getElementById('theme-icon-dark');
+                if(iconLight) iconLight.classList.add('hidden');
+                if(iconDark) iconDark.classList.remove('hidden');
+            }
         }
 
         function importJSON(event) {
@@ -2932,7 +3021,7 @@ ${m3SurfaceBlock}
                     primaryAperture_mm: model.D1,
                     primaryFNumber: model.F1,
                     secondaryMagnification: model.m,
-                    m1_m2_Separation_d_mm: model.d,
+                    backWorkingDistance_mm: model.b,
                     nasmythEnabled: model.nasmythEnabled,
                     nasmythM3Position_z3_mm: model.m3Z,
                     friedParameter_r0_500nm_cm: model.r0_500,
@@ -2943,7 +3032,7 @@ ${m3SurfaceBlock}
                     systemFNumber: Number(model.Feff.toFixed(2)),
                     primaryRoC_mm: Number(model.R1.toFixed(2)),
                     secondaryRoC_mm: Number(model.R2.toFixed(2)),
-                    backWorkingDistance_bwd_mm: Number(model.b.toFixed(2)),
+                    mirrorSeparation_mm: Number(model.d.toFixed(2)),
                     conicConstants: { k1: Number(model.k1.toFixed(4)), k2: Number(model.k2.toFixed(4)) },
                     nasmythM3ClearAperture_mm: {
                         minorAxis: Number(model.D3_minor.toFixed(2)),
@@ -2952,17 +3041,6 @@ ${m3SurfaceBlock}
                         tubeClearanceMargin_mm: Number(model.nasmythTubeClearance.toFixed(2))
                     },
                     atmosphericStrehlRatio: Number(model.netStrehl.toFixed(3))
-                },
-                appState: {
-                    params: parameters.map(p => ({ id: p.id, value: p.value, min: p.min, max: p.max, sliderActive: p.sliderActive })),
-                    prescription: document.getElementById('prescription-type').value,
-                    strutMaterial: document.getElementById('strut-material')?.value,
-                    modScheme: document.getElementById('mod-scheme')?.value,
-                    nasmythEnabled: document.getElementById('enable-nasmyth')?.checked,
-                    showOffaxis: document.getElementById('show-offaxis')?.checked,
-                    showCaustics: document.getElementById('show-caustics')?.checked,
-                    showBaffles: document.getElementById('show-baffles')?.checked,
-                    showDims: document.getElementById('show-dimensions')?.checked
                 }
             };
 
@@ -2973,6 +3051,310 @@ ${m3SurfaceBlock}
             document.execCommand('copy');
             document.body.removeChild(tempArea);
             showToast('Specification JSON copied to clipboard!');
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isLight = html.classList.toggle('light');
+            html.classList.toggle('dark', !isLight);
+            
+            const iconLight = document.getElementById('theme-icon-light');
+            const iconDark = document.getElementById('theme-icon-dark');
+            if (iconLight) iconLight.classList.toggle('hidden', isLight);
+            if (iconDark) iconDark.classList.toggle('hidden', !isLight);
+            recalculate();
+        }
+
+        async function exportToPDF() {
+            showToast('Generating Comprehensive Design Report...');
+
+            // Sync both checkboxes
+            const includeAOLink = (document.getElementById('pdf-include-ao-link')?.checked || document.getElementById('pdf-include-ao-link-panel')?.checked) ?? false;
+            const topChk = document.getElementById('pdf-include-ao-link');
+            const panelChk = document.getElementById('pdf-include-ao-link-panel');
+            if (topChk) topChk.checked = includeAOLink;
+            if (panelChk) panelChk.checked = includeAOLink;
+
+            // 1. Force light-mode rendering for all plots
+            window.isPdfExporting = true;
+            recalculate();
+
+            const model = computeOpticalModel();
+
+            // Helper to convert any canvas onto a crisp white background PNG so transparent areas never turn black
+            const captureCanvasWhiteBg = (srcCanvas) => {
+                if (!srcCanvas) return '';
+                const tmp = document.createElement('canvas');
+                tmp.width = srcCanvas.width;
+                tmp.height = srcCanvas.height;
+                const tctx = tmp.getContext('2d');
+                tctx.fillStyle = '#ffffff';
+                tctx.fillRect(0, 0, tmp.width, tmp.height);
+                tctx.drawImage(srcCanvas, 0, 0);
+                return tmp.toDataURL('image/png', 1.0);
+            };
+
+            // 2. Render dedicated high-resolution 2D Ray Trace canvas (1600x950 for large half-page display)
+            const pdfRayCanvas = document.createElement('canvas');
+            drawRayTrace(model, pdfRayCanvas, 1600, 950);
+            const rayTraceImg = captureCanvasWhiteBg(pdfRayCanvas);
+
+            // 3. Capture all diagnostic plots (Pupil, PSF, Radial PSF, Spot Diagram, MTF, Encircled Energy, AO Curve)
+            const plots = {
+                pupil: captureCanvasWhiteBg(document.getElementById('pupilCanvas')),
+                psf: captureCanvasWhiteBg(document.getElementById('psfCanvas')),
+                prof: captureCanvasWhiteBg(document.getElementById('psfProfileCanvas')),
+                spot: captureCanvasWhiteBg(document.getElementById('spotCanvas')),
+                mtf: captureCanvasWhiteBg(document.getElementById('mtfCanvas')),
+                ee: captureCanvasWhiteBg(document.getElementById('eeCanvas')),
+                ao: captureCanvasWhiteBg(document.getElementById('aoCurveCanvas'))
+            };
+
+            // 4. Restore UI theme immediately
+            window.isPdfExporting = false;
+            recalculate();
+
+            try {
+                // Use jsPDF directly via html2pdf bundle to draw native vector tables and embed every plot without DOM clipping
+                const worker = html2pdf().set({
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                });
+                await worker.from(document.createElement('div')).toPdf();
+                const pdf = await worker.get('pdf');
+
+                const pageW = pdf.internal.pageSize.getWidth(); // 210 mm
+                const margin = 14;
+                const contentW = pageW - margin * 2; // 182 mm
+
+                const drawHeader = (titleSub) => {
+                    pdf.setFillColor(248, 250, 252);
+                    pdf.rect(0, 0, pageW, 24, 'F');
+                    pdf.setDrawColor(14, 165, 233);
+                    pdf.setLineWidth(0.7);
+                    pdf.line(margin, 24, pageW - margin, 24);
+
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(15);
+                    pdf.setTextColor(15, 23, 42);
+                    pdf.text('OptiCom — Optical Terminal Design Report', margin, 11);
+
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setFontSize(8.5);
+                    pdf.setTextColor(100, 116, 139);
+                    pdf.text(`${titleSub}  |  Generated: ${new Date().toLocaleDateString()}`, margin, 18);
+                };
+
+                const drawTable = (x, y, w, title, rows) => {
+                    pdf.setFillColor(14, 165, 233);
+                    pdf.rect(x, y, w, 6.5, 'F');
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(8.5);
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.text(title.toUpperCase(), x + 2.5, y + 4.5);
+
+                    let curY = y + 6.5;
+                    rows.forEach((r, idx) => {
+                        const rowH = 6.2;
+                        if (idx % 2 === 0) {
+                            pdf.setFillColor(248, 250, 252);
+                        } else {
+                            pdf.setFillColor(255, 255, 255);
+                        }
+                        pdf.rect(x, curY, w, rowH, 'F');
+                        pdf.setDrawColor(226, 232, 240);
+                        pdf.setLineWidth(0.2);
+                        pdf.rect(x, curY, w, rowH, 'S');
+
+                        pdf.setFont('helvetica', 'normal');
+                        pdf.setFontSize(8);
+                        pdf.setTextColor(71, 85, 105);
+                        pdf.text(String(r[0]), x + 2.5, curY + 4.3);
+
+                        pdf.setFont('courier', 'bold');
+                        pdf.setFontSize(8.5);
+                        pdf.setTextColor(15, 23, 42);
+                        pdf.text(String(r[1]), x + w - 2.5, curY + 4.3, { align: 'right' });
+
+                        curY += rowH;
+                    });
+                    return curY;
+                };
+
+                // =========================================================================
+                // PAGE 1: DESIGN INPUTS, OPTICAL PRESCRIPTION & LARGE 2D RAY TRACE
+                // =========================================================================
+                drawHeader('Page 1: Optical Prescription & 2D Ray Trace Layout');
+
+                let prescName = model.prescription.toUpperCase();
+                if (prescName === 'RC') prescName = 'Ritchey-Chretien (RC)';
+                else if (prescName === 'DALL_KIRKHAM') prescName = 'Dall-Kirkham';
+                else if (prescName === 'CLASSICAL') prescName = 'Classical Cassegrain';
+                else prescName = 'Custom Conic';
+
+                const colW = (contentW - 6) / 2;
+                const leftRows = [
+                    ['Prescription Type', prescName],
+                    ['Primary Aperture (D1)', `${model.D1.toFixed(1)} mm`],
+                    ['Primary Focal Ratio (f/#1)', `f/${model.F1.toFixed(2)}`],
+                    ['Secondary Magnification (m)', `${model.m.toFixed(2)} x`],
+                    ['M1-M2 Separation (d)', `${model.d.toFixed(1)} mm`],
+                    ['Laser Wavelength (lambda)', `${model.lambdaNm} nm`],
+                    ['Acquisition Half-FOV (theta)', `${model.fovMrad.toFixed(2)} mrad`],
+                    ['SMF / Detector Diameter', `${model.detUm} um`],
+                    ['Nasmyth M3 Fold Port', model.nasmythEnabled ? `Active (z3 = ${model.m3Z.toFixed(0)} mm)` : 'Disabled (Direct)']
+                ];
+
+                const rightRows = [
+                    ['System EFL', `${model.EFL.toFixed(1)} mm`],
+                    ['Effective System f/#', `f/${model.Feff.toFixed(2)}`],
+                    ['Back Working Distance (BWD)', `${model.b.toFixed(1)} mm`],
+                    ['Primary Mirror RoC (R1)', `${model.R1.toFixed(2)} mm`],
+                    ['Secondary Mirror RoC (R2)', `${model.R2.toFixed(2)} mm`],
+                    ['Secondary Diameter (D2)', `${model.D2.toFixed(1)} mm`],
+                    ['Central Obstruction (eps)', `${(model.epsLinear * 100).toFixed(1)}% lin (${(model.epsArea * 100).toFixed(1)}% area)`],
+                    ['Conic Constants (k1 / k2)', `${model.k1.toFixed(4)} / ${model.k2.toFixed(4)}`],
+                    ['Airy Disk / Off-Axis Coma', `${model.airyDiaUm.toFixed(1)} um / ${model.comaSpotUm.toFixed(1)} um`]
+                ];
+
+                const yAfterTables = Math.max(
+                    drawTable(margin, 30, colW, '1. System Design Inputs', leftRows),
+                    drawTable(margin + colW + 6, 30, colW, '2. Derived Optical Prescription', rightRows)
+                );
+
+                // Thermal & Mechanical Summary Bar
+                const thermRows = [
+                    ['Quarter-Wave Depth of Focus (DoF)', `+/- ${Math.round(model.dofUm)} um`],
+                    ['Despace Sensitivity', `${model.despaceSensitivity.toFixed(1)} x d_sep`],
+                    [`Thermal Focus Shift (dT = ${model.deltaT} C)`, `${Math.round(model.thermalFocusShiftUm)} um (${Math.round(model.dofBudgetPct)}% DoF)`],
+                    ['Nasmyth M3 Clear Aperture / Throw', model.nasmythEnabled ? `${model.D3_minor.toFixed(1)}x${model.D3_major.toFixed(1)} mm | h_N = ${model.nasmythThrow.toFixed(1)} mm` : 'N/A (Direct Cassegrain)']
+                ];
+                const yAfterTherm = drawTable(margin, yAfterTables + 5, contentW, '3. Mechanical, Thermal & Tolerance Metrics', thermRows);
+
+                // Large Half-Page 2D Ray Trace Plot (182 mm wide x 108 mm tall)
+                const rayY = yAfterTherm + 6;
+                pdf.setFillColor(14, 165, 233);
+                pdf.rect(margin, rayY, contentW, 6.5, 'F');
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(8.5);
+                pdf.setTextColor(255, 255, 255);
+                pdf.text('4. 2D OPTICAL RAY TRACE CAD LAYOUT', margin + 2.5, rayY + 4.5);
+
+                const rayBoxH = 108;
+                pdf.setDrawColor(203, 213, 225);
+                pdf.setLineWidth(0.3);
+                pdf.rect(margin, rayY + 6.5, contentW, rayBoxH, 'S');
+                pdf.addImage(rayTraceImg, 'PNG', margin + 1, rayY + 7.5, contentW - 2, rayBoxH - 2);
+
+                // =========================================================================
+                // PAGE 2: PUPIL, PSF, SPOT DIAGRAM, MTF & ENCIRCLED ENERGY
+                // =========================================================================
+                pdf.addPage();
+                drawHeader('Page 2: Pupil, PSF, MTF & Encircled Energy Diagnostics');
+
+                const drawPlotBox = (x, y, w, h, title, subtitle, imgData, keepSquare = false) => {
+                    pdf.setFillColor(241, 245, 249);
+                    pdf.setDrawColor(203, 213, 225);
+                    pdf.setLineWidth(0.3);
+                    pdf.rect(x, y, w, 6.5, 'FD');
+
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(8);
+                    pdf.setTextColor(15, 23, 42);
+                    pdf.text(title, x + 2.5, y + 4.5);
+
+                    pdf.setFont('courier', 'normal');
+                    pdf.setFontSize(7.5);
+                    pdf.setTextColor(3, 105, 161);
+                    pdf.text(subtitle, x + w - 2.5, y + 4.5, { align: 'right' });
+
+                    pdf.setFillColor(255, 255, 255);
+                    pdf.rect(x, y + 6.5, w, h - 6.5, 'FD');
+
+                    if (imgData) {
+                        const pad = 3;
+                        const availW = w - pad * 2;
+                        const availH = h - 6.5 - pad * 2;
+                        if (keepSquare) {
+                            const side = Math.min(availW, availH);
+                            const imgX = x + (w - side) / 2;
+                            const imgY = y + 6.5 + (availH - side) / 2 + pad;
+                            pdf.addImage(imgData, 'PNG', imgX, imgY, side, side);
+                        } else {
+                            pdf.addImage(imgData, 'PNG', x + pad, y + 6.5 + pad, availW, availH);
+                        }
+                    }
+                };
+
+                const netArea = Math.max(0, (Math.PI * Math.pow(model.D1 / 2, 2)) * (1 - model.epsArea));
+                const fcLpMm = 1000 / ((model.lambdaNm * 1e-3) * model.Feff);
+                const eeDetText = document.getElementById('ee-det-label')?.textContent || '';
+                const spotRmsText = document.getElementById('spot-rms-label')?.textContent || '';
+
+                // Row 1: Annular Entrance Pupil & 2D Diffraction PSF + Coma
+                const row1Y = 30;
+                const boxH1 = 76;
+                drawPlotBox(margin, row1Y, colW, boxH1, '5A. Annular Entrance Pupil', `Net Area: ${Math.round(netArea).toLocaleString()} mm2`, plots.pupil, true);
+                drawPlotBox(margin + colW + 6, row1Y, colW, boxH1, '5B. 2D Diffraction PSF & Detector', `Airy Dia: ${model.airyDiaUm.toFixed(1)} um`, plots.psf, true);
+
+                // Row 2: Radial PSF Profile & Geometric Spot Diagram
+                const row2Y = row1Y + boxH1 + 7;
+                const boxH2 = 68;
+                drawPlotBox(margin, row2Y, colW, boxH2, '5C. Radial PSF Intensity Profile', `Peak Strehl: ${model.netStrehl.toFixed(2)}`, plots.prof, false);
+                drawPlotBox(margin + colW + 6, row2Y, colW, boxH2, '5D. Geometric Spot Diagram', spotRmsText, plots.spot, false);
+
+                // Row 3: Modulation Transfer Function (MTF) & Encircled Energy (EE)
+                const row3Y = row2Y + boxH2 + 7;
+                const boxH3 = 68;
+                drawPlotBox(margin, row3Y, colW, boxH3, '5E. Annular MTF vs. Spatial Freq', `Cutoff fc: ${fcLpMm.toFixed(0)} lp/mm`, plots.mtf, false);
+                drawPlotBox(margin + colW + 6, row3Y, colW, boxH3, '5F. Encircled Energy & SMF Coupling', eeDetText, plots.ee, false);
+
+                // =========================================================================
+                // OPTIONAL PAGE 3: TURBULENCE, ADAPTIVE OPTICS & FSOC LINK BUDGET
+                // =========================================================================
+                if (includeAOLink) {
+                    pdf.addPage();
+                    drawHeader('Page 3: Atmospheric Turbulence, Adaptive Optics & FSOC Link Budget');
+
+                    const aoRows = [
+                        ['Astronomical Seeing (@ 500nm)', `${model.seeingArcsec.toFixed(2)} arcsec`],
+                        ['Seeing at Laser Wavelength (lambda)', `${model.seeingLambdaArcsec.toFixed(2)} arcsec`],
+                        ['Fried Parameter r0 (@ 500nm)', `${model.r0_500.toFixed(1)} cm`],
+                        ['Fried Parameter r0 (@ lambda)', `${model.r0_lambda_cm.toFixed(1)} cm`],
+                        ['Turbulence Ratio (D1 / r0)', `${model.dOverR0.toFixed(2)}`],
+                        ['AO Corrected Zernike Modes (N_AO)', `${model.aoModes} modes`],
+                        ['Uncorrected Strehl Ratio (N=0)', `${model.strehlUncorr.toFixed(3)}`],
+                        ['Tip/Tilt Only Strehl Ratio (N=2)', `${model.strehlTT.toFixed(3)}`],
+                        ['Net Active AO Strehl Ratio (S)', `${model.netStrehl.toFixed(3)}`],
+                        ['SMF Fiber Coupling Efficiency', `${model.couplingEst.toFixed(1)}% (${model.couplingLossDb.toFixed(2)} dB)`]
+                    ];
+
+                    const linkRows = [
+                        ['FSOC Link Slant Range (L)', `${model.linkDistKm.toFixed(0)} km`],
+                        ['Modulation Format (10 Gbps)', model.modScheme.toUpperCase()],
+                        ['Tx Optical Power (P_Tx)', `${model.txPowerDbm.toFixed(1)} dBm`],
+                        ['Residual Pointing Jitter (sigma_j)', `${model.jitterUr.toFixed(2)} urad`],
+                        ['Tx EIRP (Clipped Gaussian)', `${model.eirpDbm.toFixed(1)} dBm`],
+                        ['Free-Space Path Loss (FSPL)', `${model.fsplDb.toFixed(1)} dB`],
+                        ['Atmo + Scint(99%) + Jitter Loss', `${model.atmoTotalLossDb.toFixed(1)} dB`],
+                        ['Net Rx Antenna Gain (incl. Optics)', `+${model.effectiveRxGainDbi.toFixed(1)} dBi`],
+                        ['Received Fiber Power (P_Rx)', `${model.pRxDbm.toFixed(1)} dBm`],
+                        ['Link Margin / Bit Error Rate (BER)', `${model.linkMarginDb >= 0 ? '+' : ''}${model.linkMarginDb.toFixed(1)} dB  |  ${formatBer(model.ber)}`]
+                    ];
+
+                    const yAfterAO = Math.max(
+                        drawTable(margin, 30, colW, '6A. Turbulence & Adaptive Optics', aoRows),
+                        drawTable(margin + colW + 6, 30, colW, '6B. FSOC Link Budget (99% Avail.)', linkRows)
+                    );
+
+                    drawPlotBox(margin, yAfterAO + 8, contentW, 85, '6C. Net Strehl Ratio vs. Corrected Zernike Modes (N_AO)', `Active N_AO = ${model.aoModes} modes (D1/r0 = ${model.dOverR0.toFixed(2)})`, plots.ao, false);
+                }
+
+                pdf.save(`OptiCom_Design_${model.prescription}_${model.D1}mm.pdf`);
+                showToast('PDF Design Report exported successfully!');
+            } catch (err) {
+                console.error('PDF Export Error:', err);
+                showToast('Error generating PDF report.');
+            }
         }
 
         function showToast(msg) {
