@@ -34,6 +34,7 @@
 
         input[type=range] {
             -webkit-appearance: none;
+            appearance: none;
             background: transparent;
         }
         input[type=range]::-webkit-slider-runnable-track {
@@ -60,6 +61,23 @@
             transform: scale(1.2);
             background: #7dd3fc;
         }
+        input[type=range]::-moz-range-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #1e293b;
+            border-radius: 999px;
+            border: 1px solid #334155;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
         .canvas-grid {
             background-color: #090d16;
             background-image: 
@@ -70,8 +88,8 @@
 
         /* Responsive Layout Grid & Resize Constraints */
         @media (min-width: 1024px) {
-            #left-col { flex: 0 0 var(--left-col-size, 33%); max-width: var(--left-col-size, 33%); }
-            #panel-sliders { flex: 0 0 var(--panel-sliders-size, 42%); max-height: var(--panel-sliders-size, 42%); }
+            #left-col { flex: 0 0 var(--left-col-size, 34%); max-width: var(--left-col-size, 34%); }
+            #panel-sliders { flex: 0 0 var(--panel-sliders-size, 40%); max-height: var(--panel-sliders-size, 40%); }
             #panel-raytrace { flex: 0 0 var(--panel-raytrace-size, 52%); max-height: var(--panel-raytrace-size, 52%); }
             #panel-metrics { flex: 0 0 var(--panel-metrics-size, 58%); max-width: var(--panel-metrics-size, 58%); }
         }
@@ -206,7 +224,7 @@
     <header class="border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-md shrink-0 z-30 px-3 lg:px-6 py-2 lg:py-2.5">
         <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-y-2 gap-x-3">
             <div class="flex items-center space-x-2.5 shrink-0">
-                <div class="w-8 h-8 lg:w-9 lg:h-9 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 border border-sky-400/30 shrink-0">
+                <div class="w-8 h-8 lg:w-9 lg:h-9 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 border border-sky-400/30 shrink-0" aria-hidden="true">
                     <svg class="w-4 h-4 lg:w-5 lg:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -223,20 +241,20 @@
 
             <!-- Always-Visible Top Bar Telemetry Pill (Desktop & Tablet) -->
             <div class="hidden xl:flex items-center gap-3 bg-slate-950/90 border border-slate-800 px-3.5 py-1.5 rounded-xl text-xs font-mono">
-                <div><span class="text-slate-500">EFL:</span> <span id="top-efl" class="text-sky-400 font-semibold">2000</span><span class="text-slate-500 text-[10px]">mm</span></div>
+                <div><span class="text-slate-500">EFL:</span> <output id="top-efl" class="text-sky-400 font-semibold">2000</output><span class="text-slate-500 text-[10px]">mm</span></div>
                 <div class="h-3.5 w-[1px] bg-slate-800"></div>
-                <div><span class="text-slate-500">f/#:</span> <span id="top-fnum" class="text-sky-400 font-semibold">f/8.0</span></div>
+                <div><span class="text-slate-500">f/#:</span> <output id="top-fnum" class="text-sky-400 font-semibold">f/8.0</output></div>
                 <div class="h-3.5 w-[1px] bg-slate-800"></div>
-                <div title="Linear & Area Central Obstruction"><span class="text-slate-500">Obstruction (ε):</span> <span id="top-obs" class="text-amber-400 font-semibold">26.5% lin (7.0% area)</span></div>
+                <div title="Linear & Area Central Obstruction"><span class="text-slate-500">Obstruction (ε):</span> <output id="top-obs" class="text-amber-400 font-semibold">26.5% lin (7.0% area)</output></div>
                 <div class="h-3.5 w-[1px] bg-slate-800"></div>
-                <div title="Astronomical Seeing & Fried Parameter at λ"><span class="text-slate-500">Seeing / r₀(λ):</span> <span id="top-r0" class="text-emerald-400 font-semibold">1.01″ / 38.9cm</span></div>
+                <div title="Astronomical Seeing & Fried Parameter at λ"><span class="text-slate-500">Seeing / r₀(λ):</span> <output id="top-r0" class="text-emerald-400 font-semibold">1.01″ / 38.9cm</output></div>
                 <div class="h-3.5 w-[1px] bg-slate-800"></div>
-                <div title="Net Strehl Ratio"><span class="text-slate-500">Strehl (S):</span> <span id="top-strehl" class="text-purple-400 font-semibold">0.85</span></div>
+                <div title="Net Strehl Ratio"><span class="text-slate-500">Strehl (S):</span> <output id="top-strehl" class="text-purple-400 font-semibold">0.85</output></div>
             </div>
 
             <!-- Preset Loader & Export Buttons -->
             <div id="action-buttons-group" class="flex flex-wrap items-center justify-end gap-1.5 lg:gap-2 shrink-0 ml-auto">
-                <select id="mobile-preset-select" onchange="loadPreset(this.value)" class="md:hidden bg-slate-800 text-xs text-slate-200 rounded-lg px-2 py-1.5 border border-slate-700 focus:outline-none focus:border-sky-500">
+                <select id="mobile-preset-select" aria-label="Load Telescope Preset" onchange="loadPreset(this.value)" class="md:hidden bg-slate-800 text-xs text-slate-200 rounded-lg px-2 py-1.5 border border-slate-700 focus:outline-none focus:border-sky-500">
                     <option value="" disabled>Presets...</option>
                     <option value="cubesat">CubeSat (100mm)</option>
                     <option value="leo_ogs" selected>LEO OGS (250mm)</option>
@@ -245,42 +263,42 @@
 
                 <div class="hidden 2xl:flex items-center gap-1.5">
                     <span class="text-xs text-slate-400 mr-1">Presets:</span>
-                    <button onclick="loadPreset('cubesat')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition whitespace-nowrap">CubeSat (100mm)</button>
-                    <button onclick="loadPreset('leo_ogs')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition whitespace-nowrap">LEO OGS (250mm)</button>
-                    <button onclick="loadPreset('deep_space')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition whitespace-nowrap">Deep-Space (600mm)</button>
+                    <button type="button" onclick="loadPreset('cubesat')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition whitespace-nowrap">CubeSat (100mm)</button>
+                    <button type="button" onclick="loadPreset('leo_ogs')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition whitespace-nowrap">LEO OGS (250mm)</button>
+                    <button type="button" onclick="loadPreset('deep_space')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition whitespace-nowrap">Deep-Space (600mm)</button>
                     <div class="h-4 w-[1px] bg-slate-800 mx-1"></div>
                 </div>
 
-                <select onchange="loadPreset(this.value)" class="hidden md:block 2xl:hidden bg-slate-800 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:border-sky-500">
+                <select aria-label="Load Telescope Preset" onchange="loadPreset(this.value)" class="hidden md:block 2xl:hidden bg-slate-800 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:border-sky-500">
                     <option value="" disabled>Presets...</option>
                     <option value="cubesat">CubeSat (100mm)</option>
                     <option value="leo_ogs" selected>LEO OGS (250mm)</option>
                     <option value="deep_space">Deep-Space (600mm)</option>
                 </select>
 
-                <button onclick="resetLayoutSizes()" title="Reset Panel Layout Proportions" class="hidden lg:flex px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 items-center gap-1 transition whitespace-nowrap">
-                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
+                <button type="button" onclick="resetLayoutSizes()" title="Reset Panel Layout Proportions" class="hidden lg:flex px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 items-center gap-1 transition whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
                     <span class="hidden xl:inline">Reset Layout</span>
                 </button>
 
-                <button onclick="openZemaxModal()" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-sky-400 border border-sky-500/30 flex items-center gap-1.5 transition whitespace-nowrap">
-                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                <button type="button" onclick="openZemaxModal()" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-sky-400 border border-sky-500/30 flex items-center gap-1.5 transition whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
                     <span class="hidden sm:inline">Zemax Table</span>
                     <span class="sm:hidden">Zemax</span>
                 </button>
 
-                <button id="header-theory-btn" onclick="toggleDesktopTheory()" class="hidden lg:flex px-2.5 lg:px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 items-center gap-1.5 transition">
-                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                <button type="button" id="header-theory-btn" onclick="toggleDesktopTheory()" class="hidden lg:flex px-2.5 lg:px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 items-center gap-1.5 transition">
+                    <svg class="w-3.5 h-3.5 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                     <span>Theory &amp; Models</span>
                 </button>
 
-                <button onclick="exportReport()" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs font-medium bg-sky-600 hover:bg-sky-500 text-white shadow-sm shadow-sky-500/30 flex items-center gap-1.5 transition">
-                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                    <span class="hidden sm:inline">Copy Spec JSON</span>
+                <button type="button" onclick="exportReport()" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs font-medium bg-sky-600 hover:bg-sky-500 text-white shadow-sm shadow-sky-500/30 flex items-center gap-1.5 transition whitespace-nowrap" title="Download Specification & State as JSON File">
+                    <svg class="w-3.5 h-3.5 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span class="hidden sm:inline">Export JSON</span>
                     <span class="sm:hidden">JSON</span>
                 </button>
-                <button onclick="document.getElementById('import-json-input').click()" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 transition whitespace-nowrap">
-                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                <button type="button" onclick="document.getElementById('import-json-input').click()" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 transition whitespace-nowrap" title="Import JSON Specification File">
+                    <svg class="w-3.5 h-3.5 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                     <span class="hidden sm:inline">Import JSON</span>
                     <span class="sm:hidden">Load</span>
                 </button>
@@ -288,18 +306,19 @@
 
                 <div class="h-4 w-[1px] bg-slate-800 mx-0.5"></div>
                 
-                <label class="flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700/80 px-2.5 py-1.5 rounded-lg border border-slate-700 cursor-pointer text-xs text-slate-200 transition whitespace-nowrap" title="Include Turbulence, Adaptive Optics & FSOC Link Budget in PDF Report">
+                <!-- Single Consolidated Checkbox for PDF AO & Link Budget Page -->
+                <label class="flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700/80 px-2.5 py-1.5 rounded-lg border border-slate-700 cursor-pointer text-xs text-slate-200 transition whitespace-nowrap" title="Include Turbulence, Adaptive Optics & FSOC Link Budget Page in PDF Report">
                     <input type="checkbox" id="pdf-include-ao-link" class="rounded bg-slate-900 border-slate-600 text-rose-500 focus:ring-0 cursor-pointer">
                     <span>+ AO &amp; Link</span>
                 </label>
 
-                <button onclick="exportToPDF()" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs font-medium bg-rose-600 hover:bg-rose-500 text-white shadow-sm shadow-rose-500/30 flex items-center gap-1.5 transition whitespace-nowrap">
-                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <button type="button" onclick="exportToPDF()" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs font-medium bg-rose-600 hover:bg-rose-500 text-white shadow-sm shadow-rose-500/30 flex items-center gap-1.5 transition whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <span class="hidden sm:inline">Export PDF</span>
                     <span class="sm:hidden">PDF</span>
                 </button>
                 
-                <button onclick="toggleTheme()" class="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition" title="Toggle Light/Dark Theme">
+                <button type="button" onclick="toggleTheme()" class="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition" title="Toggle Light/Dark Theme" aria-label="Toggle Light/Dark Theme">
                     <svg id="theme-icon-dark" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
                     <svg id="theme-icon-light" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                 </button>
@@ -309,39 +328,39 @@
 
     <!-- Persistent Sub-Header Telemetry Ribbon (Visible below XL screens) -->
     <div class="xl:hidden bg-slate-900/95 border-b border-slate-800/90 px-3 py-1.5 shrink-0 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono z-20">
-        <div><span class="text-slate-500">EFL:</span> <span id="mob-efl" class="text-sky-400 font-semibold">2000</span>mm</div>
+        <div><span class="text-slate-500">EFL:</span> <output id="mob-efl" class="text-sky-400 font-semibold">2000</output>mm</div>
         <div class="h-3 w-[1px] bg-slate-800"></div>
-        <div><span class="text-slate-500">f/#:</span> <span id="mob-fnum" class="text-sky-400 font-semibold">f/8.0</span></div>
+        <div><span class="text-slate-500">f/#:</span> <output id="mob-fnum" class="text-sky-400 font-semibold">f/8.0</output></div>
         <div class="h-3 w-[1px] bg-slate-800"></div>
-        <div><span class="text-slate-500">Obs (ε):</span> <span id="mob-obs" class="text-amber-400 font-semibold">26.5% (7.0%)</span></div>
+        <div><span class="text-slate-500">Obs (ε):</span> <output id="mob-obs" class="text-amber-400 font-semibold">26.5% (7.0%)</output></div>
         <div class="h-3 w-[1px] bg-slate-800"></div>
-        <div><span class="text-slate-500">r₀(λ):</span> <span id="mob-r0" class="text-emerald-400 font-semibold">38.9cm</span></div>
+        <div><span class="text-slate-500">r₀(λ):</span> <output id="mob-r0" class="text-emerald-400 font-semibold">38.9cm</output></div>
         <div class="h-3 w-[1px] bg-slate-800 hidden sm:block"></div>
-        <div class="hidden sm:block"><span class="text-slate-500">Strehl:</span> <span id="mob-strehl" class="text-purple-400 font-semibold">0.85</span></div>
+        <div class="hidden sm:block"><span class="text-slate-500">Strehl:</span> <output id="mob-strehl" class="text-purple-400 font-semibold">0.85</output></div>
     </div>
 
     <!-- Notification Banner -->
-    <div id="toast" class="fixed bottom-16 lg:bottom-5 right-4 lg:right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none bg-slate-800 border border-sky-500/40 text-slate-100 px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3">
+    <div id="toast" role="status" aria-live="polite" class="fixed bottom-16 lg:bottom-5 right-4 lg:right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none bg-slate-800 border border-sky-500/40 text-slate-100 px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3">
         <div class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></div>
-        <span id="toast-msg" class="text-xs font-medium">Specification copied to clipboard!</span>
+        <span id="toast-msg" class="text-xs font-medium">Specification exported!</span>
     </div>
 
     <!-- Zemax Prescription Modal -->
-    <div id="zemax-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div id="zemax-modal" role="dialog" aria-modal="true" aria-labelledby="zemax-modal-title" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-5 shadow-2xl flex flex-col max-h-[85vh]">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
                 <div>
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Zemax / CODE V Sequential Prescription</h3>
+                    <h3 id="zemax-modal-title" class="text-sm font-bold text-white uppercase tracking-wider">Zemax / CODE V Sequential Prescription</h3>
                     <p class="text-[11px] text-slate-400">Standard optical design surface data format</p>
                 </div>
-                <button onclick="closeZemaxModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800">
+                <button type="button" onclick="closeZemaxModal()" aria-label="Close modal" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
             <pre id="zemax-text" class="bg-slate-950 p-3 rounded-xl text-xs font-mono text-sky-300 overflow-auto flex-1 select-all border border-slate-800/80"></pre>
             <div class="mt-3 pt-3 border-t border-slate-800 flex justify-end gap-2">
-                <button onclick="copyZemaxText()" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-medium transition">Copy Zemax Data</button>
-                <button onclick="closeZemaxModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition">Close</button>
+                <button type="button" onclick="copyZemaxText()" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-medium transition">Copy Zemax Data</button>
+                <button type="button" onclick="closeZemaxModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition">Close</button>
             </div>
         </div>
     </div>
@@ -350,40 +369,86 @@
     <main id="main-workspace" class="max-w-[1600px] w-full mx-auto flex-1 min-h-0 flex flex-col lg:flex-row p-2.5 lg:p-4 overflow-hidden">
 
         <!-- LEFT COLUMN -->
-        <div id="left-col" class="contents lg:flex lg:flex-col lg:min-w-[260px] lg:min-h-0 lg:overflow-hidden shrink-0">
+        <div id="left-col" class="contents lg:flex lg:flex-col lg:min-w-[280px] lg:min-h-0 lg:overflow-hidden shrink-0">
             
             <!-- Panel 1B: Active Sliders Tray -->
-            <div id="panel-sliders" class="order-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-3 lg:p-4 shadow-xl flex lg:flex flex-col lg:min-h-[130px] shrink-0 overflow-hidden">
+            <section id="panel-sliders" aria-labelledby="heading-sliders" class="order-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-3 lg:p-4 shadow-xl flex lg:flex flex-col lg:min-h-[130px] shrink-0 overflow-hidden">
                 <div class="flex items-center justify-between mb-2 shrink-0">
                     <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-sky-400"></span>
-                        <h2 class="text-xs lg:text-sm font-semibold uppercase tracking-wider text-slate-200">Interactive Sliders</h2>
+                        <span class="w-2 h-2 rounded-full bg-sky-400" aria-hidden="true"></span>
+                        <h2 id="heading-sliders" class="text-xs lg:text-sm font-semibold uppercase tracking-wider text-slate-200">Interactive Sliders</h2>
                     </div>
-                    <button onclick="switchMobileTab('params')" class="lg:hidden text-[11px] font-medium text-sky-400 hover:text-sky-300 flex items-center gap-1 bg-sky-500/10 px-2 py-0.5 rounded-lg border border-sky-500/20">
-                        <span>+ Pin / Edit All</span>
+                    <button type="button" onclick="switchMobileTab('params')" class="lg:hidden text-[11px] font-medium text-sky-400 hover:text-sky-300 flex items-center gap-1 bg-sky-500/10 px-2 py-0.5 rounded-lg border border-sky-500/20">
+                        <span>+ Pin / Optimize</span>
                     </button>
                     <span class="hidden lg:inline text-[11px] text-slate-400">Double-click divider to reset</span>
                 </div>
                 <div id="active-sliders-container" class="space-y-2.5 overflow-y-auto pr-1 flex-1 min-h-0"></div>
-            </div>
+            </section>
 
             <!-- Horizontal Resizer: Left Column (Sliders vs Params) -->
             <div id="resizer-left-h" class="hidden lg:flex resizer-h" title="Drag to resize Sliders & Parameters"></div>
 
-            <!-- Panel 2: All Parameters Configuration Card -->
-            <div id="panel-params" class="hidden lg:flex order-3 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 lg:p-4 shadow-xl flex-1 min-h-[160px] flex-col justify-between overflow-y-auto">
+            <!-- Panel 2: All Parameters & Numerical Optimizer Card -->
+            <section id="panel-params" aria-labelledby="heading-params" class="hidden lg:flex order-3 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 lg:p-4 shadow-xl flex-1 min-h-[160px] flex-col justify-between overflow-y-auto">
                 <div>
-                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5 mb-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5 mb-2.5">
                         <div>
-                            <h2 class="text-xs lg:text-sm font-semibold uppercase tracking-wider text-slate-200">System Parameters</h2>
-                            <p class="text-[11px] text-slate-400">Tap slider icon to pin to Ray Trace tuner</p>
+                            <h2 id="heading-params" class="text-xs lg:text-sm font-semibold uppercase tracking-wider text-slate-200">System Parameters &amp; Optimizer</h2>
+                            <p class="text-[11px] text-slate-400">Pin sliders or check <span class="text-emerald-400 font-semibold">Opt</span> boxes to include in numerical optimization</p>
                         </div>
-                        <select id="prescription-type" onchange="recalculate()" class="bg-slate-800 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:border-sky-500 font-semibold text-sky-400">
+                        <select id="prescription-type" aria-label="Optical Prescription Type" onchange="recalculate()" class="bg-slate-800 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:border-sky-500 font-semibold text-sky-400">
                             <option value="classical">Classical Cassegrain</option>
                             <option value="rc">Ritchey-Chrétien (RC)</option>
                             <option value="dall_kirkham">Dall-Kirkham</option>
                             <option value="custom">Custom Conic Constants</option>
                         </select>
+                    </div>
+
+                    <!-- Numerical Design Optimizer Control Box (Nelder-Mead / Coordinate Pattern Search) -->
+                    <div class="mb-3 p-2.5 rounded-xl bg-emerald-950/25 border border-emerald-500/30 flex flex-col gap-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                <span class="text-xs font-bold uppercase tracking-wider text-emerald-300">Direct Search Optimizer</span>
+                            </div>
+                            <span id="opt-active-count" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">2 vars selected</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                            <div class="sm:col-span-7">
+                                <label for="opt-objective" class="block text-[10px] text-slate-400 mb-0.5">Optimization Objective (Min-Search Target)</label>
+                                <select id="opt-objective" class="w-full bg-slate-900 text-xs text-slate-200 rounded-lg px-2 py-1.5 border border-slate-700 focus:outline-none focus:border-emerald-500 font-medium">
+                                    <option value="rms_spot" selected>Minimize Full-Field RMS Spot Radius (µm)</option>
+                                    <option value="smf_coupling">Maximize SMF Fiber Coupling Efficiency (%)</option>
+                                    <option value="strehl">Maximize Net Strehl Ratio &amp; Min Obstruction</option>
+                                    <option value="target_efl">Match Target EFL + Min Off-Axis Coma</option>
+                                </select>
+                            </div>
+                            <div id="opt-target-efl-wrap" class="sm:col-span-5 hidden">
+                                <label for="opt-target-efl" class="block text-[10px] text-slate-400 mb-0.5">Target EFL (mm)</label>
+                                <input type="number" id="opt-target-efl" value="2000" min="100" max="25000" step="50" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-white">
+                            </div>
+                            <div id="opt-min-bwd-wrap" class="sm:col-span-5">
+                                <label for="opt-min-bwd" class="block text-[10px] text-slate-400 mb-0.5">Min BWD Constraint (mm)</label>
+                                <input type="number" id="opt-min-bwd" value="80" min="10" max="1000" step="10" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-emerald-300">
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-emerald-500/20">
+                            <div id="opt-status-text" class="text-[10px] font-mono text-slate-400 truncate">
+                                Algorithm: Nelder-Mead Simplex + Bounded Pattern Search
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0 ml-auto">
+                                <button type="button" id="btn-undo-opt" onclick="undoOptimization()" disabled class="px-2 py-1 rounded-lg text-[11px] font-medium bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:pointer-events-none text-slate-300 border border-slate-700 transition">
+                                    Undo
+                                </button>
+                                <button type="button" onclick="runNumericalOptimization()" class="px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm shadow-emerald-500/20 flex items-center gap-1.5 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>Optimize Selected</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="parameter-list" class="space-y-2"></div>
@@ -412,13 +477,9 @@
                             <input type="checkbox" id="enable-nasmyth" onchange="recalculate()" checked class="rounded bg-slate-900 border-indigo-500 text-indigo-500 focus:ring-0">
                             <span class="text-indigo-200 font-medium text-[11px]">Enable Flat M₃ (45° Nasmyth Port Fold)</span>
                         </label>
-                        <label class="flex items-center space-x-2 bg-rose-950/30 p-2 rounded-lg border border-rose-500/30 cursor-pointer hover:border-rose-400 col-span-2">
-                            <input type="checkbox" id="pdf-include-ao-link-panel" onchange="document.getElementById('pdf-include-ao-link').checked = this.checked" class="rounded bg-slate-900 border-rose-500 text-rose-500 focus:ring-0">
-                            <span class="text-rose-200 font-medium text-[11px]">Include Turbulence, AO &amp; FSOC Link Budget in PDF Report</span>
-                        </label>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
 
         <!-- Vertical Resizer: Main Workspace (Left Column vs Right Column) -->
@@ -428,14 +489,14 @@
         <div id="right-col" class="contents lg:flex-1 lg:flex lg:flex-col lg:min-w-[400px] lg:min-h-0 lg:overflow-hidden">
 
             <!-- Panel 1A: Ray Trace Viewport -->
-            <div id="panel-raytrace" class="order-1 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex lg:flex flex-col flex-1 lg:flex-none min-h-[180px] relative shrink-0">
+            <section id="panel-raytrace" aria-labelledby="heading-raytrace" class="order-1 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex lg:flex flex-col flex-1 lg:flex-none min-h-[180px] relative shrink-0">
                 
                 <div class="px-3 lg:px-4 py-2 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between gap-2 z-10 shrink-0">
                     <div class="flex items-center space-x-3 min-w-0">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5 truncate">
-                            <svg class="w-3.5 h-3.5 text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <h2 id="heading-raytrace" class="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5 truncate">
+                            <svg class="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                             <span class="truncate">2D Optical Ray Trace</span>
-                        </span>
+                        </h2>
                         <div class="hidden sm:flex items-center space-x-3 text-[11px] text-slate-400">
                             <span class="flex items-center gap-1"><span class="w-2.5 h-0.5 bg-sky-400 inline-block"></span> On-Axis</span>
                             <span class="flex items-center gap-1"><span class="w-2.5 h-0.5 bg-amber-400 inline-block"></span> +FOV</span>
@@ -444,44 +505,44 @@
                     </div>
                     <div class="flex items-center space-x-1 shrink-0">
                         <span id="zoom-indicator" class="hidden sm:inline-block text-[10px] font-mono text-slate-400 bg-slate-950/90 px-2 py-1 rounded-lg border border-slate-800 mr-1">100%</span>
-                        <button onclick="zoomCanvas(1.2)" title="Zoom In" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                        <button type="button" onclick="zoomCanvas(1.2)" title="Zoom In" aria-label="Zoom In" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         </button>
-                        <button onclick="zoomCanvas(0.8)" title="Zoom Out" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                        <button type="button" onclick="zoomCanvas(0.8)" title="Zoom Out" aria-label="Zoom Out" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
                         </button>
-                        <button onclick="resetView()" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] transition">Reset</button>
+                        <button type="button" onclick="resetView()" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] transition">Reset</button>
                     </div>
                 </div>
 
                 <div class="relative w-full flex-1 min-h-0 canvas-grid select-none overflow-hidden" id="canvas-wrapper">
-                    <canvas id="rayCanvas" class="w-full h-full cursor-grab active:cursor-grabbing touch-none"></canvas>
+                    <canvas id="rayCanvas" role="img" aria-label="Interactive 2D Cassegrain Optical Ray Trace Diagram" class="w-full h-full cursor-grab active:cursor-grabbing touch-none"></canvas>
 
                     <div class="absolute top-2.5 right-2.5 pointer-events-none hidden md:flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md border border-slate-800/90 px-2.5 py-1 rounded-lg text-[10px] font-mono text-slate-400">
                         <span>Drag canvas to pan • Scroll to zoom • Drag M₃ to slide fold</span>
                     </div>
 
-                    <div id="geometry-warning" class="hidden absolute top-2.5 left-2.5 right-2.5 sm:right-auto bg-rose-950/90 border border-rose-500/50 text-rose-200 px-3 py-1.5 rounded-xl text-[11px] font-medium flex items-center gap-2 shadow-lg backdrop-blur-sm">
+                    <div id="geometry-warning" role="alert" class="hidden absolute top-2.5 left-2.5 right-2.5 sm:right-auto bg-rose-950/90 border border-rose-500/50 text-rose-200 px-3 py-1.5 rounded-xl text-[11px] font-medium flex items-center gap-2 shadow-lg backdrop-blur-sm">
                         <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                         <span id="warning-text" class="truncate">Secondary intercept error</span>
                     </div>
 
                     <div class="hidden sm:flex absolute bottom-2.5 left-2.5 pointer-events-none flex-wrap gap-1.5">
                         <div class="bg-slate-900/85 backdrop-blur-md border border-slate-800 px-2 py-0.5 rounded-lg text-[11px] font-mono text-slate-300">
-                            EFL: <span id="hud-efl" class="text-sky-400 font-semibold">2000.0</span> mm
+                            EFL: <output id="hud-efl" class="text-sky-400 font-semibold">2000.0</output> mm
                         </div>
                         <div class="bg-slate-900/85 backdrop-blur-md border border-slate-800 px-2 py-0.5 rounded-lg text-[11px] font-mono text-slate-300">
-                            f/#: <span id="hud-fnum" class="text-sky-400 font-semibold">f/8.00</span>
+                            f/#: <output id="hud-fnum" class="text-sky-400 font-semibold">f/8.00</output>
                         </div>
                         <div class="bg-slate-900/85 backdrop-blur-md border border-slate-800 px-2 py-0.5 rounded-lg text-[11px] font-mono text-slate-300">
-                            Obstruction (ε): <span id="hud-obs" class="text-amber-400 font-semibold">26.5% lin / 7.0% area</span>
+                            Obstruction (ε): <output id="hud-obs" class="text-amber-400 font-semibold">26.5% lin / 7.0% area</output>
                         </div>
                         <div class="bg-slate-900/85 backdrop-blur-md border border-slate-800 px-2 py-0.5 rounded-lg text-[11px] font-mono text-slate-300">
-                            Off-Axis Coma: <span id="hud-coma" class="text-emerald-400 font-semibold">14.2 µm</span>
+                            Off-Axis Coma: <output id="hud-coma" class="text-emerald-400 font-semibold">14.2 µm</output>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Horizontal Resizer: Right Column (Ray Trace vs Bottom Panels) -->
             <div id="resizer-right-h" class="hidden lg:flex resizer-h" title="Drag to resize Ray Trace & Bottom Panels"></div>
@@ -490,19 +551,19 @@
             <div id="right-bottom-row" class="contents lg:flex lg:flex-row lg:flex-1 lg:min-h-[160px] lg:overflow-hidden">
                 
                 <!-- Panel 3: Optical Prescription, AO, Link Budget & Theory Tabs -->
-                <div id="panel-metrics" class="hidden lg:flex order-4 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 lg:p-4 shadow-xl flex-1 lg:flex-none min-h-0 flex-col justify-between overflow-hidden shrink-0">
+                <section id="panel-metrics" aria-label="Optical Telemetry and Link Budget" class="hidden lg:flex order-4 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 lg:p-4 shadow-xl flex-1 lg:flex-none min-h-0 flex-col justify-between overflow-hidden shrink-0">
                     
                     <!-- Sub-Navigation Tabs inside Panel 3 -->
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5 mb-2.5 shrink-0">
-                        <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
-                            <button id="subtab-btn-optics" onclick="switchMetricsSubTab('optics')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-sky-500/20 text-sky-400 border border-sky-500/30 transition">
+                        <div role="tablist" class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                            <button type="button" role="tab" aria-selected="true" id="subtab-btn-optics" onclick="switchMetricsSubTab('optics')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-sky-500/20 text-sky-400 border border-sky-500/30 transition">
                                 Optics &amp; Thermal
                             </button>
-                            <button id="subtab-btn-link" onclick="switchMetricsSubTab('link')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-400 hover:text-slate-200 border border-transparent transition flex items-center gap-1">
+                            <button type="button" role="tab" aria-selected="false" id="subtab-btn-link" onclick="switchMetricsSubTab('link')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-400 hover:text-slate-200 border border-transparent transition flex items-center gap-1">
                                 <span>AO &amp; Link Budget</span>
                                 <span id="subtab-ber-pill" class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300">10⁻¹²</span>
                             </button>
-                            <button id="subtab-btn-theory" onclick="switchMetricsSubTab('theory')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-400 hover:text-slate-200 border border-transparent transition">
+                            <button type="button" role="tab" aria-selected="false" id="subtab-btn-theory" onclick="switchMetricsSubTab('theory')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-400 hover:text-slate-200 border border-transparent transition">
                                 Theory &amp; Assumptions
                             </button>
                         </div>
@@ -510,58 +571,58 @@
                     </div>
 
                     <!-- SUB-TAB 1: OPTICS, TURBULENCE & THERMAL -->
-                    <div id="subtab-optics" class="flex-1 min-h-0 overflow-y-auto pr-1 flex flex-col justify-between space-y-3">
+                    <div id="subtab-optics" role="tabpanel" class="flex-1 min-h-0 overflow-y-auto pr-1 flex flex-col justify-between space-y-3">
                         <div>
                             <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-2">
                                 <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-2">
                                     <div class="text-[10px] text-slate-400">Effective Focal Length</div>
-                                    <div class="text-xs lg:text-sm font-mono font-semibold text-white mt-0.5"><span id="val-efl">2000.0</span> <span class="text-[10px] font-normal text-slate-400">mm</span></div>
-                                    <div class="text-[10px] text-slate-400 mt-0.5">Sys: <span id="val-fnum" class="text-sky-400 font-mono">f/8.00</span></div>
+                                    <div class="text-xs lg:text-sm font-mono font-semibold text-white mt-0.5"><output id="val-efl">2000.0</output> <span class="text-[10px] font-normal text-slate-400">mm</span></div>
+                                    <div class="text-[10px] text-slate-400 mt-0.5">Sys: <output id="val-fnum" class="text-sky-400 font-mono">f/8.00</output></div>
                                 </div>
 
                                 <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-2">
                                     <div class="text-[10px] text-slate-400">Primary Mirror (M₁)</div>
-                                    <div class="text-xs lg:text-sm font-mono font-semibold text-white mt-0.5">f₁ = <span id="val-f1">500.0</span> <span class="text-[10px] font-normal text-slate-400">mm</span></div>
-                                    <div class="text-[10px] text-slate-400 mt-0.5">R₁: <span id="val-r1" class="text-slate-200 font-mono">-1000.0</span> mm</div>
+                                    <div class="text-xs lg:text-sm font-mono font-semibold text-white mt-0.5">f₁ = <output id="val-f1">500.0</output> <span class="text-[10px] font-normal text-slate-400">mm</span></div>
+                                    <div class="text-[10px] text-slate-400 mt-0.5">R₁: <output id="val-r1" class="text-slate-200 font-mono">-1000.0</output> mm</div>
                                 </div>
 
                                 <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-2">
                                     <div class="text-[10px] text-slate-400">Secondary Mirror (M₂)</div>
-                                    <div class="text-xs lg:text-sm font-mono font-semibold text-white mt-0.5">D₂ = <span id="val-d2">66.3</span> <span class="text-[10px] font-normal text-slate-400">mm</span></div>
-                                    <div class="text-[10px] text-slate-400 mt-0.5">R₂: <span id="val-r2" class="text-slate-200 font-mono">-333.3</span> mm</div>
+                                    <div class="text-xs lg:text-sm font-mono font-semibold text-white mt-0.5">D₂ = <output id="val-d2">66.3</output> <span class="text-[10px] font-normal text-slate-400">mm</span></div>
+                                    <div class="text-[10px] text-slate-400 mt-0.5">R₂: <output id="val-r2" class="text-slate-200 font-mono">-333.3</output> mm</div>
                                 </div>
 
                                 <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-2 border-amber-500/30">
                                     <div class="text-[10px] text-slate-400">Central Obstruction (ε)</div>
-                                    <div class="text-xs lg:text-sm font-mono font-semibold text-amber-400 mt-0.5"><span id="val-obs-lin">26.5%</span> <span class="text-[10px] font-normal text-slate-400">lin</span></div>
-                                    <div class="text-[10px] text-slate-400 mt-0.5">Area (ε²): <span id="val-obs-area" class="text-amber-300 font-mono">7.0%</span></div>
+                                    <div class="text-xs lg:text-sm font-mono font-semibold text-amber-400 mt-0.5"><output id="val-obs-lin">26.5%</output> <span class="text-[10px] font-normal text-slate-400">lin</span></div>
+                                    <div class="text-[10px] text-slate-400 mt-0.5">Area (ε²): <output id="val-obs-area" class="text-amber-300 font-mono">7.0%</output></div>
                                 </div>
 
                                 <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-2">
                                     <div class="text-[10px] text-slate-400">Back Working Dist (BWD)</div>
-                                    <div class="text-xs lg:text-sm font-mono font-semibold text-white mt-0.5"><span id="val-bwd">100.0</span> <span class="text-[10px] font-normal text-slate-400">mm</span></div>
-                                    <div class="text-[10px] text-slate-400 mt-0.5">Len: <span id="val-length" class="text-slate-200 font-mono">475.0</span> mm</div>
+                                    <div class="text-xs lg:text-sm font-mono font-semibold text-white mt-0.5"><output id="val-bwd">100.0</output> <span class="text-[10px] font-normal text-slate-400">mm</span></div>
+                                    <div class="text-[10px] text-slate-400 mt-0.5">Len: <output id="val-length" class="text-slate-200 font-mono">475.0</output> mm</div>
                                 </div>
 
                                 <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-2">
                                     <div class="text-[10px] text-slate-400">Conic Constants (k₁, k₂)</div>
-                                    <div class="text-xs font-mono font-semibold text-sky-300 mt-0.5"><span id="val-k1">-1.000</span> / <span id="val-k2">-2.778</span></div>
-                                    <div class="text-[10px] text-slate-400 mt-0.5">Coma(θ): <span id="val-coma" class="text-emerald-400 font-mono">14.2 µm</span></div>
+                                    <div class="text-xs font-mono font-semibold text-sky-300 mt-0.5"><output id="val-k1">-1.000</output> / <output id="val-k2">-2.778</output></div>
+                                    <div class="text-[10px] text-slate-400 mt-0.5">Coma(θ): <output id="val-coma" class="text-emerald-400 font-mono">14.2 µm</output></div>
                                 </div>
 
                                 <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-2">
                                     <div class="text-[10px] text-slate-400">Despace Sensitivity</div>
-                                    <div class="text-xs lg:text-sm font-mono font-semibold text-rose-300 mt-0.5"><span id="val-despace">17.0</span><span class="text-[10px] font-normal text-slate-400">× Δd</span></div>
-                                    <div class="text-[10px] text-slate-400 mt-0.5">DoF (±λ/4): <span id="val-dof" class="text-slate-200 font-mono">±198 µm</span></div>
+                                    <div class="text-xs lg:text-sm font-mono font-semibold text-rose-300 mt-0.5"><output id="val-despace">17.0</output><span class="text-[10px] font-normal text-slate-400">× Δd</span></div>
+                                    <div class="text-[10px] text-slate-400 mt-0.5">DoF (±λ/4): <output id="val-dof" class="text-slate-200 font-mono">±198 µm</output></div>
                                 </div>
 
                                 <div class="bg-slate-850/90 border border-slate-800/80 rounded-xl p-2 border-emerald-500/30">
                                     <div class="text-[10px] text-slate-400">Seeing &amp; Fried r₀</div>
                                     <div class="text-xs font-mono font-semibold text-emerald-400 mt-0.5" title="Seeing at 500nm and at Laser Wavelength λ">
-                                        <span id="val-seeing-arcsec">1.01″</span> <span class="text-[10px] font-normal text-slate-400">(@λ: <span id="val-seeing-lambda" class="text-emerald-300">0.80″</span>)</span>
+                                        <output id="val-seeing-arcsec">1.01″</output> <span class="text-[10px] font-normal text-slate-400">(@λ: <output id="val-seeing-lambda" class="text-emerald-300">0.80″</output>)</span>
                                     </div>
                                     <div class="text-[10px] text-slate-400 mt-0.5 leading-snug break-words">
-                                        r₀(λ): <span id="val-r0-lambda" class="text-emerald-300 font-mono">38.9</span>cm <span class="text-slate-600">|</span> r₀(500): <span id="val-r0" class="text-slate-200 font-mono">10.0</span>cm
+                                        r₀(λ): <output id="val-r0-lambda" class="text-emerald-300 font-mono">38.9</output>cm <span class="text-slate-600">|</span> r₀(500): <output id="val-r0" class="text-slate-200 font-mono">10.0</output>cm
                                     </div>
                                 </div>
 
@@ -571,10 +632,10 @@
                                         <span id="val-m3-status" class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">Disabled (Direct)</span>
                                     </div>
                                     <div class="text-xs font-mono font-semibold text-white mt-0.5">
-                                        Ellipse: <span id="val-m3-size" class="text-indigo-300">33.9 × 47.9</span> <span class="text-[10px] font-normal text-slate-400">mm</span>
+                                        Ellipse: <output id="val-m3-size" class="text-indigo-300">33.9 × 47.9</output> <span class="text-[10px] font-normal text-slate-400">mm</span>
                                     </div>
                                     <div class="text-[10px] text-slate-400 mt-0.5 leading-snug break-words">
-                                        z₃: <span id="val-m3-z" class="text-slate-200 font-mono">-100</span>mm | Throw (h_N): <span id="val-nasmyth-h" class="text-indigo-300 font-mono">200.0</span>mm (<span id="val-nasmyth-clear" class="text-emerald-400">Outside Tube</span>)
+                                        z₃: <output id="val-m3-z" class="text-slate-200 font-mono">-100</output>mm | Throw (h_N): <output id="val-nasmyth-h" class="text-indigo-300 font-mono">200.0</output>mm (<span id="val-nasmyth-clear" class="text-emerald-400">Outside Tube</span>)
                                     </div>
                                 </div>
                             </div>
@@ -620,7 +681,7 @@
                             <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
                                 <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Thermal Metering &amp; FSM Backend Optics</span>
                                 <div class="flex items-center gap-1.5">
-                                    <select id="strut-material" onchange="recalculate()" class="bg-slate-850 text-[11px] text-slate-200 rounded-lg px-2 py-0.5 border border-slate-700 focus:outline-none focus:border-sky-500 font-mono">
+                                    <select id="strut-material" aria-label="Metering Strut Material" onchange="recalculate()" class="bg-slate-850 text-[11px] text-slate-200 rounded-lg px-2 py-0.5 border border-slate-700 focus:outline-none focus:border-sky-500 font-mono">
                                         <option value="0.8">CFRP (0.8 ppm/K)</option>
                                         <option value="1.2" selected>Invar-36 (1.2 ppm/K)</option>
                                         <option value="8.6">Ti-6Al-4V (8.6 ppm/K)</option>
@@ -655,7 +716,7 @@
                     </div>
 
                     <!-- SUB-TAB 2: ADAPTIVE OPTICS (AO) & END-TO-END FSOC LINK BUDGET + BER -->
-                    <div id="subtab-link" class="hidden flex-1 min-h-0 overflow-y-auto pr-1 flex-col justify-between space-y-2.5">
+                    <div id="subtab-link" role="tabpanel" class="hidden flex-1 min-h-0 overflow-y-auto pr-1 flex-col justify-between space-y-2.5">
                         <!-- Adaptive Optics vs Seeing Header & Controls -->
                         <div class="bg-slate-850/90 border border-slate-800 rounded-xl p-2.5">
                             <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
@@ -664,7 +725,7 @@
                                     <p class="text-[10px] text-slate-400">Residual wavefront variance σ²_N = C_N · (D₁ / r₀(λ))^(5/3)</p>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <select id="mod-scheme" onchange="recalculate()" class="bg-slate-900 text-[11px] text-sky-300 rounded-lg px-2 py-1 border border-slate-700 font-mono">
+                                    <select id="mod-scheme" aria-label="Modulation Format" onchange="recalculate()" class="bg-slate-900 text-[11px] text-sky-300 rounded-lg px-2 py-1 border border-slate-700 font-mono">
                                         <option value="dpsk" selected>DPSK Pre-Amp (10 Gbps)</option>
                                         <option value="ook">IM/DD OOK (10 Gbps)</option>
                                     </select>
@@ -718,27 +779,27 @@
                                     <span class="text-[10px] font-sans font-semibold uppercase tracking-wider text-slate-300">Realistic Link Budget (99% Availability)</span>
                                     <span class="text-[10px] text-sky-400">Range: <span id="lb-range">1000</span> km</span>
                                 </div>
-                                <div class="space-y-1 text-[11px]">
-                                    <div class="flex justify-between"><span class="text-slate-400">Tx Power + Clipped Gauss Gain:</span><span id="lb-eirp" class="text-slate-200">+134.2 dBm</span></div>
-                                    <div class="flex justify-between"><span class="text-slate-400">Free-Space Path Loss (FSPL):</span><span id="lb-fspl" class="text-rose-400">-258.2 dB</span></div>
-                                    <div class="flex justify-between"><span class="text-slate-400">Atmo + Scint(99%) + Tx Jitter:</span><span id="lb-atmo-loss" class="text-amber-400">-9.4 dB</span></div>
-                                    <div class="flex justify-between"><span class="text-slate-400">Rx Gain (net ε²) - Optics Loss:</span><span id="lb-rxgain" class="text-emerald-400">+110.3 dBi</span></div>
-                                    <div class="flex justify-between"><span class="text-slate-400">AO SMF Coupling Loss (η_SMF):</span><span id="lb-smf-loss" class="text-indigo-400">-3.4 dB</span></div>
+                                <dl class="space-y-1 text-[11px]">
+                                    <div class="flex justify-between"><dt class="text-slate-400">Tx Power + Clipped Gauss Gain:</dt><dd id="lb-eirp" class="text-slate-200">+134.2 dBm</dd></div>
+                                    <div class="flex justify-between"><dt class="text-slate-400">Free-Space Path Loss (FSPL):</dt><dd id="lb-fspl" class="text-rose-400">-258.2 dB</dd></div>
+                                    <div class="flex justify-between"><dt class="text-slate-400">Atmo + Scint(99%) + Tx Jitter:</dt><dd id="lb-atmo-loss" class="text-amber-400">-9.4 dB</dd></div>
+                                    <div class="flex justify-between"><dt class="text-slate-400">Rx Gain (net ε²) - Optics Loss:</dt><dd id="lb-rxgain" class="text-emerald-400">+110.3 dBi</dd></div>
+                                    <div class="flex justify-between"><dt class="text-slate-400">AO SMF Coupling Loss (η_SMF):</dt><dd id="lb-smf-loss" class="text-indigo-400">-3.4 dB</dd></div>
                                     <div class="border-t border-slate-800 pt-1 mt-1 flex justify-between font-bold">
-                                        <span class="text-slate-200">Received Fiber Power (P_Rx):</span>
-                                        <span id="lb-prx" class="text-sky-400">-26.5 dBm</span>
+                                        <dt class="text-slate-200">Received Fiber Power (P_Rx):</dt>
+                                        <dd id="lb-prx" class="text-sky-400">-26.5 dBm</dd>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-slate-400">Link Margin (vs -38dBm) / BER:</span>
-                                        <span><span id="lb-margin" class="text-emerald-400 font-bold">+11.5 dB</span> | <span id="lb-ber" class="text-purple-300 font-bold">≤ 10⁻¹²</span></span>
+                                        <dt class="text-slate-400">Link Margin (vs -38dBm) / BER:</dt>
+                                        <dd><span id="lb-margin" class="text-emerald-400 font-bold">+11.5 dB</span> | <span id="lb-ber" class="text-purple-300 font-bold">≤ 10⁻¹²</span></dd>
                                     </div>
-                                </div>
+                                </dl>
                             </div>
                         </div>
                     </div>
 
                     <!-- SUB-TAB 3: THEORY, EQUATIONS & ENGINEERING ASSUMPTIONS -->
-                    <div id="subtab-theory" class="hidden flex-1 min-h-0 flex-col overflow-y-auto pr-1.5 space-y-2.5 text-xs text-slate-300 leading-relaxed">
+                    <div id="subtab-theory" role="tabpanel" class="hidden flex-1 min-h-0 flex-col overflow-y-auto pr-1.5 space-y-2.5 text-xs text-slate-300 leading-relaxed">
                         <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 shrink-0">
                             <h4 class="text-sky-400 font-semibold uppercase tracking-wider text-[11px] mb-1">1. Cassegrain Paraxial &amp; Conic Prescription Geometry</h4>
                             <p class="text-[11px] text-slate-400 mb-1.5">
@@ -761,53 +822,24 @@
                                 <div>At Laser λ: r₀(λ) = r₀_500 · (λ / 500nm)^(6/5)      (e.g. at 1550nm, r₀ = 3.89 × r₀_500)</div>
                                 <div>At Laser λ: θ(λ)  = 0.98 · λ / r₀(λ) = θ_500 · (λ / 500nm)^(-1/5)  (at 1550nm, θ = 0.80 × θ_500)</div>
                             </div>
-                            <p class="text-[10px] text-slate-400 mt-1.5">
-                                <strong>Key Insight:</strong> Because <code class="text-slate-200">r₀ ∝ λ^(1.2)</code> grows faster than <code class="text-slate-200">λ¹</code>, angular seeing <code class="text-slate-200">θ(λ) ∝ λ^(-0.2)</code> actually improves by ~20% at 1550 nm compared to 500 nm, while turbulence ratio <code class="text-slate-200">D₁/r₀(λ)</code> drops by almost 4×!
+                        </div>
+
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 shrink-0">
+                            <h4 class="text-purple-400 font-semibold uppercase tracking-wider text-[11px] mb-1">3. Deterministic Direct Search Optimizer (Nelder-Mead + Pattern Search)</h4>
+                            <p class="text-[11px] text-slate-400">
+                                Selecting checkboxes next to parameters defines the active optimization vector <code class="text-purple-300">x ∈ ℝⁿ</code> bounded by each parameter's <code class="text-purple-300">[min, max]</code> range. The solver runs an adaptive Coordinate Pattern Search followed by Nelder-Mead Simplex refinement with exterior penalty functions enforcing physical clearance (<code class="text-purple-300">BWD ≥ BWD_min</code> and <code class="text-purple-300">ε_lin ≤ 0.45</code>).
                             </p>
-                        </div>
-
-                        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 shrink-0">
-                            <h4 class="text-purple-400 font-semibold uppercase tracking-wider text-[11px] mb-1">3. Adaptive Optics (AO) Noll Zernikes &amp; Servo-Lag Floor</h4>
-                            <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800 break-words whitespace-pre-wrap">
-                                <div>Uncorrected (N=0): σ²_0 = 1.0299 · (D₁/r₀(λ))^(5/3) | Tip/Tilt (N=2): σ²_fit = 0.1340 · (D₁/r₀(λ))^(5/3)</div>
-                                <div>High-Order (N&gt;5):  σ²_fit = 0.2944 · N^(-√3/2) · (D₁/r₀(λ))^(5/3) [rad²]</div>
-                                <div>AO Servo + WFS Floor: σ²_servo ≈ 0.055 · (D₁/r₀(λ))^(5/3) + 0.035 [rad²] (for N &gt; 0)</div>
-                                <div>Net Strehl Ratio:  S_net = exp(-(σ²_fit + σ²_servo)) · (1 - ε²)</div>
-                            </div>
-                        </div>
-
-                        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 shrink-0">
-                            <h4 class="text-amber-400 font-semibold uppercase tracking-wider text-[11px] mb-1">4. Realistic 99%-Availability FSOC Link Budget &amp; Thermal Despace</h4>
-                            <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800 break-words whitespace-pre-wrap">
-                                <div>G_Tx = 10·log₁₀((π·D_Tx/λ)²) - 1.8 dB (Clipped Gaussian) | L_optics = -3.5 dB (Coatings/Splitters)</div>
-                                <div>L_ptg(99%) = 4.343 · 2 · (-ln(0.01)) · (σ_j / θ_e2)² | L_scint(99%) = 1.8 + 4.2·(D₁/r₀)^0.45 · Avg(D₁)</div>
-                                <div>Thermal Focus Shift: ΔBWD = (m² + 1) · d · CTE · ΔT  vs.  Quarter-Wave DoF = ±2·λ·(f/#_eff)²</div>
-                            </div>
-                        </div>
-
-                        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 shrink-0">
-                            <h4 class="text-indigo-400 font-semibold uppercase tracking-wider text-[11px] mb-1">5. Tertiary Flat Mirror (M₃) &amp; Nasmyth Port Geometry</h4>
-                            <p class="text-[11px] text-slate-400 mb-1.5">
-                                Placing a -45° flat fold mirror (<code class="text-indigo-300">M₃</code>) centered on the optical axis at <code class="text-indigo-300">(z₃, 0)</code> with surface equation <code class="text-indigo-300">z + y = z₃</code> reflects the converging beam by 90° downward (<code class="text-indigo-300">-Y</code>) when <code class="text-indigo-300">M₃</code> intercepts the beam ahead of the unfolded focus:
-                            </p>
-                            <div class="bg-slate-900 p-2 rounded-lg font-mono text-[10px] text-slate-200 space-y-0.5 border border-slate-800 break-words whitespace-pre-wrap">
-                                <div>2D Reflection Mapping across M₃:   (z', y') = (z₃ - y , z₃ - z)</div>
-                                <div>Unfolded Focus (b, y_img) → Folded: z_N = z₃ - y_img ,   y_N = -(b - z₃)</div>
-                                <div>On-Axis Path to Nasmyth Focus:     L_N = b - z₃   (Vertical Throw h_N = -y_N = b - z₃)</div>
-                                <div>Beam Footprint Minor Axis (D₃_min): D₃_min = D₂_axial · (L_N / L₂) + 2 · (d + z₃) · tan(θ_FOV)</div>
-                                <div>45° Elliptical Major Axis (D₃_maj): D₃_maj = √2 · D₃_min   | Tube Clearance: ΔR = h_N - (D₁ / 2)</div>
-                            </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
                 <!-- Vertical Resizer: Bottom Row (Metrics vs Pupil/PSF) -->
                 <div id="resizer-bottom-v" class="hidden lg:flex resizer-v" title="Drag to resize Metrics & Pupil/PSF panels"></div>
 
                 <!-- Panel 4: Pupil & PSF Visualizer -->
-                <div id="panel-pupil" class="hidden lg:flex order-5 lg:flex-1 lg:min-w-[220px] bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 lg:p-4 shadow-xl flex-1 min-h-0 flex-col justify-between overflow-y-auto space-y-2.5">
+                <section id="panel-pupil" aria-labelledby="heading-pupil" class="hidden lg:flex order-5 lg:flex-1 lg:min-w-[220px] bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 lg:p-4 shadow-xl flex-1 min-h-0 flex-col justify-between overflow-y-auto space-y-2.5">
                     <div class="flex items-center justify-between border-b border-slate-800 pb-2 shrink-0">
-                        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Pupil, PSF, MTF &amp; Encircled Energy</h3>
+                        <h3 id="heading-pupil" class="text-xs font-semibold uppercase tracking-wider text-slate-300">Pupil, PSF, MTF &amp; Encircled Energy</h3>
                         <span class="text-[11px] text-amber-400 font-mono" id="pupil-subtitle">ε = 0.27 (7.0% area)</span>
                     </div>
 
@@ -871,7 +903,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
             </div>
 
@@ -880,53 +912,53 @@
     </main>
 
     <!-- Mobile Bottom Navigation Tab Bar -->
-    <nav class="lg:hidden bg-slate-900/95 backdrop-blur-md border-t border-slate-800 px-2 py-1.5 shrink-0 z-30 grid grid-cols-4 gap-1">
-        <button id="tab-btn-trace" onclick="switchMobileTab('trace')" class="flex flex-col items-center justify-center py-1 rounded-xl text-sky-400 bg-sky-500/10 border border-sky-500/20 transition relative">
+    <nav aria-label="Mobile Workspace Panels" class="lg:hidden bg-slate-900/95 backdrop-blur-md border-t border-slate-800 px-2 py-1.5 shrink-0 z-30 grid grid-cols-4 gap-1">
+        <button type="button" id="tab-btn-trace" onclick="switchMobileTab('trace')" class="flex flex-col items-center justify-center py-1 rounded-xl text-sky-400 bg-sky-500/10 border border-sky-500/20 transition relative">
             <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             <span class="text-[10px] font-semibold">Ray Trace</span>
-            <span id="badge-slider-count" class="absolute top-1 right-3 text-[9px] font-mono bg-sky-500 text-slate-950 font-bold px-1 rounded-full">4</span>
+            <span id="badge-slider-count" class="absolute top-1 right-3 text-[9px] font-mono bg-sky-500 text-slate-950 font-bold px-1 rounded-full">6</span>
         </button>
 
-        <button id="tab-btn-params" onclick="switchMobileTab('params')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 hover:text-slate-200 border border-transparent transition">
+        <button type="button" id="tab-btn-params" onclick="switchMobileTab('params')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 hover:text-slate-200 border border-transparent transition">
             <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-            <span class="text-[10px] font-medium">Parameters</span>
+            <span class="text-[10px] font-medium">Params &amp; Opt</span>
         </button>
 
-        <button id="tab-btn-metrics" onclick="switchMobileTab('metrics')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 hover:text-slate-200 border border-transparent transition">
+        <button type="button" id="tab-btn-metrics" onclick="switchMobileTab('metrics')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 hover:text-slate-200 border border-transparent transition">
             <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             <span class="text-[10px] font-medium">Specs &amp; r₀</span>
         </button>
 
-        <button id="tab-btn-pupil" onclick="switchMobileTab('pupil')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 hover:text-slate-200 border border-transparent transition">
+        <button type="button" id="tab-btn-pupil" onclick="switchMobileTab('pupil')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 hover:text-slate-200 border border-transparent transition">
             <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-            <span class="text-[10px] font-medium">Pupil & PSF</span>
+            <span class="text-[10px] font-medium">Pupil &amp; PSF</span>
         </button>
     </nav>
 
     <script>
         // ============================================================================
-        // 1. PARAMETER DEFINITIONS & STATE
+        // 1. PARAMETER DEFINITIONS & STATE (WITH OPTIMIZATION SELECTION FLAGS)
         // ============================================================================
         const parameters = [
-            { id: 'D1', name: 'Primary Aperture (D₁)', unit: 'mm', min: 50, max: 1000, step: 5, value: 250, sliderActive: true, desc: 'Clear aperture diameter of primary mirror' },
-            { id: 'F1', name: 'Primary Focal Ratio (f/#₁)', unit: '', min: 1.0, max: 5.0, step: 0.05, value: 2.0, sliderActive: true, desc: 'Focal ratio of primary mirror alone' },
-            { id: 'm', name: 'Secondary Magnification (m)', unit: '×', min: 2.0, max: 15.0, step: 0.1, value: 4.0, sliderActive: true, desc: 'Effective focal length multiplier' },
-            { id: 'd', name: 'M1-M2 Separation (d)', unit: 'mm', min: 50, max: 2000, step: 5, value: 380, sliderActive: true, desc: 'Axial distance between M1 and M2 vertices' },
-            { id: 'R1', name: 'Primary RoC (R₁)', unit: 'mm', min: -10000, max: -100, step: 10, value: -1000, sliderActive: false, desc: 'Alternative to f/#. Radius of Curvature of M1' },
-            { id: 'R2', name: 'Secondary RoC (R₂)', unit: 'mm', min: -5000, max: -10, step: 5, value: -333.3, sliderActive: false, desc: 'Alternative to m. Radius of Curvature of M2' },
-            { id: 'k1', name: 'Primary Conic (k₁)', unit: '', min: -5.0, max: 2.0, step: 0.005, value: -1.0, sliderActive: false, desc: 'Shape of M1 (0=sphere, -1=parabola)' },
-            { id: 'k2', name: 'Secondary Conic (k₂)', unit: '', min: -10.0, max: 5.0, step: 0.005, value: -2.778, sliderActive: false, desc: 'Shape of M2' },
-            { id: 'm3Z', name: 'Nasmyth M₃ Axial Pos (z₃)', unit: 'mm', min: -350, max: 50, step: 5, value: -100, sliderActive: true, desc: 'Axial Z position of 45° M3 fold mirror relative to M1 vertex' },
-            { id: 'seeing_arcsec', name: 'Astronomical Seeing (@500nm)', unit: 'arcsec', min: 0.35, max: 5.0, step: 0.05, value: 1.01, sliderActive: true, desc: 'Atmospheric seeing FWHM (coupled with r₀ = 0.98λ/θ)' },
-            { id: 'r0_500', name: 'Fried Parameter r₀ (@500nm)', unit: 'cm', min: 2.0, max: 30.0, step: 0.2, value: 10.0, sliderActive: false, desc: 'Atmospheric coherence diameter at zenith (synced w/ seeing)' },
-            { id: 'aoModes', name: 'AO Corrected Modes (N_AO)', unit: 'modes', min: 0, max: 150, step: 1, value: 15, sliderActive: false, desc: '0=No AO, 2=Tip/Tilt FSM, >2=Deformable Mirror Zernikes' },
-            { id: 'linkDist', name: 'FSOC Link Range (L)', unit: 'km', min: 10, max: 40000, step: 50, value: 1000, sliderActive: false, desc: 'Slant range between Tx spacecraft and Rx terminal' },
-            { id: 'txPower', name: 'Tx Optical Power (P_Tx)', unit: 'dBm', min: 0, max: 50, step: 0.5, value: 33.0, sliderActive: false, desc: 'Transmitter laser output power (33 dBm = 2W)' },
-            { id: 'jitterUr', name: 'Residual Pointing Jitter (σ_j)', unit: 'µrad', min: 0.1, max: 20.0, step: 0.2, value: 1.5, sliderActive: false, desc: '1-sigma RMS angular tracking error on Tx beam' },
-            { id: 'deltaT', name: 'Thermal Swing (ΔT)', unit: '°C', min: 1, max: 80, step: 1, value: 20, sliderActive: false, desc: 'Operating temperature excursion on metering structure' },
-            { id: 'fov', name: 'Acquisition Half-FOV (θ)', unit: 'mrad', min: 0.1, max: 10.0, step: 0.1, value: 2.0, sliderActive: false, desc: 'Half-angle field of view for tracking sensor' },
-            { id: 'lambda', name: 'Laser Wavelength (λ)', unit: 'nm', min: 500, max: 2000, step: 1, value: 1550, sliderActive: false, desc: 'Operating optical carrier wavelength' },
-            { id: 'detSize', name: 'SMF MFD / Detector Ø', unit: 'µm', min: 5, max: 200, step: 1, value: 30, sliderActive: false, desc: 'Single-mode fiber mode-field diameter' }
+            { id: 'D1', name: 'Primary Aperture (D₁)', unit: 'mm', min: 50, max: 1000, step: 5, value: 250, sliderActive: true, optimizeActive: false, desc: 'Clear aperture diameter of primary mirror' },
+            { id: 'F1', name: 'Primary Focal Ratio (f/#₁)', unit: '', min: 1.0, max: 5.0, step: 0.05, value: 2.0, sliderActive: true, optimizeActive: false, desc: 'Focal ratio of primary mirror alone' },
+            { id: 'm', name: 'Secondary Magnification (m)', unit: '×', min: 2.0, max: 15.0, step: 0.1, value: 4.0, sliderActive: true, optimizeActive: false, desc: 'Effective focal length multiplier' },
+            { id: 'd', name: 'M1-M2 Separation (d)', unit: 'mm', min: 50, max: 2000, step: 5, value: 380, sliderActive: true, optimizeActive: false, desc: 'Axial distance between M1 and M2 vertices' },
+            { id: 'R1', name: 'Primary RoC (R₁)', unit: 'mm', min: -10000, max: -100, step: 10, value: -1000, sliderActive: false, optimizeActive: false, desc: 'Alternative to f/#. Radius of Curvature of M1' },
+            { id: 'R2', name: 'Secondary RoC (R₂)', unit: 'mm', min: -5000, max: -10, step: 5, value: -333.3, sliderActive: false, optimizeActive: false, desc: 'Alternative to m. Radius of Curvature of M2' },
+            { id: 'k1', name: 'Primary Conic (k₁)', unit: '', min: -5.0, max: 2.0, step: 0.005, value: -1.0, sliderActive: false, optimizeActive: true, desc: 'Shape of M1 (0=sphere, -1=parabola, <-1=hyperbola)' },
+            { id: 'k2', name: 'Secondary Conic (k₂)', unit: '', min: -12.0, max: 5.0, step: 0.005, value: -2.778, sliderActive: false, optimizeActive: true, desc: 'Shape of M2 (optimize k₁ & k₂ for zero coma/spherical)' },
+            { id: 'm3Z', name: 'Nasmyth M₃ Axial Pos (z₃)', unit: 'mm', min: -350, max: 50, step: 5, value: -100, sliderActive: true, optimizeActive: false, desc: 'Axial Z position of 45° M3 fold mirror relative to M1 vertex' },
+            { id: 'seeing_arcsec', name: 'Astronomical Seeing (@500nm)', unit: 'arcsec', min: 0.35, max: 5.0, step: 0.05, value: 1.01, sliderActive: true, optimizeActive: false, desc: 'Atmospheric seeing FWHM (coupled with r₀ = 0.98λ/θ)' },
+            { id: 'r0_500', name: 'Fried Parameter r₀ (@500nm)', unit: 'cm', min: 2.0, max: 30.0, step: 0.2, value: 10.0, sliderActive: false, optimizeActive: false, desc: 'Atmospheric coherence diameter at zenith (synced w/ seeing)' },
+            { id: 'aoModes', name: 'AO Corrected Modes (N_AO)', unit: 'modes', min: 0, max: 150, step: 1, value: 15, sliderActive: false, optimizeActive: false, desc: '0=No AO, 2=Tip/Tilt FSM, >2=Deformable Mirror Zernikes' },
+            { id: 'linkDist', name: 'FSOC Link Range (L)', unit: 'km', min: 10, max: 40000, step: 50, value: 1000, sliderActive: false, optimizeActive: false, desc: 'Slant range between Tx spacecraft and Rx terminal' },
+            { id: 'txPower', name: 'Tx Optical Power (P_Tx)', unit: 'dBm', min: 0, max: 50, step: 0.5, value: 33.0, sliderActive: false, optimizeActive: false, desc: 'Transmitter laser output power (33 dBm = 2W)' },
+            { id: 'jitterUr', name: 'Residual Pointing Jitter (σ_j)', unit: 'µrad', min: 0.1, max: 20.0, step: 0.2, value: 1.5, sliderActive: false, optimizeActive: false, desc: '1-sigma RMS angular tracking error on Tx beam' },
+            { id: 'deltaT', name: 'Thermal Swing (ΔT)', unit: '°C', min: 1, max: 80, step: 1, value: 20, sliderActive: false, optimizeActive: false, desc: 'Operating temperature excursion on metering structure' },
+            { id: 'fov', name: 'Acquisition Half-FOV (θ)', unit: 'mrad', min: 0.1, max: 10.0, step: 0.1, value: 2.0, sliderActive: false, optimizeActive: false, desc: 'Half-angle field of view for tracking sensor' },
+            { id: 'lambda', name: 'Laser Wavelength (λ)', unit: 'nm', min: 500, max: 2000, step: 1, value: 1550, sliderActive: false, optimizeActive: false, desc: 'Operating optical carrier wavelength' },
+            { id: 'detSize', name: 'SMF MFD / Detector Ø', unit: 'µm', min: 5, max: 200, step: 1, value: 30, sliderActive: false, optimizeActive: false, desc: 'Single-mode fiber mode-field diameter' }
         ];
 
         let viewState = {
@@ -945,6 +977,7 @@
         let activeMobileTab = 'trace';
         let activeMetricsSubTab = 'optics';
         let openBounds = {};
+        let preOptimizationSnapshot = null;
 
         function switchMetricsSubTab(subTab) {
             activeMetricsSubTab = subTab;
@@ -955,10 +988,12 @@
                 if (t === subTab) {
                     content.classList.remove('hidden');
                     content.classList.add('flex');
+                    btn.setAttribute('aria-selected', 'true');
                     btn.className = 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-sky-500/20 text-sky-400 border border-sky-500/30 transition flex items-center gap-1';
                 } else {
                     content.classList.add('hidden');
                     content.classList.remove('flex');
+                    btn.setAttribute('aria-selected', 'false');
                     btn.className = 'px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-400 hover:text-slate-200 border border-transparent transition flex items-center gap-1';
                 }
             });
@@ -981,8 +1016,20 @@
             renderActiveSliders();
             setupCanvasInteractions();
             setupDesktopResizers();
+            setupOptimizerUI();
             switchMobileTab('trace');
             recalculate();
+        }
+
+        function setupOptimizerUI() {
+            const objSelect = document.getElementById('opt-objective');
+            if (objSelect) {
+                objSelect.addEventListener('change', () => {
+                    const isTargetEfl = objSelect.value === 'target_efl';
+                    document.getElementById('opt-target-efl-wrap')?.classList.toggle('hidden', !isTargetEfl);
+                    document.getElementById('opt-min-bwd-wrap')?.classList.toggle('hidden', isTargetEfl);
+                });
+            }
         }
 
         function setupDesktopResizers() {
@@ -1126,6 +1173,25 @@
             renderActiveSliders();
         }
 
+        function toggleOptimizeParam(id, checked) {
+            const param = parameters.find(p => p.id === id);
+            if (!param) return;
+            param.optimizeActive = checked;
+            updateOptimizerBadgeCount();
+            saveState();
+        }
+
+        function updateOptimizerBadgeCount() {
+            const count = parameters.filter(p => p.optimizeActive).length;
+            const badge = document.getElementById('opt-active-count');
+            if (badge) {
+                badge.textContent = `${count} var${count === 1 ? '' : 's'} selected`;
+                badge.className = count > 0
+                    ? 'text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    : 'text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30';
+            }
+        }
+
         function renderParameterList() {
             const container = document.getElementById('parameter-list');
             container.innerHTML = '';
@@ -1136,7 +1202,8 @@
                 row.innerHTML = `
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-1.5 min-w-0">
-                            <button onclick="toggleSlider('${param.id}')" title="Pin/Unpin Interactive Slider"
+                            <!-- Pin to Interactive Sliders Button -->
+                            <button type="button" onclick="toggleSlider('${param.id}')" title="Pin/Unpin Interactive Slider"
                                 class="p-1.5 rounded-lg border transition shrink-0 ${param.sliderActive 
                                     ? 'bg-sky-500/20 border-sky-500/50 text-sky-400 shadow-sm shadow-sky-500/20' 
                                     : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'}">
@@ -1144,14 +1211,28 @@
                                     <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z"/>
                                 </svg>
                             </button>
-                            <button onclick="toggleBounds('${param.id}')" title="Edit Range Bounds"
+
+                            <!-- Select Parameter for Numerical Optimization Checkbox -->
+                            <label title="Check to allow the Numerical Optimizer to vary ${param.name}"
+                                class="flex items-center gap-1 px-1.5 py-1 rounded-lg border cursor-pointer transition shrink-0 select-none ${param.optimizeActive
+                                    ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
+                                    : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'}">
+                                <input type="checkbox" ${param.optimizeActive ? 'checked' : ''}
+                                    onchange="toggleOptimizeParam('${param.id}', this.checked); renderParameterList();"
+                                    class="w-3 h-3 rounded bg-slate-950 border-slate-600 text-emerald-500 focus:ring-0 cursor-pointer">
+                                <span class="text-[9px] font-mono uppercase font-semibold">Opt</span>
+                            </label>
+
+                            <!-- Edit Min/Max Bounds Button -->
+                            <button type="button" onclick="toggleBounds('${param.id}')" title="Edit Range Bounds"
                                 class="p-1.5 rounded-lg border transition shrink-0 ${openBounds[param.id] 
                                     ? 'bg-amber-500/20 border-amber-500/50 text-amber-400 shadow-sm shadow-amber-500/20' 
                                     : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'}">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             </button>
+
                             <div class="truncate ml-1">
-                                <div class="text-xs font-medium text-slate-200 truncate">${param.name}</div>
+                                <label for="input-${param.id}" class="text-xs font-medium text-slate-200 truncate block cursor-pointer">${param.name}</label>
                                 <div class="text-[10px] text-slate-400 truncate">${param.desc}</div>
                             </div>
                         </div>
@@ -1166,7 +1247,7 @@
                     </div>
                     ${openBounds[param.id] ? `
                     <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-700/50">
-                        <div class="text-[10px] text-slate-400">Adjust Slider Limits:</div>
+                        <div class="text-[10px] text-slate-400">Slider &amp; Optimizer Limits:</div>
                         <div class="flex items-center gap-2">
                             <span class="text-[10px] text-slate-500">Min</span>
                             <input type="number" value="${param.min}" step="${param.step}" onchange="updateBound('${param.id}', 'min', this.value)" class="w-16 bg-slate-950 border border-slate-700 focus:border-amber-500 rounded px-1.5 py-0.5 text-right text-[11px] font-mono text-amber-300 focus:outline-none">
@@ -1178,6 +1259,8 @@
                 `;
                 container.appendChild(row);
             });
+
+            updateOptimizerBadgeCount();
         }
 
         function renderActiveSliders() {
@@ -1191,7 +1274,7 @@
             if (activeParams.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-3 text-xs text-slate-500 border border-dashed border-slate-800 rounded-xl">
-                        Tap <span class="text-sky-400 font-medium">Parameters</span> tab to pin sliders for live tuning.
+                        Tap <span class="text-sky-400 font-medium">Params &amp; Opt</span> tab to pin sliders for live tuning.
                     </div>
                 `;
                 return;
@@ -1202,9 +1285,9 @@
                 block.className = 'bg-slate-850/90 border border-slate-800/90 rounded-xl px-3 py-2';
                 block.innerHTML = `
                     <div class="flex items-center justify-between text-xs mb-1">
-                        <span class="font-medium text-slate-200 truncate pr-2">${param.name}</span>
+                        <label for="slider-${param.id}" class="font-medium text-slate-200 truncate pr-2">${param.name}</label>
                         <span class="font-mono text-sky-400 font-semibold shrink-0">
-                            <span id="slider-val-${param.id}">${param.value}</span> ${param.unit}
+                            <output id="slider-val-${param.id}">${param.value}</output> ${param.unit}
                         </span>
                     </div>
                     <div class="flex items-center gap-2">
@@ -1226,7 +1309,17 @@
                 param.sliderActive = !param.sliderActive;
                 renderParameterList();
                 renderActiveSliders();
+                saveState();
             }
+        }
+
+        function syncInputDisplays(id, val) {
+            const numInput = document.getElementById(`input-${id}`);
+            if (numInput) numInput.value = val;
+            const rangeInput = document.getElementById(`slider-${id}`);
+            if (rangeInput) rangeInput.value = val;
+            const labelVal = document.getElementById(`slider-val-${id}`);
+            if (labelVal) labelVal.textContent = val;
         }
 
         function updateParamValue(id, rawVal, source) {
@@ -1243,6 +1336,21 @@
             const param = parameters.find(p => p.id === id);
             if (!param) return;
             param.value = val;
+
+            // Physical bidirectional coupling between Seeing (@500nm) and Fried Parameter r0 (@500nm)
+            if (id === 'seeing_arcsec' && val > 0) {
+                const r0Param = parameters.find(p => p.id === 'r0_500');
+                if (r0Param) {
+                    r0Param.value = Number((10.107 / val).toFixed(2));
+                    syncInputDisplays('r0_500', r0Param.value);
+                }
+            } else if (id === 'r0_500' && val > 0) {
+                const seeingParam = parameters.find(p => p.id === 'seeing_arcsec');
+                if (seeingParam) {
+                    seeingParam.value = Number((10.107 / val).toFixed(2));
+                    syncInputDisplays('seeing_arcsec', seeingParam.value);
+                }
+            }
 
             if (source !== 'number') {
                 const numInput = document.getElementById(`input-${id}`);
@@ -1263,7 +1371,261 @@
         }
 
         // ============================================================================
-        // 3. OPTICAL & ATMOSPHERIC PHYSICS ENGINE
+        // 3. DETERMINISTIC NUMERICAL OPTIMIZER (NELDER-MEAD + COORDINATE DESCENT)
+        // ============================================================================
+        function evaluateSpotRmsUm(model, fovRad) {
+            const dz0 = Math.cos(fovRad);
+            const dy0 = Math.sin(fovRad);
+            const zStart = -model.d * 1.22;
+            const nRings = 4;
+            const spots = [];
+
+            for (let rIdx = 1; rIdx <= nRings; rIdx++) {
+                const r = (model.D2 / 2) + (model.D1 / 2 - model.D2 / 2) * (rIdx / nRings);
+                if (r <= model.D2 / 2 || r > model.D1 / 2) continue;
+                const nPoints = rIdx * 6;
+                for (let i = 0; i < nPoints; i++) {
+                    const theta = (i / nPoints) * Math.PI * 2;
+                    const rx = r * Math.cos(theta);
+                    const ry = r * Math.sin(theta);
+                    const yIn = ry + (zStart - 0) * (dy0 / dz0);
+                    const yAtM2 = ry + (-model.d - 0) * (dy0 / dz0);
+                    if (Math.hypot(rx, yAtM2) <= model.D2 / 2) continue;
+
+                    const hit1 = intersectAndReflectConic3D(rx, yIn, zStart, 0, dy0, dz0, 0.0, model.R1, model.k1);
+                    const hit2 = intersectAndReflectConic3D(hit1.xHit, hit1.yHit, hit1.zHit, hit1.rdx, hit1.rdy, hit1.rdz, -model.d, model.R2, model.k2);
+                    if (Math.abs(hit2.rdz) < 1e-6) continue;
+                    const tFocus = (model.b - hit2.zHit) / hit2.rdz;
+                    const xFocus = hit2.xHit + tFocus * hit2.rdx;
+                    const yFocus = hit2.yHit + tFocus * hit2.rdy;
+                    spots.push({ x: xFocus * 1000, y: yFocus * 1000 });
+                }
+            }
+
+            if (spots.length < 3) return 9999.0;
+            let sumX = 0, sumY = 0;
+            spots.forEach(s => { sumX += s.x; sumY += s.y; });
+            const cx = sumX / spots.length;
+            const cy = sumY / spots.length;
+            let sumSq = 0;
+            spots.forEach(s => {
+                sumSq += (s.x - cx) ** 2 + (s.y - cy) ** 2;
+            });
+            return Math.sqrt(sumSq / spots.length);
+        }
+
+        function runNumericalOptimization() {
+            const activeVars = parameters.filter(p => p.optimizeActive);
+            if (activeVars.length === 0) {
+                showToast('Select at least one parameter checkbox ("Opt") to optimize!');
+                return;
+            }
+
+            // Save snapshot for Undo
+            preOptimizationSnapshot = parameters.map(p => ({ id: p.id, value: p.value }));
+            const prescriptionSelect = document.getElementById('prescription-type');
+            const prevPrescription = prescriptionSelect ? prescriptionSelect.value : 'classical';
+
+            // If optimizing conic or RoC parameters directly, switch to Custom Conic mode so they aren't overwritten
+            if (activeVars.some(v => ['k1', 'k2', 'R1', 'R2'].includes(v.id)) && prescriptionSelect) {
+                prescriptionSelect.value = 'custom';
+            }
+
+            const objectiveType = document.getElementById('opt-objective')?.value || 'rms_spot';
+            const targetEfl = parseFloat(document.getElementById('opt-target-efl')?.value || '2000');
+            const minBwd = parseFloat(document.getElementById('opt-min-bwd')?.value || '80');
+
+            const n = activeVars.length;
+
+            // Map normalized vector u in [0, 1]^n to parameter values
+            const applyVector = (u) => {
+                for (let i = 0; i < n; i++) {
+                    const p = activeVars[i];
+                    const clamped = Math.max(0, Math.min(1, u[i]));
+                    const val = p.min + clamped * (p.max - p.min);
+                    p.value = val;
+                    if (p.id === 'seeing_arcsec' && val > 0) {
+                        const r0P = parameters.find(x => x.id === 'r0_500');
+                        if (r0P) r0P.value = 10.107 / val;
+                    } else if (p.id === 'r0_500' && val > 0) {
+                        const sP = parameters.find(x => x.id === 'seeing_arcsec');
+                        if (sP) sP.value = 10.107 / val;
+                    }
+                }
+            };
+
+            // Objective Cost Function (Lower is better)
+            const costFunction = (u) => {
+                let boundPenalty = 0;
+                for (let i = 0; i < n; i++) {
+                    if (u[i] < 0) boundPenalty += 1e6 * (u[i] * u[i]);
+                    if (u[i] > 1) boundPenalty += 1e6 * ((u[i] - 1) * (u[i] - 1));
+                }
+
+                applyVector(u);
+                const model = computeOpticalModel();
+
+                // Physical Geometry Penalties
+                let penalty = boundPenalty;
+                if (model.p1 <= 10) penalty += 5e5 + (10 - model.p1) * 1e4;
+                if (model.b < minBwd) penalty += 500 * Math.pow(minBwd - model.b, 2);
+                if (model.epsLinear > 0.45) penalty += 5000 * Math.pow((model.epsLinear - 0.45) * 100, 2);
+                if (model.epsLinear <= 0.05 || isNaN(model.EFL) || model.EFL <= 0) penalty += 1e6;
+
+                if (objectiveType === 'rms_spot') {
+                    const rms0 = evaluateSpotRmsUm(model, 0);
+                    const rmsFov = evaluateSpotRmsUm(model, model.fovRad);
+                    return penalty + 0.45 * rms0 + 0.55 * rmsFov + 0.15 * model.comaSpotUm;
+                } else if (objectiveType === 'smf_coupling') {
+                    const rms0 = evaluateSpotRmsUm(model, 0);
+                    const aberPenalty = rms0 > model.airyDiaUm * 0.5 ? (rms0 - model.airyDiaUm * 0.5) * 2.0 : 0;
+                    return penalty - model.couplingEst * 10.0 + aberPenalty;
+                } else if (objectiveType === 'strehl') {
+                    const rmsFov = evaluateSpotRmsUm(model, model.fovRad);
+                    return penalty - model.netStrehl * 1000.0 + model.epsArea * 250.0 + rmsFov * 0.2;
+                } else if (objectiveType === 'target_efl') {
+                    const eflErr = Math.abs(model.EFL - targetEfl);
+                    const rmsFov = evaluateSpotRmsUm(model, model.fovRad);
+                    return penalty + eflErr * 2.5 + rmsFov * 1.2 + model.comaSpotUm * 0.5;
+                }
+                return penalty;
+            };
+
+            // Initial normalized vector u0
+            let uBest = activeVars.map(p => (p.value - p.min) / Math.max(1e-9, p.max - p.min));
+            const initialCost = costFunction(uBest);
+            let bestCost = initialCost;
+
+            // Phase 1: Multi-Scale Coordinate Pattern Search (escapes shallow local traps)
+            const stepSizes = [0.15, 0.05, 0.015, 0.004, 0.001];
+            for (const step of stepSizes) {
+                let improved = true;
+                let iter = 0;
+                while (improved && iter < 30) {
+                    improved = false;
+                    iter++;
+                    for (let i = 0; i < n; i++) {
+                        for (const dir of [1, -1]) {
+                            const uCand = uBest.slice();
+                            uCand[i] = Math.max(0, Math.min(1, uCand[i] + dir * step));
+                            const c = costFunction(uCand);
+                            if (c < bestCost - 1e-7) {
+                                bestCost = c;
+                                uBest = uCand;
+                                improved = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Phase 2: Nelder-Mead Downhill Simplex Refinement
+            let simplex = [uBest.slice()];
+            for (let i = 0; i < n; i++) {
+                const v = uBest.slice();
+                const delta = v[i] + 0.025 <= 1.0 ? 0.025 : -0.025;
+                v[i] = Math.max(0, Math.min(1, v[i] + delta));
+                simplex.push(v);
+            }
+            let fVals = simplex.map(v => costFunction(v));
+
+            const maxSimplexIter = 140;
+            for (let iter = 0; iter < maxSimplexIter; iter++) {
+                // Sort simplex vertices by objective cost
+                const idx = Array.from({ length: n + 1 }, (_, i) => i).sort((a, b) => fVals[a] - fVals[b]);
+                simplex = idx.map(i => simplex[i]);
+                fVals = idx.map(i => fVals[i]);
+
+                if (Math.abs(fVals[n] - fVals[0]) < 1e-6) break;
+
+                // Centroid of best n vertices
+                const centroid = new Array(n).fill(0);
+                for (let i = 0; i < n; i++) {
+                    for (let j = 0; j < n; j++) centroid[j] += simplex[i][j] / n;
+                }
+
+                // Reflection
+                const xr = centroid.map((c, j) => Math.max(0, Math.min(1, c + 1.0 * (c - simplex[n][j]))));
+                const fr = costFunction(xr);
+
+                if (fr < fVals[0]) {
+                    // Expansion
+                    const xe = centroid.map((c, j) => Math.max(0, Math.min(1, c + 2.0 * (xr[j] - c))));
+                    const fe = costFunction(xe);
+                    if (fe < fr) { simplex[n] = xe; fVals[n] = fe; }
+                    else { simplex[n] = xr; fVals[n] = fr; }
+                } else if (fr < fVals[n - 1]) {
+                    simplex[n] = xr; fVals[n] = fr;
+                } else {
+                    // Contraction
+                    const xc = centroid.map((c, j) => Math.max(0, Math.min(1, c + 0.5 * (simplex[n][j] - c))));
+                    const fc = costFunction(xc);
+                    if (fc < fVals[n]) {
+                        simplex[n] = xc; fVals[n] = fc;
+                    } else {
+                        // Shrink around best vertex
+                        for (let i = 1; i <= n; i++) {
+                            simplex[i] = simplex[i].map((val, j) => 0.5 * (simplex[0][j] + val));
+                            fVals[i] = costFunction(simplex[i]);
+                        }
+                    }
+                }
+            }
+
+            if (fVals[0] < bestCost) {
+                bestCost = fVals[0];
+                uBest = simplex[0];
+            }
+
+            // Apply final optimized vector & round cleanly
+            applyVector(uBest);
+            activeVars.forEach(p => {
+                const decimals = p.step < 0.01 ? 4 : (p.step < 0.1 ? 3 : (p.step < 1 ? 2 : 1));
+                p.value = Number(p.value.toFixed(decimals));
+            });
+
+            const undoBtn = document.getElementById('btn-undo-opt');
+            if (undoBtn) {
+                undoBtn.disabled = false;
+                undoBtn.dataset.prevPrescription = prevPrescription;
+            }
+
+            renderParameterList();
+            renderActiveSliders();
+            recalculate();
+
+            const finalModel = computeOpticalModel();
+            const finalRms = evaluateSpotRmsUm(finalModel, finalModel.fovRad);
+            const statusEl = document.getElementById('opt-status-text');
+            if (statusEl) {
+                statusEl.textContent = `Converged! RMS(θ): ${finalRms.toFixed(1)}µm | η_SMF: ${finalModel.couplingEst.toFixed(1)}% | Strehl: ${finalModel.netStrehl.toFixed(2)}`;
+                statusEl.className = 'text-[10px] font-mono text-emerald-300 truncate';
+            }
+            showToast(`Optimization complete across ${n} parameter${n > 1 ? 's' : ''}!`);
+        }
+
+        function undoOptimization() {
+            if (!preOptimizationSnapshot) return;
+            preOptimizationSnapshot.forEach(snap => {
+                const p = parameters.find(item => item.id === snap.id);
+                if (p) p.value = snap.value;
+            });
+            const undoBtn = document.getElementById('btn-undo-opt');
+            if (undoBtn) {
+                const prevPresc = undoBtn.dataset.prevPrescription;
+                if (prevPresc && document.getElementById('prescription-type')) {
+                    document.getElementById('prescription-type').value = prevPresc;
+                }
+                undoBtn.disabled = true;
+            }
+            renderParameterList();
+            renderActiveSliders();
+            recalculate();
+            showToast('Reverted to pre-optimization parameters.');
+        }
+
+        // ============================================================================
+        // 4. OPTICAL & ATMOSPHERIC PHYSICS ENGINE
         // ============================================================================
         function getNollResidualVariance(N, dOverR0) {
             const factor = Math.pow(Math.max(0.001, dOverR0), 5.0 / 3.0);
@@ -1347,11 +1709,11 @@
             }
             
             // AUTO-FOCUS: Exact zonal ray trace to find optimal Back Working Distance (b) and EFL
-            let b = p1 * (m + 1) - f1; // Default to paraxial
+            let b = p1 * (m + 1) - f1;
             let EFL = f1 * m;
             
             const zStartFocus = -d * 2.0; 
-            const yZone = (D1 / 2) * 0.70710678; // 70.7% aperture zone (best focus for spherical aberration)
+            const yZone = (D1 / 2) * 0.70710678;
             const hit1Focus = intersectAndReflectConic(zStartFocus, yZone, 1.0, 0.0, 0.0, R1, k1);
             const hit2Focus = intersectAndReflectConic(hit1Focus.zHit, hit1Focus.yHit, hit1Focus.rdz, hit1Focus.rdy, -d, R2, k2);
             
@@ -1389,6 +1751,11 @@
             let comaFactor = 1.0;
             if (prescription === 'rc') comaFactor = 0.0;
             else if (prescription === 'dall_kirkham') comaFactor = 3.2;
+            else if (prescription === 'custom') {
+                // Estimate residual coma from conic deviation relative to RC condition
+                const k1_rc = -1.0 - (2.0 * p1 * Math.pow(1.0 / m, 2)) / (d * m);
+                comaFactor = Math.min(4.0, Math.abs(k1 - k1_rc) / Math.max(0.02, Math.abs(1.0 + k1_rc)));
+            }
             const comaSpotUm = comaFactor * classicalComaRad * EFL * 1000;
 
             const despaceSensitivity = m * m + 1;
@@ -1487,8 +1854,20 @@
         }
 
         // ============================================================================
-        // 4. MASTER RECALCULATION, DOM METRICS & AO CURVE RENDERER
+        // 5. MASTER RECALCULATION, DOM METRICS & HIGH-DPI CANVAS SETUP
         // ============================================================================
+        function prepareCanvasContext(canvas, logicalW, logicalH) {
+            const scale = window.pdfRenderScale || (window.devicePixelRatio || 1);
+            if (canvas.width !== Math.round(logicalW * scale) || canvas.height !== Math.round(logicalH * scale)) {
+                canvas.width = Math.round(logicalW * scale);
+                canvas.height = Math.round(logicalH * scale);
+            }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(scale, 0, 0, scale, 0, 0);
+            ctx.clearRect(0, 0, logicalW, logicalH);
+            return ctx;
+        }
+
         function formatBer(ber) {
             if (ber <= 1.05e-12) return '≤ 10⁻¹²';
             const exp = Math.floor(Math.log10(ber));
@@ -1550,7 +1929,7 @@
                     badge.textContent = 'Dall-Kirkham (Spherical M₂)';
                     badge.className = 'text-[10px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 hidden sm:inline';
                 } else if (model.prescription === 'custom') {
-                    badge.textContent = 'Custom Conic Constants';
+                    badge.textContent = 'Custom / Optimized Conics';
                     badge.className = 'text-[10px] font-mono text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20 hidden sm:inline';
                 } else {
                     badge.textContent = 'Classical (M₁ Parabola)';
@@ -1561,12 +1940,7 @@
             if (model.prescription !== 'custom') {
                 ['k1', 'k2', 'R1', 'R2'].forEach(id => {
                     const val = model[id];
-                    const numInput = document.getElementById(`input-${id}`);
-                    if (numInput) numInput.value = Number(val.toFixed(4));
-                    const rangeInput = document.getElementById(`slider-${id}`);
-                    if (rangeInput) rangeInput.value = val;
-                    const labelVal = document.getElementById(`slider-val-${id}`);
-                    if (labelVal) labelVal.textContent = Number(val.toFixed(4));
+                    syncInputDisplays(id, Number(val.toFixed(4)));
                 });
             }
 
@@ -1688,10 +2062,8 @@
         function drawAOCurve(model) {
             const canvas = document.getElementById('aoCurveCanvas');
             if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const W = canvas.width;
-            const H = canvas.height;
-            ctx.clearRect(0, 0, W, H);
+            const W = 240, H = 115;
+            const ctx = prepareCanvasContext(canvas, W, H);
 
             const isLight = window.isPdfExporting || document.documentElement.classList.contains('light');
 
@@ -1730,7 +2102,6 @@
             }
             ctx.stroke();
 
-            // Active Operating Point Marker
             const activeN = Math.min(maxModes, model.aoModes);
             const activeX = padL + (activeN / maxModes) * pW;
             const activeY = padT + pH * (1 - model.netStrehl);
@@ -1748,10 +2119,13 @@
             drawPupilAndPSF(model);
             drawSpotDiagram(model);
             drawAOCurve(model);
+            if (!window.isPdfExporting) {
+                saveState();
+            }
         }
 
         // ============================================================================
-        // 5. 2D RAY TRACE CANVAS (EXACT VECTOR SNELL/LAW OF REFLECTION ENGINE)
+        // 6. 2D RAY TRACE CANVAS (EXACT VECTOR SNELL/LAW OF REFLECTION ENGINE)
         // ============================================================================
         function getConicSag(y, R, k, useExact) {
             if (!useExact || R === 0) return (y * y) / (2 * R);
@@ -1830,7 +2204,7 @@
             return { xHit, yHit, zHit, rdx, rdy, rdz };
         }
 
-        function drawRayTrace(model, targetCanvas = null, targetW = 0, targetH = 0) {
+        function drawRayTrace(model, targetCanvas = null, targetW = 0, targetH = 0, customDpr = 0) {
             let canvas = targetCanvas || document.getElementById('rayCanvas');
             let wrapper = targetCanvas ? null : document.getElementById('canvas-wrapper');
             if (!canvas) return;
@@ -1839,7 +2213,7 @@
             if (targetCanvas) {
                 W = targetW;
                 H = targetH;
-                dpr = 1;
+                dpr = customDpr || 3;
             } else {
                 if (!wrapper) return;
                 const rect = wrapper.getBoundingClientRect();
@@ -1849,8 +2223,8 @@
                 dpr = window.devicePixelRatio || 1;
             }
 
-            canvas.width = W * dpr;
-            canvas.height = H * dpr;
+            canvas.width = Math.round(W * dpr);
+            canvas.height = Math.round(H * dpr);
 
             const ctx = canvas.getContext('2d');
             ctx.save();
@@ -1895,7 +2269,7 @@
 
             // Optical Axis
             ctx.save();
-            ctx.strokeStyle = isLight ? 'rgba(15, 23, 42, 0.2)' : 'rgba(148, 163, 184, 0.25)';
+            ctx.strokeStyle = isLight ? 'rgba(15, 23, 42, 0.22)' : 'rgba(148, 163, 184, 0.25)';
             ctx.lineWidth = 1;
             ctx.setLineDash([6, 4]);
             ctx.beginPath();
@@ -1911,7 +2285,7 @@
             const tubeRightX = toScreenX(0);
 
             ctx.save();
-            ctx.strokeStyle = isLight ? 'rgba(15, 23, 42, 0.3)' : 'rgba(71, 85, 105, 0.5)';
+            ctx.strokeStyle = isLight ? 'rgba(15, 23, 42, 0.35)' : 'rgba(71, 85, 105, 0.5)';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(tubeLeftX, tubeTopY);
@@ -1951,8 +2325,7 @@
             // Internal Stray-Light Baffles
             if (showBaffles) {
                 ctx.save();
-                ctx.strokeStyle = isLight ? '#000000' : 'rgba(148, 163, 184, 0.65)';
-                ctx.fillStyle = isLight ? 'rgba(15, 23, 42, 0.8)' : 'rgba(30, 41, 59, 0.55)';
+                ctx.strokeStyle = isLight ? '#0f172a' : 'rgba(148, 163, 184, 0.65)';
                 ctx.lineWidth = 1.5;
 
                 const b1Len = model.d * 0.52;
@@ -1991,7 +2364,7 @@
                 if (absY0 <= model.D2 / 2) {
                     const zStop = -model.d + getConicSag(y0, model.R2, model.k2, exactConic) - 4;
                     ctx.save();
-                    ctx.strokeStyle = isLight ? 'rgba(225, 29, 72, 0.5)' : 'rgba(244, 63, 94, 0.55)';
+                    ctx.strokeStyle = isLight ? 'rgba(225, 29, 72, 0.55)' : 'rgba(244, 63, 94, 0.55)';
                     ctx.lineWidth = 1.1;
                     ctx.setLineDash([3, 3]);
                     ctx.beginPath();
@@ -2010,10 +2383,10 @@
 
                 ctx.save();
                 if (Math.abs(frac) > 0.95) {
-                    ctx.strokeStyle = isLight ? 'rgba(37, 99, 235, 0.8)' : 'rgba(56, 189, 248, 0.92)';
+                    ctx.strokeStyle = isLight ? 'rgba(2, 132, 199, 0.9)' : 'rgba(56, 189, 248, 0.92)';
                     ctx.lineWidth = 1.5;
                 } else {
-                    ctx.strokeStyle = isLight ? 'rgba(37, 99, 235, 0.3)' : 'rgba(56, 189, 248, 0.42)';
+                    ctx.strokeStyle = isLight ? 'rgba(2, 132, 199, 0.38)' : 'rgba(56, 189, 248, 0.42)';
                     ctx.lineWidth = 1.0;
                 }
                 ctx.beginPath();
@@ -2055,7 +2428,7 @@
                     const yFocus = hit2.yHit + tFocus * hit2.rdy;
 
                     ctx.save();
-                    ctx.strokeStyle = isLight ? 'rgba(217, 119, 6, 0.7)' : 'rgba(251, 191, 36, 0.82)';
+                    ctx.strokeStyle = isLight ? 'rgba(217, 119, 6, 0.8)' : 'rgba(251, 191, 36, 0.82)';
                     ctx.lineWidth = 1.25;
                     ctx.setLineDash([5, 3]);
                     ctx.beginPath();
@@ -2083,7 +2456,7 @@
             const m1Thickness = Math.max(8, model.D1 * 0.06);
             [1, -1].forEach(dir => {
                 ctx.save();
-                ctx.fillStyle = isLight ? 'rgba(186, 230, 253, 0.5)' : 'rgba(30, 58, 138, 0.45)';
+                ctx.fillStyle = isLight ? 'rgba(186, 230, 253, 0.6)' : 'rgba(30, 58, 138, 0.45)';
                 ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -2109,7 +2482,7 @@
             // M2 Mirror
             const m2Thickness = Math.max(5, model.D2 * 0.08);
             ctx.save();
-            ctx.fillStyle = isLight ? 'rgba(203, 213, 225, 0.8)' : 'rgba(51, 65, 85, 0.75)';
+            ctx.fillStyle = isLight ? 'rgba(203, 213, 225, 0.85)' : 'rgba(51, 65, 85, 0.75)';
             ctx.strokeStyle = isLight ? '#334155' : '#7dd3fc';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -2159,7 +2532,7 @@
                 ctx.restore();
 
                 ctx.save();
-                ctx.fillStyle = isLight ? 'rgba(165, 180, 252, 0.5)' : 'rgba(79, 70, 229, 0.45)';
+                ctx.fillStyle = isLight ? 'rgba(165, 180, 252, 0.55)' : 'rgba(79, 70, 229, 0.45)';
                 ctx.strokeStyle = isLight ? '#4f46e5' : '#a5b4fc';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -2191,7 +2564,7 @@
             // Dimension Callouts
             if (showDims) {
                 ctx.save();
-                ctx.strokeStyle = isLight ? 'rgba(71, 85, 105, 0.6)' : 'rgba(148, 163, 184, 0.45)';
+                ctx.strokeStyle = isLight ? 'rgba(71, 85, 105, 0.7)' : 'rgba(148, 163, 184, 0.45)';
                 ctx.fillStyle = isLight ? '#334155' : '#94a3b8';
                 ctx.font = '500 10px "JetBrains Mono", monospace';
                 ctx.lineWidth = 1;
@@ -2231,7 +2604,7 @@
                     const xNas = toScreenX(model.nasmythFocusZ);
 
                     const z3DimY = toScreenY(model.D1 / 2 + 42);
-                    ctx.strokeStyle = isLight ? 'rgba(79, 70, 229, 0.5)' : 'rgba(129, 140, 248, 0.65)';
+                    ctx.strokeStyle = isLight ? 'rgba(79, 70, 229, 0.55)' : 'rgba(129, 140, 248, 0.65)';
                     ctx.fillStyle = isLight ? '#4f46e5' : '#a5b4fc';
                     ctx.beginPath();
                     ctx.moveTo(xM3, z3DimY);
@@ -2257,7 +2630,7 @@
                     const fpHalfH = Math.max(model.D1 * 0.14, model.focalSpotDia * 1.5);
                     const yDimX = xNas - Math.max(24, fpHalfH * scale + 14);
 
-                    ctx.strokeStyle = isLight ? 'rgba(5, 150, 105, 0.7)' : 'rgba(52, 211, 153, 0.7)';
+                    ctx.strokeStyle = isLight ? 'rgba(5, 150, 105, 0.75)' : 'rgba(52, 211, 153, 0.7)';
                     ctx.fillStyle = isLight ? '#059669' : '#6ee7b7';
                     ctx.beginPath();
                     ctx.moveTo(yDimX, yAxis);
@@ -2342,25 +2715,23 @@
         }
 
         // ============================================================================
-        // 6. PUPIL & PSF VISUALIZER
+        // 7. PUPIL & PSF VISUALIZER (WITH SUPER-SAMPLED PDF SUPPORT)
         // ============================================================================
         function drawPupilAndPSF(model) {
             const isLight = window.isPdfExporting || document.documentElement.classList.contains('light');
 
             const pCanvas = document.getElementById('pupilCanvas');
             if (pCanvas) {
-                const ctx = pCanvas.getContext('2d');
-                const W = pCanvas.width;
-                const H = pCanvas.height;
+                const W = 120, H = 120;
+                const ctx = prepareCanvasContext(pCanvas, W, H);
                 const cx = W / 2;
                 const cy = H / 2;
                 const rOuter = (W / 2) - 12;
                 const rInner = Math.min(rOuter, rOuter * model.epsLinear);
 
-                ctx.clearRect(0, 0, W, H);
                 const grad = ctx.createRadialGradient(cx, cy, rInner * 0.5, cx, cy, rOuter);
-                grad.addColorStop(0, isLight ? 'rgba(186, 230, 253, 0.5)' : 'rgba(56, 189, 248, 0.25)');
-                grad.addColorStop(1, isLight ? 'rgba(56, 189, 248, 0.8)' : 'rgba(37, 99, 235, 0.55)');
+                grad.addColorStop(0, isLight ? 'rgba(186, 230, 253, 0.55)' : 'rgba(56, 189, 248, 0.25)');
+                grad.addColorStop(1, isLight ? 'rgba(56, 189, 248, 0.85)' : 'rgba(37, 99, 235, 0.55)');
 
                 ctx.beginPath();
                 ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
@@ -2381,7 +2752,7 @@
 
                 ctx.beginPath();
                 ctx.arc(cx, cy, rInner, 0, Math.PI * 2);
-                ctx.fillStyle = isLight ? '#f8fafc' : '#090d16'; // Match container background
+                ctx.fillStyle = isLight ? '#ffffff' : '#090d16';
                 ctx.fill();
                 ctx.lineWidth = 1.5;
                 ctx.strokeStyle = isLight ? '#d97706' : '#f59e0b';
@@ -2394,13 +2765,11 @@
 
             const fCanvas = document.getElementById('psfCanvas');
             if (fCanvas) {
-                const ctx = fCanvas.getContext('2d');
-                const W = fCanvas.width;
-                const H = fCanvas.height;
+                const W = 120, H = 120;
+                const ctx = prepareCanvasContext(fCanvas, W, H);
                 const cx = W / 2;
                 const cy = H / 2;
 
-                ctx.clearRect(0, 0, W, H);
                 const maxUm = Math.max(model.airyDiaUm * 1.5, model.detUm * 1.4, (model.airyDiaUm + model.comaSpotUm) * 1.2, 12);
                 const pxPerUm = ((W / 2) - 14) / (maxUm / 2);
 
@@ -2412,7 +2781,7 @@
                     ctx.save();
                     ctx.beginPath();
                     ctx.ellipse(cx + rComa * 0.45, cy, rAiry + rComa * 0.55, rAiry * 0.85, 0, 0, Math.PI * 2);
-                    ctx.fillStyle = isLight ? 'rgba(217, 119, 6, 0.3)' : 'rgba(251, 191, 36, 0.28)';
+                    ctx.fillStyle = isLight ? 'rgba(217, 119, 6, 0.35)' : 'rgba(251, 191, 36, 0.28)';
                     ctx.fill();
                     ctx.restore();
                 }
@@ -2424,8 +2793,8 @@
                 ctx.stroke();
 
                 const psfGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(2, rAiry));
-                psfGrad.addColorStop(0, isLight ? 'rgba(14, 165, 233, 0.9)' : 'rgba(224, 242, 254, 0.95)');
-                psfGrad.addColorStop(0.5, isLight ? 'rgba(14, 165, 233, 0.5)' : 'rgba(56, 189, 248, 0.65)');
+                psfGrad.addColorStop(0, isLight ? 'rgba(14, 165, 233, 0.95)' : 'rgba(224, 242, 254, 0.95)');
+                psfGrad.addColorStop(0.5, isLight ? 'rgba(14, 165, 233, 0.55)' : 'rgba(56, 189, 248, 0.65)');
                 psfGrad.addColorStop(1, isLight ? 'rgba(14, 165, 233, 0.0)' : 'rgba(56, 189, 248, 0.0)');
 
                 ctx.beginPath();
@@ -2447,10 +2816,8 @@
 
             const profCanvas = document.getElementById('psfProfileCanvas');
             if (profCanvas) {
-                const ctx = profCanvas.getContext('2d');
-                const W = profCanvas.width;
-                const H = profCanvas.height;
-                ctx.clearRect(0, 0, W, H);
+                const W = 180, H = 72;
+                const ctx = prepareCanvasContext(profCanvas, W, H);
 
                 const eps = Math.min(0.9, model.epsLinear);
                 const jinc = x => {
@@ -2458,7 +2825,7 @@
                     return (Math.sin(x) / (x * x) - Math.cos(x) / x) * 0.72 + (Math.sin(x * 0.88) / (x * 1.8));
                 };
 
-                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.6)' : 'rgba(51, 65, 85, 0.4)';
+                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.65)' : 'rgba(51, 65, 85, 0.4)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(0, H - 6);
@@ -2466,11 +2833,11 @@
                 ctx.stroke();
 
                 ctx.save();
-                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.8)' : 'rgba(148, 163, 184, 0.35)';
+                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.85)' : 'rgba(148, 163, 184, 0.35)';
                 ctx.lineWidth = 1.2;
                 ctx.setLineDash([3, 3]);
                 ctx.beginPath();
-                for (let px = 0; px < W; px++) {
+                for (let px = 0; px <= W; px += 0.5) {
                     const u = ((px - W / 2) / (W / 2)) * 9.5;
                     const idealInt = Math.min(1.0, Math.pow(2 * jinc(u), 2));
                     const y = (H - 6) - idealInt * (H - 12);
@@ -2484,7 +2851,7 @@
                 ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
                 ctx.lineWidth = 1.75;
                 ctx.beginPath();
-                for (let px = 0; px < W; px++) {
+                for (let px = 0; px <= W; px += 0.5) {
                     const u = ((px - W / 2) / (W / 2)) * 9.5;
                     const num = 2 * jinc(u) - 2 * eps * eps * jinc(eps * u);
                     const den = Math.max(0.05, 1 - eps * eps);
@@ -2501,10 +2868,8 @@
 
             const mtfCanvas = document.getElementById('mtfCanvas');
             if (mtfCanvas) {
-                const ctx = mtfCanvas.getContext('2d');
-                const W = mtfCanvas.width;
-                const H = mtfCanvas.height;
-                ctx.clearRect(0, 0, W, H);
+                const W = 180, H = 72;
+                const ctx = prepareCanvasContext(mtfCanvas, W, H);
 
                 const padL = 22, padR = 6, padT = 6, padB = 12;
                 const pW = W - padL - padR;
@@ -2514,7 +2879,7 @@
                 const mtfLbl = document.getElementById('mtf-cutoff-label');
                 if (mtfLbl) mtfLbl.textContent = `f_c: ${fcLpMm.toFixed(0)} lp/mm`;
 
-                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.6)' : 'rgba(51, 65, 85, 0.4)';
+                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.65)' : 'rgba(51, 65, 85, 0.4)';
                 ctx.lineWidth = 1;
                 [0, 0.5, 1.0].forEach(v => {
                     const y = padT + pH * (1 - v);
@@ -2529,12 +2894,12 @@
                 });
 
                 ctx.save();
-                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.8)' : 'rgba(148, 163, 184, 0.35)';
+                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.85)' : 'rgba(148, 163, 184, 0.35)';
                 ctx.lineWidth = 1.2;
                 ctx.setLineDash([3, 2]);
                 ctx.beginPath();
-                for (let i = 0; i <= 50; i++) {
-                    const s = i / 50;
+                for (let i = 0; i <= 80; i++) {
+                    const s = i / 80;
                     const mtfIdeal = (2 / Math.PI) * (Math.acos(s) - s * Math.sqrt(1 - s * s));
                     const x = padL + s * pW;
                     const y = padT + pH * (1 - mtfIdeal);
@@ -2549,8 +2914,8 @@
                 ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
                 ctx.lineWidth = 1.75;
                 ctx.beginPath();
-                for (let i = 0; i <= 50; i++) {
-                    const s = i / 50;
+                for (let i = 0; i <= 80; i++) {
+                    const s = i / 80;
                     const mtf0 = (2 / Math.PI) * (Math.acos(s) - s * Math.sqrt(1 - s * s));
                     const midSag = eps > 0.05 ? eps * 0.65 * Math.sin(Math.PI * Math.min(1, s / Math.max(0.15, 1 - eps * 0.5))) : 0;
                     const atmoAtten = Math.pow(model.netStrehl, 0.55 * Math.min(1, s * 2.2));
@@ -2566,16 +2931,14 @@
 
             const eeCanvas = document.getElementById('eeCanvas');
             if (eeCanvas) {
-                const ctx = eeCanvas.getContext('2d');
-                const W = eeCanvas.width;
-                const H = eeCanvas.height;
-                ctx.clearRect(0, 0, W, H);
+                const W = 180, H = 72;
+                const ctx = prepareCanvasContext(eeCanvas, W, H);
 
                 const padL = 22, padR = 6, padT = 6, padB = 12;
                 const pW = W - padL - padR;
                 const pH = H - padT - padB;
 
-                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.6)' : 'rgba(51, 65, 85, 0.4)';
+                ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.65)' : 'rgba(51, 65, 85, 0.4)';
                 ctx.lineWidth = 1;
                 [0, 0.5, 1.0].forEach(v => {
                     const y = padT + pH * (1 - v);
@@ -2597,8 +2960,8 @@
                 ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
                 ctx.lineWidth = 1.75;
                 ctx.beginPath();
-                for (let i = 0; i <= 50; i++) {
-                    const rNorm = (i / 50) * maxRatio;
+                for (let i = 0; i <= 80; i++) {
+                    const rNorm = (i / 80) * maxRatio;
                     const eeCore = 0.838 * coreEnergy * (1 - Math.exp(-2.6 * rNorm * rNorm));
                     const eeRings = (1 - 0.838 * coreEnergy) * (1 - Math.exp(-0.75 * Math.max(0, rNorm - 0.85)));
                     const eeTotal = Math.min(0.99, eeCore + Math.max(0, eeRings));
@@ -2636,10 +2999,8 @@
         function drawSpotDiagram(model) {
             const canvas = document.getElementById('spotCanvas');
             if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const W = canvas.width;
-            const H = canvas.height;
-            ctx.clearRect(0, 0, W, H);
+            const W = 180, H = 72;
+            const ctx = prepareCanvasContext(canvas, W, H);
 
             const isLight = window.isPdfExporting || document.documentElement.classList.contains('light');
 
@@ -2700,7 +3061,7 @@
             const scaleExtentUm = Math.max(15, maxRMS * 3.5, model.comaSpotUm * 1.5, model.airyDiaUm * 1.5); 
             const pxPerUm = Math.min((W / 2 - pad) / scaleExtentUm, (H / 2 - pad) / scaleExtentUm);
 
-            ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.6)' : 'rgba(51, 65, 85, 0.4)';
+            ctx.strokeStyle = isLight ? 'rgba(148, 163, 184, 0.65)' : 'rgba(51, 65, 85, 0.4)';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(cx, 0); ctx.lineTo(cx, H);
@@ -2709,7 +3070,7 @@
 
             ctx.beginPath();
             ctx.arc(cx, cy, (model.airyDiaUm / 2) * pxPerUm, 0, Math.PI * 2);
-            ctx.strokeStyle = isLight ? 'rgba(100, 116, 139, 0.7)' : 'rgba(100, 116, 139, 0.45)';
+            ctx.strokeStyle = isLight ? 'rgba(100, 116, 139, 0.75)' : 'rgba(100, 116, 139, 0.45)';
             ctx.lineWidth = 1;
             ctx.stroke();
 
@@ -2718,15 +3079,17 @@
                 group.spots.forEach(s => {
                     const sx = cx + (s.x - group.centroid.x) * pxPerUm;
                     const sy = cy - (s.y - group.centroid.y) * pxPerUm;
-                    ctx.fillRect(sx, sy, 1.5, 1.5);
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, 1.0, 0, Math.PI * 2);
+                    ctx.fill();
                 });
             };
 
-            drawGroup(onAxis, isLight ? 'rgba(2, 132, 199, 0.8)' : 'rgba(56, 189, 248, 0.75)');
+            drawGroup(onAxis, isLight ? 'rgba(2, 132, 199, 0.85)' : 'rgba(56, 189, 248, 0.75)');
             
             let rmsLabel = `RMS(0): ${onAxis.rms.toFixed(1)}µm`;
             if (model.fovRad > 0 && offAxis.spots.length > 0) {
-                drawGroup(offAxis, isLight ? 'rgba(217, 119, 6, 0.8)' : 'rgba(251, 191, 36, 0.75)');
+                drawGroup(offAxis, isLight ? 'rgba(217, 119, 6, 0.85)' : 'rgba(251, 191, 36, 0.75)');
                 rmsLabel = `RMS(θ): ${offAxis.rms.toFixed(1)}µm`;
             }
 
@@ -2735,7 +3098,7 @@
         }
 
         // ============================================================================
-        // 7. INTERACTIONS & EXPORTS (ZEMAX & JSON)
+        // 8. INTERACTIONS & EXPORTS (ZEMAX, JSON FILE DOWNLOAD, ULTRA-HIGH-RES PDF)
         // ============================================================================
         function setupCanvasInteractions() {
             const canvas = document.getElementById('rayCanvas');
@@ -2797,7 +3160,7 @@
                 requestAnimationFrame(() => recalculate());
             });
 
-            const endPointerDrag = e => {
+            const endPointerDrag = () => {
                 if (viewState.isDragging || viewState.draggingM3) {
                     viewState.isDragging = false;
                     viewState.draggingM3 = false;
@@ -2882,11 +3245,18 @@
             renderActiveSliders();
             resetView();
         }
-        
-        function saveState() {
-            const state = {
-                params: parameters.map(p => ({ id: p.id, value: p.value, min: p.min, max: p.max, sliderActive: p.sliderActive })),
-                prescription: document.getElementById('prescription-type').value,
+
+        function getCurrentAppState() {
+            return {
+                params: parameters.map(p => ({
+                    id: p.id,
+                    value: p.value,
+                    min: p.min,
+                    max: p.max,
+                    sliderActive: p.sliderActive,
+                    optimizeActive: p.optimizeActive
+                })),
+                prescription: document.getElementById('prescription-type')?.value,
                 strutMaterial: document.getElementById('strut-material')?.value,
                 modScheme: document.getElementById('mod-scheme')?.value,
                 nasmythEnabled: document.getElementById('enable-nasmyth')?.checked,
@@ -2896,7 +3266,12 @@
                 showDims: document.getElementById('show-dimensions')?.checked,
                 isLightMode: document.documentElement.classList.contains('light')
             };
-            localStorage.setItem('opticom_state', JSON.stringify(state));
+        }
+        
+        function saveState() {
+            try {
+                localStorage.setItem('opticom_state', JSON.stringify(getCurrentAppState()));
+            } catch (e) {}
         }
 
         function loadState() {
@@ -2920,11 +3295,11 @@
                         if (sp.min !== undefined) p.min = sp.min;
                         if (sp.max !== undefined) p.max = sp.max;
                         if (sp.sliderActive !== undefined) p.sliderActive = sp.sliderActive;
+                        if (sp.optimizeActive !== undefined) p.optimizeActive = sp.optimizeActive;
                     }
                 });
             }
             
-            // Safely set DOM elements if they exist
             const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
             const setChk = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
             
@@ -2942,8 +3317,8 @@
                 document.documentElement.classList.remove('dark');
                 const iconLight = document.getElementById('theme-icon-light');
                 const iconDark = document.getElementById('theme-icon-dark');
-                if(iconLight) iconLight.classList.add('hidden');
-                if(iconDark) iconDark.classList.remove('hidden');
+                if (iconLight) iconLight.classList.add('hidden');
+                if (iconDark) iconDark.classList.remove('hidden');
             }
         }
 
@@ -3012,18 +3387,22 @@ ${m3SurfaceBlock}
             closeZemaxModal();
         }
 
+        // Direct JSON file download (includes both derived optical specs & full re-importable appState)
         function exportReport() {
             const model = computeOpticalModel();
             const report = {
                 project: "OptiCom Cassegrain Optical Terminal Specification",
+                exportedAt: new Date().toISOString(),
                 prescriptionType: model.prescription,
                 inputs: {
                     primaryAperture_mm: model.D1,
                     primaryFNumber: model.F1,
                     secondaryMagnification: model.m,
-                    backWorkingDistance_mm: model.b,
+                    mirrorSeparation_d_mm: model.d,
+                    backWorkingDistance_mm: Number(model.b.toFixed(2)),
                     nasmythEnabled: model.nasmythEnabled,
                     nasmythM3Position_z3_mm: model.m3Z,
+                    astronomicalSeeing_500nm_arcsec: model.seeingArcsec,
                     friedParameter_r0_500nm_cm: model.r0_500,
                     wavelength_nm: model.lambdaNm
                 },
@@ -3040,17 +3419,23 @@ ${m3SurfaceBlock}
                         lateralThrow_mm: Number(model.nasmythThrow.toFixed(2)),
                         tubeClearanceMargin_mm: Number(model.nasmythTubeClearance.toFixed(2))
                     },
-                    atmosphericStrehlRatio: Number(model.netStrehl.toFixed(3))
-                }
+                    atmosphericStrehlRatio: Number(model.netStrehl.toFixed(3)),
+                    smfCouplingEfficiency_pct: Number(model.couplingEst.toFixed(2))
+                },
+                appState: getCurrentAppState()
             };
 
-            const tempArea = document.createElement('textarea');
-            tempArea.value = JSON.stringify(report, null, 2);
-            document.body.appendChild(tempArea);
-            tempArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempArea);
-            showToast('Specification JSON copied to clipboard!');
+            const jsonStr = JSON.stringify(report, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `OptiCom_Spec_${model.prescription}_${model.D1}mm.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Specification JSON file downloaded!');
         }
 
         function toggleTheme() {
@@ -3066,40 +3451,38 @@ ${m3SurfaceBlock}
         }
 
         async function exportToPDF() {
-            showToast('Generating Comprehensive Design Report...');
+            showToast('Generating High-Resolution PDF Report...');
 
-            // Sync both checkboxes
-            const includeAOLink = (document.getElementById('pdf-include-ao-link')?.checked || document.getElementById('pdf-include-ao-link-panel')?.checked) ?? false;
-            const topChk = document.getElementById('pdf-include-ao-link');
-            const panelChk = document.getElementById('pdf-include-ao-link-panel');
-            if (topChk) topChk.checked = includeAOLink;
-            if (panelChk) panelChk.checked = includeAOLink;
+            const includeAOLink = document.getElementById('pdf-include-ao-link')?.checked ?? false;
 
-            // 1. Force light-mode rendering for all plots
+            // 1. Force 4x super-sampled DPI and light-mode rendering for crisp print-grade plots
             window.isPdfExporting = true;
+            window.pdfRenderScale = 4;
             recalculate();
 
             const model = computeOpticalModel();
 
-            // Helper to convert any canvas onto a crisp white background PNG so transparent areas never turn black
+            // Helper to convert any super-sampled canvas onto a crisp white background PNG
             const captureCanvasWhiteBg = (srcCanvas) => {
                 if (!srcCanvas) return '';
                 const tmp = document.createElement('canvas');
                 tmp.width = srcCanvas.width;
                 tmp.height = srcCanvas.height;
                 const tctx = tmp.getContext('2d');
+                tctx.imageSmoothingEnabled = true;
+                tctx.imageSmoothingQuality = 'high';
                 tctx.fillStyle = '#ffffff';
                 tctx.fillRect(0, 0, tmp.width, tmp.height);
                 tctx.drawImage(srcCanvas, 0, 0);
                 return tmp.toDataURL('image/png', 1.0);
             };
 
-            // 2. Render dedicated high-resolution 2D Ray Trace canvas (1600x950 for large half-page display)
+            // 2. Render dedicated ultra-high-resolution 2D Ray Trace canvas (900x535 logical @ 3x scale = 2700x1605 px)
             const pdfRayCanvas = document.createElement('canvas');
-            drawRayTrace(model, pdfRayCanvas, 1600, 950);
+            drawRayTrace(model, pdfRayCanvas, 900, 535, 3);
             const rayTraceImg = captureCanvasWhiteBg(pdfRayCanvas);
 
-            // 3. Capture all diagnostic plots (Pupil, PSF, Radial PSF, Spot Diagram, MTF, Encircled Energy, AO Curve)
+            // 3. Capture all 4x super-sampled diagnostic plots
             const plots = {
                 pupil: captureCanvasWhiteBg(document.getElementById('pupilCanvas')),
                 psf: captureCanvasWhiteBg(document.getElementById('psfCanvas')),
@@ -3110,12 +3493,12 @@ ${m3SurfaceBlock}
                 ao: captureCanvasWhiteBg(document.getElementById('aoCurveCanvas'))
             };
 
-            // 4. Restore UI theme immediately
+            // 4. Restore interactive UI theme & native devicePixelRatio immediately
             window.isPdfExporting = false;
+            window.pdfRenderScale = null;
             recalculate();
 
             try {
-                // Use jsPDF directly via html2pdf bundle to draw native vector tables and embed every plot without DOM clipping
                 const worker = html2pdf().set({
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 });
@@ -3189,7 +3572,7 @@ ${m3SurfaceBlock}
                 if (prescName === 'RC') prescName = 'Ritchey-Chretien (RC)';
                 else if (prescName === 'DALL_KIRKHAM') prescName = 'Dall-Kirkham';
                 else if (prescName === 'CLASSICAL') prescName = 'Classical Cassegrain';
-                else prescName = 'Custom Conic';
+                else prescName = 'Custom / Optimized Conic';
 
                 const colW = (contentW - 6) / 2;
                 const leftRows = [
@@ -3221,7 +3604,6 @@ ${m3SurfaceBlock}
                     drawTable(margin + colW + 6, 30, colW, '2. Derived Optical Prescription', rightRows)
                 );
 
-                // Thermal & Mechanical Summary Bar
                 const thermRows = [
                     ['Quarter-Wave Depth of Focus (DoF)', `+/- ${Math.round(model.dofUm)} um`],
                     ['Despace Sensitivity', `${model.despaceSensitivity.toFixed(1)} x d_sep`],
@@ -3237,7 +3619,7 @@ ${m3SurfaceBlock}
                 pdf.setFont('helvetica', 'bold');
                 pdf.setFontSize(8.5);
                 pdf.setTextColor(255, 255, 255);
-                pdf.text('4. 2D OPTICAL RAY TRACE CAD LAYOUT', margin + 2.5, rayY + 4.5);
+                pdf.text('4. 2D OPTICAL RAY TRACE CAD LAYOUT (300 DPI VECTOR-SCALED)', margin + 2.5, rayY + 4.5);
 
                 const rayBoxH = 108;
                 pdf.setDrawColor(203, 213, 225);
@@ -3251,7 +3633,8 @@ ${m3SurfaceBlock}
                 pdf.addPage();
                 drawHeader('Page 2: Pupil, PSF, MTF & Encircled Energy Diagnostics');
 
-                const drawPlotBox = (x, y, w, h, title, subtitle, imgData, keepSquare = false) => {
+                // Aspect-ratio-preserving plot renderer so 2.5:1 charts are never stretched vertically
+                const drawPlotBox = (x, y, w, h, title, subtitle, imgData, aspectRatio = 1.0) => {
                     pdf.setFillColor(241, 245, 249);
                     pdf.setDrawColor(203, 213, 225);
                     pdf.setLineWidth(0.3);
@@ -3271,17 +3654,18 @@ ${m3SurfaceBlock}
                     pdf.rect(x, y + 6.5, w, h - 6.5, 'FD');
 
                     if (imgData) {
-                        const pad = 3;
+                        const pad = 3.5;
                         const availW = w - pad * 2;
                         const availH = h - 6.5 - pad * 2;
-                        if (keepSquare) {
-                            const side = Math.min(availW, availH);
-                            const imgX = x + (w - side) / 2;
-                            const imgY = y + 6.5 + (availH - side) / 2 + pad;
-                            pdf.addImage(imgData, 'PNG', imgX, imgY, side, side);
-                        } else {
-                            pdf.addImage(imgData, 'PNG', x + pad, y + 6.5 + pad, availW, availH);
+                        let drawW = availW;
+                        let drawH = availW / aspectRatio;
+                        if (drawH > availH) {
+                            drawH = availH;
+                            drawW = availH * aspectRatio;
                         }
+                        const imgX = x + (w - drawW) / 2;
+                        const imgY = y + 6.5 + (availH - drawH) / 2 + pad;
+                        pdf.addImage(imgData, 'PNG', imgX, imgY, drawW, drawH);
                     }
                 };
 
@@ -3290,23 +3674,20 @@ ${m3SurfaceBlock}
                 const eeDetText = document.getElementById('ee-det-label')?.textContent || '';
                 const spotRmsText = document.getElementById('spot-rms-label')?.textContent || '';
 
-                // Row 1: Annular Entrance Pupil & 2D Diffraction PSF + Coma
                 const row1Y = 30;
                 const boxH1 = 76;
-                drawPlotBox(margin, row1Y, colW, boxH1, '5A. Annular Entrance Pupil', `Net Area: ${Math.round(netArea).toLocaleString()} mm2`, plots.pupil, true);
-                drawPlotBox(margin + colW + 6, row1Y, colW, boxH1, '5B. 2D Diffraction PSF & Detector', `Airy Dia: ${model.airyDiaUm.toFixed(1)} um`, plots.psf, true);
+                drawPlotBox(margin, row1Y, colW, boxH1, '5A. Annular Entrance Pupil', `Net Area: ${Math.round(netArea).toLocaleString()} mm2`, plots.pupil, 1.0);
+                drawPlotBox(margin + colW + 6, row1Y, colW, boxH1, '5B. 2D Diffraction PSF & Detector', `Airy Dia: ${model.airyDiaUm.toFixed(1)} um`, plots.psf, 1.0);
 
-                // Row 2: Radial PSF Profile & Geometric Spot Diagram
                 const row2Y = row1Y + boxH1 + 7;
-                const boxH2 = 68;
-                drawPlotBox(margin, row2Y, colW, boxH2, '5C. Radial PSF Intensity Profile', `Peak Strehl: ${model.netStrehl.toFixed(2)}`, plots.prof, false);
-                drawPlotBox(margin + colW + 6, row2Y, colW, boxH2, '5D. Geometric Spot Diagram', spotRmsText, plots.spot, false);
+                const boxH2 = 60;
+                drawPlotBox(margin, row2Y, colW, boxH2, '5C. Radial PSF Intensity Profile', `Peak Strehl: ${model.netStrehl.toFixed(2)}`, plots.prof, 2.5);
+                drawPlotBox(margin + colW + 6, row2Y, colW, boxH2, '5D. Geometric Spot Diagram', spotRmsText, plots.spot, 2.5);
 
-                // Row 3: Modulation Transfer Function (MTF) & Encircled Energy (EE)
                 const row3Y = row2Y + boxH2 + 7;
-                const boxH3 = 68;
-                drawPlotBox(margin, row3Y, colW, boxH3, '5E. Annular MTF vs. Spatial Freq', `Cutoff fc: ${fcLpMm.toFixed(0)} lp/mm`, plots.mtf, false);
-                drawPlotBox(margin + colW + 6, row3Y, colW, boxH3, '5F. Encircled Energy & SMF Coupling', eeDetText, plots.ee, false);
+                const boxH3 = 60;
+                drawPlotBox(margin, row3Y, colW, boxH3, '5E. Annular MTF vs. Spatial Freq', `Cutoff fc: ${fcLpMm.toFixed(0)} lp/mm`, plots.mtf, 2.5);
+                drawPlotBox(margin + colW + 6, row3Y, colW, boxH3, '5F. Encircled Energy & SMF Coupling', eeDetText, plots.ee, 2.5);
 
                 // =========================================================================
                 // OPTIONAL PAGE 3: TURBULENCE, ADAPTIVE OPTICS & FSOC LINK BUDGET
@@ -3346,11 +3727,11 @@ ${m3SurfaceBlock}
                         drawTable(margin + colW + 6, 30, colW, '6B. FSOC Link Budget (99% Avail.)', linkRows)
                     );
 
-                    drawPlotBox(margin, yAfterAO + 8, contentW, 85, '6C. Net Strehl Ratio vs. Corrected Zernike Modes (N_AO)', `Active N_AO = ${model.aoModes} modes (D1/r0 = ${model.dOverR0.toFixed(2)})`, plots.ao, false);
+                    drawPlotBox(margin, yAfterAO + 8, contentW, 88, '6C. Net Strehl Ratio vs. Corrected Zernike Modes (N_AO)', `Active N_AO = ${model.aoModes} modes (D1/r0 = ${model.dOverR0.toFixed(2)})`, plots.ao, 240 / 115);
                 }
 
                 pdf.save(`OptiCom_Design_${model.prescription}_${model.D1}mm.pdf`);
-                showToast('PDF Design Report exported successfully!');
+                showToast('High-Resolution PDF Report exported!');
             } catch (err) {
                 console.error('PDF Export Error:', err);
                 showToast('Error generating PDF report.');
