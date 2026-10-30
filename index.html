@@ -1421,7 +1421,7 @@
                     const hit1 = intersectAndReflectConic3D(rx, yIn, zStart, 0, dy0, dz0, 0.0, model.R1, model.k1);
                     const hit2 = intersectAndReflectConic3D(hit1.xHit, hit1.yHit, hit1.zHit, hit1.rdx, hit1.rdy, hit1.rdz, -model.d, model.R2, model.k2);
                     if (Math.abs(hit2.rdz) < 1e-6) continue;
-                    const tFocus = (model.detectorZ - hit2.zHit) / hit2.rdz;
+                    const tFocus = (model.b - hit2.zHit) / hit2.rdz;
                     const xFocus = hit2.xHit + tFocus * hit2.rdx;
                     const yFocus = hit2.yHit + tFocus * hit2.rdy;
                     spots.push({ x: xFocus * 1000, y: yFocus * 1000 });
@@ -1564,25 +1564,21 @@
 
             const maxSimplexIter = 140;
             for (let iter = 0; iter < maxSimplexIter; iter++) {
-                // Sort simplex vertices by objective cost
                 const idx = Array.from({ length: n + 1 }, (_, i) => i).sort((a, b) => fVals[a] - fVals[b]);
                 simplex = idx.map(i => simplex[i]);
                 fVals = idx.map(i => fVals[i]);
 
                 if (Math.abs(fVals[n] - fVals[0]) < 1e-6) break;
 
-                // Centroid of best n vertices
                 const centroid = new Array(n).fill(0);
                 for (let i = 0; i < n; i++) {
                     for (let j = 0; j < n; j++) centroid[j] += simplex[i][j] / n;
                 }
 
-                // Reflection
                 const xr = centroid.map((c, j) => Math.max(0, Math.min(1, c + 1.0 * (c - simplex[n][j]))));
                 const fr = costFunction(xr);
 
                 if (fr < fVals[0]) {
-                    // Expansion
                     const xe = centroid.map((c, j) => Math.max(0, Math.min(1, c + 2.0 * (xr[j] - c))));
                     const fe = costFunction(xe);
                     if (fe < fr) { simplex[n] = xe; fVals[n] = fe; }
@@ -1590,13 +1586,11 @@
                 } else if (fr < fVals[n - 1]) {
                     simplex[n] = xr; fVals[n] = fr;
                 } else {
-                    // Contraction
                     const xc = centroid.map((c, j) => Math.max(0, Math.min(1, c + 0.5 * (simplex[n][j] - c))));
                     const fc = costFunction(xc);
                     if (fc < fVals[n]) {
                         simplex[n] = xc; fVals[n] = fc;
                     } else {
-                        // Shrink around best vertex
                         for (let i = 1; i <= n; i++) {
                             simplex[i] = simplex[i].map((val, j) => 0.5 * (simplex[0][j] + val));
                             fVals[i] = costFunction(simplex[i]);
@@ -1610,7 +1604,6 @@
                 uBest = simplex[0];
             }
 
-            // Apply final optimized vector & round cleanly
             applyVector(uBest);
             activeVars.forEach(p => {
                 const decimals = p.step < 0.01 ? 4 : (p.step < 0.1 ? 3 : (p.step < 1 ? 2 : 1));
@@ -1817,54 +1810,57 @@
             const Feff = EFL / D1;
 
             const fovRad = fovMrad * 1e-3;
+            const D2_axial = D1 * (p1 / f1);
             
-            // EXACT MARGINAL RAY TRACE FOR TRUE M2 SIZING (Eliminates Paraxial Margin Error)
-            const zStartM2 = -d * 2.0; 
-            const hit1_ax = intersectAndReflectConic(zStartM2, D1/2, 1.0, 0.0, 0.0, R1, k1);
-            const hit2_ax = intersectAndReflectConic(hit1_ax.zHit, hit1_ax.yHit, hit1_ax.rdz, hit1_ax.rdy, -d, R2, k2);
-            let D2_axial = Math.abs(hit2_ax.yHit) * 2;
-            if (isNaN(D2_axial) || D2_axial === 0) D2_axial = D1 * (p1 / f1); // Fallback
-
-            let D2_fov = 0;
-            if (fovRad > 0) {
-                const dz0_fov = Math.cos(fovRad);
-                const dy0_fov_plus = Math.sin(fovRad);
-                const dy0_fov_minus = Math.sin(-fovRad);
-                
-                // Trace worst-case off-axis tilt to find absolute maximum beam footprint on M2
-                const yIn_plus = (D1/2) + (zStartM2 - 0) * (dy0_fov_plus / dz0_fov);
-                const hit1_plus = intersectAndReflectConic(zStartM2, yIn_plus, dz0_fov, dy0_fov_plus, 0.0, R1, k1);
-                const hit2_plus = intersectAndReflectConic(hit1_plus.zHit, hit1_plus.yHit, hit1_plus.rdz, hit1_plus.rdy, -d, R2, k2);
-                
-                const yIn_minus = (D1/2) + (zStartM2 - 0) * (dy0_fov_minus / dz0_fov);
-                const hit1_minus = intersectAndReflectConic(zStartM2, yIn_minus, dz0_fov, dy0_fov_minus, 0.0, R1, k1);
-                const hit2_minus = intersectAndReflectConic(hit1_minus.zHit, hit1_minus.yHit, hit1_minus.rdz, hit1_minus.rdy, -d, R2, k2);
-                
-                const D2_total = Math.max(Math.abs(hit2_plus.yHit), Math.abs(hit2_minus.yHit)) * 2;
-                if (!isNaN(D2_total) && D2_total > D2_axial) {
-                    D2_fov = D2_total - D2_axial;
-                } else {
-                    D2_fov = 2 * d * Math.tan(fovRad); // Fallback
+            // Exact calculation for M2 diameter
+            let maxM2Radius = 0;
+            const testAnglesM2 = [0, fovRad, -fovRad];
+            const testYM2 = [D1 / 2, -D1 / 2];
+            const zStartM2 = -d * 2.0;
+            for (let a of testAnglesM2) {
+                const dz0 = Math.cos(a);
+                const dy0 = Math.sin(a);
+                for (let y of testYM2) {
+                    const yIn = y + zStartM2 * (dy0 / dz0);
+                    const h1 = intersectAndReflectConic(zStartM2, yIn, dz0, dy0, 0.0, R1, k1);
+                    const h2 = intersectAndReflectConic(h1.zHit, h1.yHit, h1.rdz, h1.rdy, -d, R2, k2);
+                    if (Math.abs(h2.yHit) > maxM2Radius) maxM2Radius = Math.abs(h2.yHit);
                 }
             }
-            const D2 = D2_axial + D2_fov;
-
-            const m3Z = m3ZRaw;
-            const h_N = h_NRaw;
-            const nasmythThrow = h_N;
+            const D2 = maxM2Radius * 2;
 
             const m3Y = 0;
+            const m3Z = m3ZRaw;
             const distM2ToM3 = m3Z - (-d);
             const nasmythAxialRem = b - m3Z;
             const nasmythFocusZ = m3Z;
+            const nasmythThrow = h_NRaw;
             const nasmythFocusY = -nasmythThrow;
-            
-            const detectorZ = nasmythEnabled ? m3Z + h_N : b;
-            const defocus = b - detectorZ;
-
-            const D3_axial = D2_axial * (Math.max(0, nasmythAxialRem) / L2);
             const focalSpotDia = 2 * EFL * Math.tan(fovRad);
-            const D3_minor = Math.max(0, D3_axial + focalSpotDia * (distM2ToM3 / L2));
+
+            // Exact Sizing for M3 (Fold Mirror) based on true 45-deg plane intercept
+            let maxM3HalfProj = 0;
+            const testAnglesM3 = [0, fovRad, -fovRad];
+            for (let a of testAnglesM3) {
+                const dz0 = Math.cos(a);
+                const dy0 = Math.sin(a);
+                for (let y of testYM2) {
+                    const yIn = y + zStartM2 * (dy0 / dz0);
+                    const h1 = intersectAndReflectConic(zStartM2, yIn, dz0, dy0, 0.0, R1, k1);
+                    const h2 = intersectAndReflectConic(h1.zHit, h1.yHit, h1.rdz, h1.rdy, -d, R2, k2);
+                    
+                    const denom = h2.rdz + h2.rdy;
+                    if (Math.abs(denom) > 1e-9) {
+                        const t3 = (m3Z + m3Y - h2.zHit - h2.yHit) / denom;
+                        const z3Hit = h2.zHit + t3 * h2.rdz;
+                        const diffZ = Math.abs(z3Hit - m3Z);
+                        if (diffZ > maxM3HalfProj) maxM3HalfProj = diffZ;
+                    }
+                }
+            }
+            
+            // Add 1.5% safety margin for clean visual box
+            const D3_minor = (maxM3HalfProj * 2) * 1.015;
             const D3_major = D3_minor * Math.SQRT2;
             const nasmythTubeClearance = nasmythThrow - (D1 / 2);
 
@@ -1905,13 +1901,9 @@
             const seeingLambdaArcsec = seeingArcsec * Math.pow(500.0 / lambdaNm, 0.2);
             const dOverR0 = (D1 * 0.1) / r0_lambda_cm;
 
-            const W020_m = (defocus * 1e-3) / (8 * Feff * Feff);
-            const rmsDefocus_m = Math.abs(W020_m) / Math.sqrt(12);
-            const varDefocus = Math.pow((2 * Math.PI * rmsDefocus_m) / lambdaM, 2);
-
-            const varUncorr = getNollResidualVariance(0, dOverR0) + varDefocus;
-            const varTT = getNollResidualVariance(2, dOverR0) + varDefocus;
-            const varActive = getNollResidualVariance(aoModes, dOverR0) + varDefocus;
+            const varUncorr = getNollResidualVariance(0, dOverR0);
+            const varTT = getNollResidualVariance(2, dOverR0);
+            const varActive = getNollResidualVariance(aoModes, dOverR0);
 
             const obsFactor = Math.max(0.05, 1.0 - epsArea);
             const strehlUncorr = Math.max(0.01, Math.exp(-varUncorr)) * obsFactor;
@@ -1978,8 +1970,7 @@
                 r0_500, seeingArcsec, seeingLambdaArcsec, r0_lambda_cm, dOverR0, netStrehl,
                 aoModes, varUncorr, varTT, varActive, strehlUncorr, strehlTT, aoGainBoostDb,
                 linkDistKm, txPowerDbm, jitterUr, eirpDbm, fsplDb, atmoTotalLossDb, pRxDbm, linkMarginDb, ber, modScheme,
-                deltaT, ctePpm, thermalDeltaDUm, thermalFocusShiftUm, dofBudgetPct, mBeam, fColMm,
-                detectorZ, defocus, varDefocus
+                deltaT, ctePpm, thermalDeltaDUm, thermalFocusShiftUm, dofBudgetPct, mBeam, fColMm
             };
         }
 
@@ -2045,7 +2036,7 @@
                 } else if (model.b < 0) {
                     warnBox.classList.remove('hidden');
                     warnText.textContent = `Focal plane is inside the telescope (BWD = ${model.b.toFixed(1)} mm). Decrease separation d or increase m.`;
-                } else if (model.nasmythEnabled && (model.m3Z <= -model.d + 2 || model.m3Z >= model.detectorZ - 2)) {
+                } else if (model.nasmythEnabled && (model.m3Z <= -model.d + 2 || model.m3Z >= model.b - 2)) {
                     warnBox.classList.remove('hidden');
                     warnText.textContent = `M3 Fold Mirror intersects M2 or focal plane. Adjust m3Z or d.`;
                 } else {
@@ -2112,17 +2103,12 @@
             setText('val-nasmyth-h', model.nasmythThrow.toFixed(1));
             const clearEl = document.getElementById('val-nasmyth-clear');
             if (clearEl) {
-                if (Math.abs(model.defocus) > 0.5) {
-                    clearEl.textContent = `Defocus: ${model.defocus > 0 ? '+' : ''}${model.defocus.toFixed(1)}mm`;
-                    clearEl.className = 'text-rose-400 font-bold';
+                if (model.nasmythTubeClearance >= 0) {
+                    clearEl.textContent = `+${model.nasmythTubeClearance.toFixed(0)}mm Outside Tube`;
+                    clearEl.className = 'text-emerald-400';
                 } else {
-                    if (model.nasmythTubeClearance >= 0) {
-                        clearEl.textContent = `In Focus (+${model.nasmythTubeClearance.toFixed(0)}mm clear)`;
-                        clearEl.className = 'text-emerald-400';
-                    } else {
-                        clearEl.textContent = `In Focus (${model.nasmythTubeClearance.toFixed(0)}mm inside)`;
-                        clearEl.className = 'text-amber-400';
-                    }
+                    clearEl.textContent = `${model.nasmythTubeClearance.toFixed(0)}mm Inside Tube`;
+                    clearEl.className = 'text-amber-400';
                 }
             }
 
@@ -2516,8 +2502,8 @@
 
                 const hit1 = intersectAndReflectConic(zStart, y0, 1.0, 0.0, 0.0, model.R1, model.k1);
                 const hit2 = intersectAndReflectConic(hit1.zHit, hit1.yHit, hit1.rdz, hit1.rdy, -model.d, model.R2, model.k2);
-                const tFocus = (model.detectorZ - hit2.zHit) / hit2.rdz;
-                const zFocus = model.detectorZ;
+                const tFocus = (model.b - hit2.zHit) / hit2.rdz;
+                const zFocus = model.b;
                 const yFocus = hit2.yHit + tFocus * hit2.rdy;
 
                 ctx.save();
@@ -2562,8 +2548,8 @@
 
                     const hit1 = intersectAndReflectConic(zStart, yIn, dz0, dy0, 0.0, model.R1, model.k1);
                     const hit2 = intersectAndReflectConic(hit1.zHit, hit1.yHit, hit1.rdz, hit1.rdy, -model.d, model.R2, model.k2);
-                    const tFocus = (model.detectorZ - hit2.zHit) / hit2.rdz;
-                    const zFocus = model.detectorZ;
+                    const tFocus = (model.b - hit2.zHit) / hit2.rdz;
+                    const zFocus = model.b;
                     const yFocus = hit2.yHit + tFocus * hit2.rdy;
 
                     ctx.save();
@@ -2643,7 +2629,7 @@
 
             // M3 Flat Fold Mirror
             if (model.nasmythEnabled) {
-                const halfProj = Math.max(model.D3_minor / 2, Math.abs(model.m3Y) + model.D3_minor * 0.35);
+                const halfProj = model.D3_minor / 2;
                 const z3A = model.m3Z - halfProj;
                 const y3A = model.m3Y + halfProj;
                 const z3B = model.m3Z + halfProj;
@@ -2722,19 +2708,18 @@
                 ctx.moveTo(xM1, sepDimY - 4);
                 ctx.lineTo(xM1, sepDimY + 4);
                 
-                const xDet = toScreenX(model.detectorZ);
-                if (!model.nasmythEnabled && model.detectorZ > 5) {
+                if (!model.nasmythEnabled && model.b > 5) {
                     ctx.moveTo(xM1, sepDimY);
-                    ctx.lineTo(xDet, sepDimY);
-                    ctx.moveTo(xDet, sepDimY - 4);
-                    ctx.lineTo(xDet, sepDimY + 4);
+                    ctx.lineTo(xFP, sepDimY);
+                    ctx.moveTo(xFP, sepDimY - 4);
+                    ctx.lineTo(xFP, sepDimY + 4);
                 }
                 ctx.stroke();
 
                 ctx.textAlign = 'center';
                 ctx.fillText(`d = ${model.d.toFixed(1)} mm`, (xM2 + xM1) / 2, sepDimY - 6);
-                if (!model.nasmythEnabled && model.detectorZ > 5) {
-                    ctx.fillText(`BWD = ${model.detectorZ.toFixed(0)} mm`, (xM1 + xDet) / 2, sepDimY - 6);
+                if (!model.nasmythEnabled && model.b > 5) {
+                    ctx.fillText(`BWD = ${model.b.toFixed(0)} mm`, (xM1 + xFP) / 2, sepDimY - 6);
                 }
 
                 if (model.nasmythEnabled) {
@@ -2809,8 +2794,8 @@
             // Focal Plane
             const fpHalfH = Math.max(model.D1 * 0.14, model.focalSpotDia * 1.5);
             if (model.nasmythEnabled) {
-                const nasY = model.nasmythFocusY; // -h_N
-                const nasX = model.nasmythFocusZ; // m3Z
+                const nasY = model.nasmythFocusY;
+                const nasX = model.nasmythFocusZ;
 
                 ctx.save();
                 ctx.strokeStyle = isLight ? '#059669' : '#34d399';
@@ -2831,7 +2816,7 @@
                 ctx.fillText('Nasmyth Port Focus', toScreenX(nasX + fpHalfH) + 6, toScreenY(nasY) + 3);
                 ctx.restore();
             } else {
-                const fpX = toScreenX(model.detectorZ);
+                const fpX = toScreenX(model.b);
                 ctx.save();
                 ctx.strokeStyle = isLight ? '#059669' : '#34d399';
                 ctx.lineWidth = 2;
@@ -3174,7 +3159,7 @@
                     const hit1 = intersectAndReflectConic3D(ray.x, yIn, zStart, 0, dy0, dz0, 0.0, model.R1, model.k1);
                     const hit2 = intersectAndReflectConic3D(hit1.xHit, hit1.yHit, hit1.zHit, hit1.rdx, hit1.rdy, hit1.rdz, -model.d, model.R2, model.k2);
                     
-                    const tFocus = (model.detectorZ - hit2.zHit) / hit2.rdz;
+                    const tFocus = (model.b - hit2.zHit) / hit2.rdz;
                     const xFocus = hit2.xHit + tFocus * hit2.rdx;
                     const yFocus = hit2.yHit + tFocus * hit2.rdy;
                     spots.push({ x: xFocus * 1000, y: yFocus * 1000 });
