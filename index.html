@@ -1817,8 +1817,36 @@
             const Feff = EFL / D1;
 
             const fovRad = fovMrad * 1e-3;
-            const D2_axial = D1 * (p1 / f1);
-            const D2_fov = 2 * d * Math.tan(fovRad);
+            
+            // EXACT MARGINAL RAY TRACE FOR TRUE M2 SIZING (Eliminates Paraxial Margin Error)
+            const zStartM2 = -d * 2.0; 
+            const hit1_ax = intersectAndReflectConic(zStartM2, D1/2, 1.0, 0.0, 0.0, R1, k1);
+            const hit2_ax = intersectAndReflectConic(hit1_ax.zHit, hit1_ax.yHit, hit1_ax.rdz, hit1_ax.rdy, -d, R2, k2);
+            let D2_axial = Math.abs(hit2_ax.yHit) * 2;
+            if (isNaN(D2_axial) || D2_axial === 0) D2_axial = D1 * (p1 / f1); // Fallback
+
+            let D2_fov = 0;
+            if (fovRad > 0) {
+                const dz0_fov = Math.cos(fovRad);
+                const dy0_fov_plus = Math.sin(fovRad);
+                const dy0_fov_minus = Math.sin(-fovRad);
+                
+                // Trace worst-case off-axis tilt to find absolute maximum beam footprint on M2
+                const yIn_plus = (D1/2) + (zStartM2 - 0) * (dy0_fov_plus / dz0_fov);
+                const hit1_plus = intersectAndReflectConic(zStartM2, yIn_plus, dz0_fov, dy0_fov_plus, 0.0, R1, k1);
+                const hit2_plus = intersectAndReflectConic(hit1_plus.zHit, hit1_plus.yHit, hit1_plus.rdz, hit1_plus.rdy, -d, R2, k2);
+                
+                const yIn_minus = (D1/2) + (zStartM2 - 0) * (dy0_fov_minus / dz0_fov);
+                const hit1_minus = intersectAndReflectConic(zStartM2, yIn_minus, dz0_fov, dy0_fov_minus, 0.0, R1, k1);
+                const hit2_minus = intersectAndReflectConic(hit1_minus.zHit, hit1_minus.yHit, hit1_minus.rdz, hit1_minus.rdy, -d, R2, k2);
+                
+                const D2_total = Math.max(Math.abs(hit2_plus.yHit), Math.abs(hit2_minus.yHit)) * 2;
+                if (!isNaN(D2_total) && D2_total > D2_axial) {
+                    D2_fov = D2_total - D2_axial;
+                } else {
+                    D2_fov = 2 * d * Math.tan(fovRad); // Fallback
+                }
+            }
             const D2 = D2_axial + D2_fov;
 
             const m3Z = m3ZRaw;
@@ -2526,7 +2554,7 @@
                 const dy0 = Math.sin(model.fovRad);
 
                 [-1, 0, 1].forEach(sign => {
-                    const yPupil = sign * (model.D1 * 0.46);
+                    const yPupil = sign * (model.D1 * 0.50);
                     const yIn = yPupil + (zStart - 0) * (dy0 / dz0);
 
                     const yAtM2Plane = yPupil + (-model.d - 0) * (dy0 / dz0);
